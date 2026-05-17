@@ -2,37 +2,71 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles.css';
 
+const calendlyLink = 'https://calendly.com/propertydext/15min';
+
 const services = [
-  'AI workflow audits',
-  'Client follow-up systems',
-  'Document and estimate workflows',
-  'Reporting and decision dashboards',
-  'Task management improvements',
-  'Internal communication playbooks',
+  'Workflow audits for the places work slows down',
+  'Client follow-up systems that create clear next steps',
+  'Document, estimate, and report templates your team can reuse',
+  'Task management improvements that make ownership visible',
+  'Communication routines for fewer dropped details',
+  'Decision support for owners who need cleaner information',
+];
+
+const deliverables = [
+  {
+    title: 'Workflow audit',
+    text: 'A clear look at where follow-up, documents, estimates, reports, tasks, and communication are breaking down.',
+  },
+  {
+    title: 'AI use-case map',
+    text: 'A practical map of where tools like ChatGPT and Claude can help—and where they should stay out of the way.',
+  },
+  {
+    title: 'Prompt and template starter pack',
+    text: 'Reusable prompts, checklists, and document structures for the work your team repeats every week.',
+  },
+  {
+    title: 'Recommended tools and setup',
+    text: 'A lean tool recommendation based on your current operations, not a stack of unnecessary software.',
+  },
+  {
+    title: 'Simple implementation roadmap',
+    text: 'A prioritized plan that turns the best ideas into owners, timelines, and practical next actions.',
+  },
 ];
 
 const processSteps = [
   {
     title: 'Map the real workflow',
-    text: 'We identify where work slows down, gets duplicated, or depends on memory instead of a reliable system.',
+    text: 'We identify how work actually moves through the business and where owners, teams, or clients lose clarity.',
   },
   {
-    title: 'Design the practical system',
-    text: 'We choose the right AI and project management tools only after the operating process is clear.',
+    title: 'Choose the right AI support',
+    text: 'We match AI use cases to real operations: follow-up, documents, estimates, reports, tasks, communication, and decisions.',
   },
   {
-    title: 'Implement and train',
-    text: 'Your team gets usable templates, handoffs, prompts, checklists, and guidance they can apply immediately.',
+    title: 'Install simple routines',
+    text: 'Your team gets templates, prompts, handoffs, and a roadmap they can use without becoming technical experts.',
   },
 ];
 
 const useCases = [
+  'Turn call notes into follow-up emails, assigned tasks, and next steps.',
   'Turn call notes into follow-up emails, tasks, and next steps.',
   'Create consistent estimates, proposals, and project summaries.',
   'Summarize weekly progress across clients, jobs, or departments.',
   'Convert messy internal requests into clear work tickets.',
   'Build repeatable checklists for recurring decisions and reviews.',
   'Improve owner visibility without adding another meeting.',
+];
+
+const audiences = [
+  'Contractors',
+  'Real estate professionals',
+  'Local service businesses',
+  'Consultants',
+  'Small teams using scattered tools',
 ];
 
 function App() {
@@ -44,6 +78,7 @@ function App() {
             <span className="brand-mark">PA</span>
             Practical AI Systems
           </a>
+          <a className="nav-cta" href={calendlyLink} target="_blank" rel="noreferrer">
           <a className="nav-cta" href="#contact">
             Start a workflow review
           </a>
@@ -52,6 +87,20 @@ function App() {
         <div className="hero-grid" id="top">
           <div className="hero-copy">
             <p className="eyebrow">AI + Project Management Consulting</p>
+            <h1>
+              Most small businesses do not have an AI problem. <span>They have a workflow problem.</span>
+            </h1>
+            <p className="hero-lede">
+              Practical AI Systems helps owners turn AI curiosity into cleaner operations. We connect tools like
+              ChatGPT and Claude to the work that already runs your business: client follow-up, documents, estimates,
+              reports, task management, communication, decision-making, and internal workflows.
+            </p>
+            <div className="hero-actions">
+              <a className="button primary" href={calendlyLink} target="_blank" rel="noreferrer">
+                Book a 15-minute review
+              </a>
+              <a className="button secondary" href="#deliverables">
+                See what you get
             <h1>Most small businesses do not have an AI problem. They have a workflow problem.</h1>
             <p className="hero-lede">
               Practical AI Systems helps small business owners connect tools like ChatGPT and Claude to the real work:
@@ -68,6 +117,12 @@ function App() {
           </div>
 
           <aside className="hero-card" aria-label="Consulting focus areas">
+            <div className="card-topline">Where AI becomes useful</div>
+            <ul>
+              <li>Follow-up that becomes a system instead of a memory test</li>
+              <li>Documents and estimates that follow one clear standard</li>
+              <li>Reports that show owners what needs attention</li>
+              <li>Tasks and decisions that turn into accountable next steps</li>
             <div className="card-topline">What gets improved</div>
             <ul>
               <li>Client follow-up that does not fall through the cracks</li>
@@ -82,6 +137,15 @@ function App() {
       <section className="problem section-shell">
         <div className="section-kicker">The problem</div>
         <div className="split">
+          <h2>Buying another AI tool will not fix a messy handoff.</h2>
+          <div className="copy-stack">
+            <p>
+              Small businesses rarely need a complicated AI strategy on day one. They need clearer ways to capture
+              information, decide what matters, assign work, follow up, and keep clients moving.
+            </p>
+            <p>
+              Random prompts and one-off experiments can be interesting, but they do not create operating leverage. The
+              value appears when AI is tied to repeatable workflows your team can trust.
           <h2>AI tools are easy to open. They are harder to connect to how your business actually runs.</h2>
           <div className="copy-stack">
             <p>
@@ -102,6 +166,9 @@ function App() {
           <div>
             <h2>Build practical AI systems around the workflow first.</h2>
             <p>
+              We help you decide where AI belongs, what should stay human, and how each tool should support the way your
+              business actually operates. The outcome is not more noise. It is fewer dropped balls, clearer standards,
+              and better decisions.
               We help you decide where AI belongs, where it does not, and how it should support your existing team. The
               goal is not more software. The goal is cleaner operations and better decisions.
             </p>
@@ -123,6 +190,27 @@ function App() {
         </div>
       </section>
 
+      <section className="deliverables section-shell" id="deliverables">
+        <div className="section-header">
+          <div>
+            <div className="section-kicker">What you get</div>
+            <h2>Concrete deliverables your business can use immediately.</h2>
+          </div>
+          <p>
+            Every engagement is built around practical outputs, not vague advice. You leave with a clearer operating
+            picture and a focused plan for using AI where it will actually help.
+          </p>
+        </div>
+        <div className="deliverable-grid">
+          {deliverables.map((deliverable) => (
+            <article className="deliverable-card" key={deliverable.title}>
+              <h3>{deliverable.title}</h3>
+              <p>{deliverable.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="services section-shell" id="services">
         <div className="section-header">
           <div>
@@ -130,8 +218,8 @@ function App() {
             <h2>Focused consulting for owners who want results, not hype.</h2>
           </div>
           <p>
-            Engagements can start with a focused workflow review and expand into implementation support, team training,
-            and operating playbooks.
+            Start with a workflow review, then move into implementation support, team training, and operating playbooks
+            only where the business needs them.
           </p>
         </div>
         <div className="service-grid">
@@ -174,6 +262,20 @@ function App() {
         </div>
       </section>
 
+      <section className="audience section-shell">
+        <div className="audience-panel">
+          <div>
+            <div className="section-kicker">Who this is for</div>
+            <h2>Built for small businesses that need practical systems, not AI theater.</h2>
+          </div>
+          <ul className="audience-list">
+            {audiences.map((audience) => (
+              <li key={audience}>{audience}</li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       <section className="about section-shell">
         <div className="about-card">
           <div className="section-kicker">About</div>
@@ -193,8 +295,8 @@ function App() {
         <div className="cta-panel">
           <p className="eyebrow">Ready to make AI practical?</p>
           <h2>Start with the workflow you already know is slowing the business down.</h2>
-          <a className="button primary light" href="#contact">
-            Request a workflow review
+          <a className="button primary light" href={calendlyLink} target="_blank" rel="noreferrer">
+            Book a 15-minute review
           </a>
         </div>
       </section>
