@@ -507,6 +507,7 @@ h2 {
     margin-top: 24px;
     font-size: 1.04rem;
     line-height: 1.58;
+    font-size: clamp(3.25rem, 17vw, 5.2rem);
   }
 
   .hero-card,
@@ -536,6 +537,15 @@ h2 {
 
   .service-grid,
   .deliverable-grid,
+  .services,
+  .process,
+  .use-cases,
+  .about,
+  .cta {
+    padding: 58px 0;
+  }
+
+  .service-grid,
   .process-grid {
     grid-template-columns: 1fr;
   }
