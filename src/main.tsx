@@ -53,7 +53,6 @@ const processSteps = [
 
 const useCases = [
   'Turn call notes into follow-up emails, assigned tasks, and next steps.',
-  'Turn call notes into follow-up emails, tasks, and next steps.',
   'Create consistent estimates, proposals, and project summaries.',
   'Summarize weekly progress across clients, jobs, or departments.',
   'Convert messy internal requests into clear work tickets.',
@@ -79,7 +78,6 @@ function App() {
             Practical AI Systems
           </a>
           <a className="nav-cta" href={calendlyLink} target="_blank" rel="noreferrer">
-          <a className="nav-cta" href="#contact">
             Start a workflow review
           </a>
         </nav>
@@ -101,17 +99,6 @@ function App() {
               </a>
               <a className="button secondary" href="#deliverables">
                 See what you get
-            <h1>Most small businesses do not have an AI problem. They have a workflow problem.</h1>
-            <p className="hero-lede">
-              Practical AI Systems helps small business owners connect tools like ChatGPT and Claude to the real work:
-              follow-up, documents, estimates, reports, task management, communication, and decisions.
-            </p>
-            <div className="hero-actions">
-              <a className="button primary" href="#contact">
-                Book a practical review
-              </a>
-              <a className="button secondary" href="#services">
-                See services
               </a>
             </div>
           </div>
@@ -123,12 +110,6 @@ function App() {
               <li>Documents and estimates that follow one clear standard</li>
               <li>Reports that show owners what needs attention</li>
               <li>Tasks and decisions that turn into accountable next steps</li>
-            <div className="card-topline">What gets improved</div>
-            <ul>
-              <li>Client follow-up that does not fall through the cracks</li>
-              <li>Documents and estimates that follow a clear standard</li>
-              <li>Reports that help owners see what needs attention</li>
-              <li>Task systems that turn decisions into accountable work</li>
             </ul>
           </aside>
         </div>
@@ -146,15 +127,6 @@ function App() {
             <p>
               Random prompts and one-off experiments can be interesting, but they do not create operating leverage. The
               value appears when AI is tied to repeatable workflows your team can trust.
-          <h2>AI tools are easy to open. They are harder to connect to how your business actually runs.</h2>
-          <div className="copy-stack">
-            <p>
-              Many teams try AI by asking random questions, generating one-off documents, or testing a new app with no
-              operational owner. That creates novelty, not better execution.
-            </p>
-            <p>
-              The bigger issue is usually unclear handoffs, inconsistent follow-up, scattered information, and decisions
-              that never become assigned work.
             </p>
           </div>
         </div>
@@ -166,11 +138,9 @@ function App() {
           <div>
             <h2>Build practical AI systems around the workflow first.</h2>
             <p>
-              We help you decide where AI belongs, what should stay human, and how each tool should support the way your
-              business actually operates. The outcome is not more noise. It is fewer dropped balls, clearer standards,
-              and better decisions.
-              We help you decide where AI belongs, where it does not, and how it should support your existing team. The
-              goal is not more software. The goal is cleaner operations and better decisions.
+              {
+                'We help you decide where AI belongs, what should stay human, and how each tool should support the way your business actually operates. The outcome is not more noise. It is fewer dropped balls, clearer standards, and better decisions.'
+              }
             </p>
           </div>
           <div className="metrics-grid" aria-label="Consulting principles">
