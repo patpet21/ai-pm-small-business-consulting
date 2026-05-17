@@ -1,88 +1,204 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom';
 import './styles.css';
 
 const calendlyLink = 'https://calendly.com/propertydext/15min';
 
-const services = [
-  'Workflow audits for the places work slows down',
-  'Client follow-up systems that create clear next steps',
-  'Document, estimate, and report templates your team can reuse',
-  'Task management improvements that make ownership visible',
-  'Communication routines for fewer dropped details',
-  'Decision support for owners who need cleaner information',
+const workflowAreas = [
+  'Client follow-up',
+  'Documents',
+  'Estimates',
+  'Reports',
+  'Task management',
+  'Communication',
+  'Decision-making',
+  'Internal operations',
 ];
 
 const deliverables = [
+  'Workflow audit',
+  'AI use-case map',
+  'Prompt and template starter pack',
+  'Recommended tools and setup',
+  'Simple implementation roadmap',
+];
+
+const serviceBlocks = [
   {
-    title: 'Workflow audit',
-    text: 'A clear look at where follow-up, documents, estimates, reports, tasks, and communication are breaking down.',
+    title: 'AI Workflow Audit',
+    for: 'Owners and small teams that know work is slipping but are not sure where AI should fit.',
+    problem:
+      'Follow-up, documents, estimates, reports, and internal handoffs are scattered across too many tools or too many people.',
+    gets: [
+      'A practical workflow review',
+      'Clear AI use-case priorities',
+      'A short list of process fixes before software changes',
+      'A simple implementation roadmap',
+    ],
   },
   {
-    title: 'AI use-case map',
-    text: 'A practical map of where tools like ChatGPT and Claude can help—and where they should stay out of the way.',
+    title: 'AI + PM System Setup',
+    for: 'Businesses ready to connect AI outputs to tasks, ownership, communication, and recurring operating routines.',
+    problem:
+      'AI creates drafts and summaries, but the work still does not become an assigned next step or a repeatable process.',
+    gets: [
+      'Recommended tool structure',
+      'Task and communication workflows',
+      'Reusable templates for everyday work',
+      'Team guidance for practical adoption',
+    ],
   },
   {
-    title: 'Prompt and template starter pack',
-    text: 'Reusable prompts, checklists, and document structures for the work your team repeats every week.',
-  },
-  {
-    title: 'Recommended tools and setup',
-    text: 'A lean tool recommendation based on your current operations, not a stack of unnecessary software.',
-  },
-  {
-    title: 'Simple implementation roadmap',
-    text: 'A prioritized plan that turns the best ideas into owners, timelines, and practical next actions.',
+    title: 'Claude / ChatGPT Business Playbook',
+    for: 'Small teams that want clear, safe, non-technical ways to use Claude or ChatGPT in day-to-day operations.',
+    problem:
+      'People are using AI randomly, with inconsistent prompts, unclear standards, and no shared way to apply the results.',
+    gets: [
+      'Prompt and template starter pack',
+      'Use-case guidance by workflow',
+      'Do-and-do-not-use rules for your team',
+      'Examples for follow-up, documents, reporting, and decisions',
+    ],
   },
 ];
 
-const processSteps = [
+const resourceSections = [
   {
-    title: 'Map the real workflow',
-    text: 'We identify how work actually moves through the business and where owners, teams, or clients lose clarity.',
+    title: 'AI Workflow Checklist',
+    points: [
+      'Pick one workflow before picking another tool.',
+      'Write down where information enters, who owns it, and what happens next.',
+      'Look for repeated tasks: follow-up emails, estimate drafts, weekly summaries, and internal updates.',
+      'Decide what AI can draft, summarize, classify, or turn into tasks.',
+    ],
   },
   {
-    title: 'Choose the right AI support',
-    text: 'We match AI use cases to real operations: follow-up, documents, estimates, reports, tasks, communication, and decisions.',
+    title: 'Prompt Templates for Small Business',
+    points: [
+      '“Turn these call notes into a client follow-up email with next steps and open questions.”',
+      '“Summarize this project update for an owner who needs risks, decisions, and deadlines.”',
+      '“Create a checklist from this messy request so a team member can complete it without another meeting.”',
+      '“Rewrite this estimate explanation so it is clear, direct, and professional.”',
+    ],
   },
   {
-    title: 'Install simple routines',
-    text: 'Your team gets templates, prompts, handoffs, and a roadmap they can use without becoming technical experts.',
+    title: 'Common AI Mistakes',
+    points: [
+      'Trying to automate a workflow no one has clearly defined.',
+      'Letting each team member invent their own prompts and standards.',
+      'Using AI for client-facing work without review, context, or accountability.',
+      'Buying another app when the real issue is ownership and handoff clarity.',
+    ],
+  },
+  {
+    title: 'Simple Workflow Examples',
+    points: [
+      'Call notes → summary → client email → assigned task → follow-up date.',
+      'Site visit notes → estimate draft → internal review → client-ready proposal.',
+      'Weekly team updates → risk summary → owner decisions → project tasks.',
+      'Client request → clarified scope → task checklist → status update.',
+    ],
   },
 ];
 
-const useCases = [
-  'Turn call notes into follow-up emails, assigned tasks, and next steps.',
-  'Create consistent estimates, proposals, and project summaries.',
-  'Summarize weekly progress across clients, jobs, or departments.',
-  'Convert messy internal requests into clear work tickets.',
-  'Build repeatable checklists for recurring decisions and reviews.',
-  'Improve owner visibility without adding another meeting.',
+const useCaseDetails = [
+  {
+    title: 'Contractors',
+    problem: 'Job details, site notes, estimate changes, and client follow-up often live in texts, calls, and memory.',
+    help: 'AI can turn notes and photos into summaries, estimate explanations, task lists, and follow-up drafts.',
+    system: 'A simple intake-to-estimate workflow with standard prompts, review steps, and assigned next actions.',
+  },
+  {
+    title: 'Real estate professionals',
+    problem: 'Client communication, property details, transaction tasks, and vendor coordination can become fragmented.',
+    help: 'AI can summarize conversations, draft updates, organize deal tasks, and prepare client-ready communication.',
+    system: 'A transaction coordination workflow that converts notes into follow-ups, documents, reminders, and decision points.',
+  },
+  {
+    title: 'Local service businesses',
+    problem: 'New inquiries, scheduling, service notes, reviews, and repeat communication are handled inconsistently.',
+    help: 'AI can standardize responses, summarize service history, draft updates, and create internal handoff notes.',
+    system: 'A client request workflow from intake to service completion with templates for each recurring touchpoint.',
+  },
+  {
+    title: 'Consultants',
+    problem: 'Discovery notes, client recommendations, proposals, and status reports take too long to convert into clear outputs.',
+    help: 'AI can structure insights, draft deliverables, prepare meeting summaries, and keep action items visible.',
+    system: 'A consulting delivery workflow that turns meetings into decisions, tasks, summaries, and polished client materials.',
+  },
+  {
+    title: 'Small internal teams',
+    problem: 'Work is spread across email, chat, spreadsheets, project tools, and informal conversations.',
+    help: 'AI can consolidate updates, clarify requests, draft internal documentation, and surface decisions that need attention.',
+    system: 'A lightweight operating rhythm for requests, updates, decisions, and weekly visibility.',
+  },
 ];
 
-const audiences = [
-  'Contractors',
-  'Real estate professionals',
-  'Local service businesses',
-  'Consultants',
-  'Small teams using scattered tools',
+const navItems = [
+  { label: 'Home', to: '/' },
+  { label: 'Services', to: '/services' },
+  { label: 'Resources', to: '/resources' },
+  { label: 'Use Cases', to: '/use-cases' },
+  { label: 'About', to: '/about' },
 ];
 
-function App() {
+function CTAButton({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
   return (
-    <main>
-      <section className="hero section-shell">
-        <nav className="nav" aria-label="Main navigation">
-          <a className="brand" href="#top" aria-label="Practical AI Systems home">
-            <span className="brand-mark">PA</span>
-            Practical AI Systems
-          </a>
-          <a className="nav-cta" href={calendlyLink} target="_blank" rel="noreferrer">
-            Start a workflow review
-          </a>
-        </nav>
+    <a className={`button primary${light ? ' light' : ''}`} href={calendlyLink} target="_blank" rel="noreferrer">
+      {children}
+    </a>
+  );
+}
 
-        <div className="hero-grid" id="top">
+function SiteHeader() {
+  return (
+    <header className="site-header section-shell">
+      <Link className="brand" to="/" aria-label="Practical AI Systems home">
+        <span className="brand-mark">PA</span>
+        Practical AI Systems
+      </Link>
+      <nav className="nav-links" aria-label="Main navigation">
+        {navItems.map((item) => (
+          <NavLink className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} key={item.to} to={item.to}>
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+      <a className="nav-cta" href={calendlyLink} target="_blank" rel="noreferrer">
+        Book a Call
+      </a>
+    </header>
+  );
+}
+
+function PageIntro({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) {
+  return (
+    <section className="page-intro section-shell">
+      <p className="eyebrow">{eyebrow}</p>
+      <h1>{title}</h1>
+      <p className="hero-lede">{text}</p>
+    </section>
+  );
+}
+
+function FinalCTA() {
+  return (
+    <section className="cta section-shell" id="contact">
+      <div className="cta-panel">
+        <p className="eyebrow">Ready to make AI practical?</p>
+        <h2>Start with the workflow you already know is slowing the business down.</h2>
+        <CTAButton light>Book a 15-minute review</CTAButton>
+      </div>
+    </section>
+  );
+}
+
+function Home() {
+  return (
+    <>
+      <section className="hero section-shell">
+        <div className="hero-grid">
           <div className="hero-copy">
             <p className="eyebrow">AI + Project Management Consulting</p>
             <h1>
@@ -90,26 +206,22 @@ function App() {
             </h1>
             <p className="hero-lede">
               Practical AI Systems helps owners turn AI curiosity into cleaner operations. We connect tools like
-              ChatGPT and Claude to the work that already runs your business: client follow-up, documents, estimates,
-              reports, task management, communication, decision-making, and internal workflows.
+              ChatGPT and Claude to real workflows: client follow-up, documents, estimates, reports, task management,
+              communication, decision-making, and internal operations.
             </p>
             <div className="hero-actions">
-              <a className="button primary" href={calendlyLink} target="_blank" rel="noreferrer">
-                Book a 15-minute review
-              </a>
-              <a className="button secondary" href="#deliverables">
-                See what you get
-              </a>
+              <CTAButton>Book a 15-minute review</CTAButton>
+              <Link className="button secondary" to="/services">
+                Explore services
+              </Link>
             </div>
           </div>
-
-          <aside className="hero-card" aria-label="Consulting focus areas">
+          <aside className="hero-card" aria-label="Workflow areas">
             <div className="card-topline">Where AI becomes useful</div>
             <ul>
-              <li>Follow-up that becomes a system instead of a memory test</li>
-              <li>Documents and estimates that follow one clear standard</li>
-              <li>Reports that show owners what needs attention</li>
-              <li>Tasks and decisions that turn into accountable next steps</li>
+              {workflowAreas.map((area) => (
+                <li key={area}>{area}</li>
+              ))}
             </ul>
           </aside>
         </div>
@@ -138,9 +250,9 @@ function App() {
           <div>
             <h2>Build practical AI systems around the workflow first.</h2>
             <p>
-              {
-                'We help you decide where AI belongs, what should stay human, and how each tool should support the way your business actually operates. The outcome is not more noise. It is fewer dropped balls, clearer standards, and better decisions.'
-              }
+              We help you decide where AI belongs, what should stay human, and how each tool should support the way your
+              business actually operates. The outcome is not more noise. It is fewer dropped balls, clearer standards,
+              and better decisions.
             </p>
           </div>
           <div className="metrics-grid" aria-label="Consulting principles">
@@ -160,7 +272,7 @@ function App() {
         </div>
       </section>
 
-      <section className="deliverables section-shell" id="deliverables">
+      <section className="deliverables section-shell">
         <div className="section-header">
           <div>
             <div className="section-kicker">What you get</div>
@@ -173,104 +285,169 @@ function App() {
         </div>
         <div className="deliverable-grid">
           {deliverables.map((deliverable) => (
-            <article className="deliverable-card" key={deliverable.title}>
-              <h3>{deliverable.title}</h3>
-              <p>{deliverable.text}</p>
+            <article className="deliverable-card" key={deliverable}>
+              <h3>{deliverable}</h3>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="services section-shell" id="services">
-        <div className="section-header">
-          <div>
-            <div className="section-kicker">Services</div>
-            <h2>Focused consulting for owners who want results, not hype.</h2>
-          </div>
-          <p>
-            Start with a workflow review, then move into implementation support, team training, and operating playbooks
-            only where the business needs them.
-          </p>
-        </div>
-        <div className="service-grid">
-          {services.map((service) => (
-            <article className="service-card" key={service}>
-              <span aria-hidden="true">—</span>
-              <h3>{service}</h3>
-            </article>
-          ))}
-        </div>
-      </section>
+      <FinalCTA />
+    </>
+  );
+}
 
-      <section className="process section-shell">
-        <div className="section-header compact">
-          <div>
-            <div className="section-kicker">How it works</div>
-            <h2>A simple path from scattered work to reliable systems.</h2>
-          </div>
-        </div>
-        <div className="process-grid">
-          {processSteps.map((step, index) => (
-            <article className="process-card" key={step.title}>
-              <span className="step-number">0{index + 1}</span>
-              <h3>{step.title}</h3>
-              <p>{step.text}</p>
-            </article>
-          ))}
-        </div>
+function Services() {
+  return (
+    <>
+      <PageIntro
+        eyebrow="Services"
+        title="Practical AI systems for owners who want results, not hype."
+        text="Start with the workflow, then connect AI and project management tools only where they make operations clearer."
+      />
+      <section className="section-shell service-detail-grid">
+        {serviceBlocks.map((service) => (
+          <article className="detail-card" key={service.title}>
+            <h2>{service.title}</h2>
+            <div className="detail-stack">
+              <div>
+                <strong>Who it is for</strong>
+                <p>{service.for}</p>
+              </div>
+              <div>
+                <strong>The problem it solves</strong>
+                <p>{service.problem}</p>
+              </div>
+              <div>
+                <strong>What you get</strong>
+                <ul>
+                  {service.gets.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <CTAButton>Book a call</CTAButton>
+          </article>
+        ))}
       </section>
+    </>
+  );
+}
 
-      <section className="use-cases section-shell">
-        <div className="section-kicker">Example use cases</div>
-        <div className="use-case-layout">
-          <h2>AI can support the everyday work that keeps the business moving.</h2>
-          <ul className="use-case-list">
-            {useCases.map((useCase) => (
-              <li key={useCase}>{useCase}</li>
-            ))}
-          </ul>
-        </div>
+function Resources() {
+  return (
+    <>
+      <PageIntro
+        eyebrow="Resources"
+        title="Useful starting points for applying AI to real small business workflows."
+        text="These examples are designed to help you think clearly before buying another tool or asking your team to change everything at once."
+      />
+      <section className="section-shell resource-grid">
+        {resourceSections.map((section) => (
+          <article className="resource-card" key={section.title}>
+            <h2>{section.title}</h2>
+            <ul>
+              {section.points.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
       </section>
+    </>
+  );
+}
 
-      <section className="audience section-shell">
-        <div className="audience-panel">
-          <div>
-            <div className="section-kicker">Who this is for</div>
-            <h2>Built for small businesses that need practical systems, not AI theater.</h2>
-          </div>
-          <ul className="audience-list">
-            {audiences.map((audience) => (
-              <li key={audience}>{audience}</li>
-            ))}
-          </ul>
-        </div>
+function UseCases() {
+  return (
+    <>
+      <PageIntro
+        eyebrow="Use cases"
+        title="Practical AI examples by business type."
+        text="The best use cases are not flashy. They remove friction from the work your team already repeats every week."
+      />
+      <section className="section-shell use-case-detail-grid">
+        {useCaseDetails.map((useCase) => (
+          <article className="detail-card" key={useCase.title}>
+            <h2>{useCase.title}</h2>
+            <div className="detail-stack three-column-text">
+              <div>
+                <strong>Common workflow problem</strong>
+                <p>{useCase.problem}</p>
+              </div>
+              <div>
+                <strong>How AI can help</strong>
+                <p>{useCase.help}</p>
+              </div>
+              <div>
+                <strong>Simple system</strong>
+                <p>{useCase.system}</p>
+              </div>
+            </div>
+          </article>
+        ))}
       </section>
+      <FinalCTA />
+    </>
+  );
+}
 
-      <section className="about section-shell">
+function About() {
+  return (
+    <>
+      <PageIntro
+        eyebrow="About"
+        title="Practical systems for business owners who need clarity, not buzzwords."
+        text="Practical AI Systems is led by Peter, an AI + Project Management Systems Consultant focused on turning complex ideas into usable operations."
+      />
+      <section className="section-shell about-profile">
+        <img src="https://i.ibb.co/nx5qk7T/Progetto-senza-titolo-3.png" alt="Peter, founder of Practical AI Systems" />
         <div className="about-card">
-          <div className="section-kicker">About</div>
-          <h2>Practical AI Systems is built for small business reality.</h2>
+          <div className="section-kicker">Founder profile</div>
+          <h2>Peter</h2>
+          <p className="profile-title">Founder / AI + Project Management Systems Consultant</p>
           <p>
-            The work is part AI strategy, part project management, and part operational cleanup. We translate new tools
-            into clear workflows that owners and teams can understand, adopt, and maintain.
+            Peter is an engineer by background and a builder by instinct. With experience across civil engineering,
+            construction, real estate coordination, blockchain, digital ventures, and business operations, he focuses on
+            turning complex ideas into practical systems.
           </p>
           <p>
-            No technical theater. No pressure to automate everything. Just a disciplined look at where AI can reduce
-            friction and make the business easier to run.
+            He started exploring crypto and blockchain in 2017, later applying that curiosity to real estate
+            tokenization, decision-support tools, and practical AI workflows.
           </p>
+          <p>
+            Today, through Practical AI Systems, Peter helps small businesses use AI tools like ChatGPT and Claude in a
+            structured, useful way: not as random tools, but as part of real business operations.
+          </p>
+          <ul className="credential-list">
+            <li>Civil engineering background</li>
+            <li>Construction and real estate experience</li>
+            <li>Blockchain and digital business experience</li>
+            <li>Project coordination mindset</li>
+            <li>Focus on practical AI systems, not hype</li>
+          </ul>
         </div>
       </section>
+      <FinalCTA />
+    </>
+  );
+}
 
-      <section className="cta section-shell" id="contact">
-        <div className="cta-panel">
-          <p className="eyebrow">Ready to make AI practical?</p>
-          <h2>Start with the workflow you already know is slowing the business down.</h2>
-          <a className="button primary light" href={calendlyLink} target="_blank" rel="noreferrer">
-            Book a 15-minute review
-          </a>
-        </div>
-      </section>
-    </main>
+function App() {
+  return (
+    <BrowserRouter>
+      <SiteHeader />
+      <main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/use-cases" element={<UseCases />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
   );
 }
 
