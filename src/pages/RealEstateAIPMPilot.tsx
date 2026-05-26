@@ -241,9 +241,22 @@ export function RealEstateAIPMPilot() {
       </section>
 
       <footer className="section-shell pilot-footer">
-        <p><strong>Practical AI Systems</strong></p>
-        <p>Email: hello@practicalaisystems.com</p>
-        <p>Book a 15-minute review: <a href="https://calendly.com/propertydext/30min" target="_blank" rel="noreferrer">calendly.com/propertydext/30min</a></p>
+        <div className="pilot-footer-grid">
+          <div>
+            <p className="pilot-footer-brand">Practical AI Systems</p>
+            <p>AI + Project Management workflow consulting for small businesses.</p>
+          </div>
+          <div>
+            <p className="pilot-footer-title">Contact</p>
+            <p><a href="mailto:hello@practicalaisystems.com">hello@practicalaisystems.com</a></p>
+            <p><a href="https://calendly.com/propertydext/30min" target="_blank" rel="noreferrer">Book a 15-minute review</a></p>
+          </div>
+          <div>
+            <p className="pilot-footer-title">Navigation</p>
+            <p><a href="/">Home</a></p>
+            <p><a href="/real-estate-ai-pm-pilot">Real Estate AI PM Pilot</a></p>
+          </div>
+        </div>
       </footer>
     </>
   );
