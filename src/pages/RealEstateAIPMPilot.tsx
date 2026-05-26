@@ -135,9 +135,18 @@ export function RealEstateAIPMPilot() {
       }
 
       const json = (await res.json()) as ApiResponse;
+      console.log('[pilot-submit] status:', res.status);
+      console.log('[pilot-submit] success:', Boolean(json.success));
+      console.log('[pilot-submit] hasInstantSnapshot:', Boolean(json.instantSnapshot));
+      console.log('[pilot-submit] message:', json.message || '');
+
       setResponse(json);
       setSubmitted(true);
-      setFallbackSuccess(!(json.success && json.instantSnapshot));
+      setFallbackSuccess(!(json.success === true && Boolean(json.instantSnapshot)));
+
+      if (json.success !== true) {
+        setError('The intake was submitted, but the instant AI snapshot could not be displayed. Full report will still be reviewed within 3 business days.');
+      }
     } catch {
       setSubmitted(true);
       setFallbackSuccess(true);
@@ -178,9 +187,11 @@ export function RealEstateAIPMPilot() {
             </div>
           </div>
         ) : (
-          <p className="resource-card">
-            We will review it and prepare a full human-reviewed AI PM Workflow Report within 3 business days.
-          </p>
+          <div className="resource-card">
+            <p>The intake was submitted, but the instant AI snapshot could not be displayed. Full report will still be reviewed within 3 business days.</p>
+            <p>Thank you — your intake was received. We will review it and prepare a full human-reviewed AI PM Workflow Report within 3 business days.</p>
+            {response?.message ? <p><strong>Debug message:</strong> {response.message}</p> : null}
+          </div>
         )}
 
         <div className="hero-actions">
