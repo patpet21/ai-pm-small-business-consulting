@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 
 const APPS_SCRIPT_WEB_APP_URL =
   'https://script.google.com/macros/s/AKfycbw-4odu_K3po27Dv3n5hEzjezxBR-kM06fBNWMdkU1RwRhDucpdSpt7LE1NzKpS1f8fMw/exec';
+import { Link } from 'react-router-dom';
+import { REAL_ESTATE_AI_PM_PROXY_ENDPOINT } from '../config/endpoints';
 
 type IntakeData = {
   name: string;
