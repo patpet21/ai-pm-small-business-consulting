@@ -11,7 +11,29 @@ export async function handler(event: Event): Promise<Result> {
   }
 
   try {
-    const payload = JSON.parse(event.body || '{}');
+    const intakePayload = JSON.parse(event.body || '{}');
+    const payload = {
+      ...intakePayload,
+      reportMode: 'preliminary_ai_pm_workflow_report',
+      reportStructure: {
+        sections: [
+          'executivePmSummary',
+          'pmProblemStatement',
+          'initialWorkflowCharter',
+          'workflowChart',
+          'stakeholderMap',
+          'riskRegister',
+          'taskBreakdown',
+          'aiPmOpportunities',
+          'recommendedSimpleSystem',
+          'sevenDayImplementationRoadmap',
+          'humanReviewNextStep',
+          'disclaimer',
+        ],
+      },
+      consultantPrompt:
+        'Act as a senior AI + Project Management Workflow Consultant for real estate operations. Use only submitted intake details. Do not invent facts. Provide practical PM analysis with clear sections. Do not provide legal, tax, financial, investment, brokerage, or compliance advice. AI supports workflow clarity and execution; it does not replace human PM judgment.',
+    };
     const upstream = await fetch(APPS_SCRIPT_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },

@@ -718,3 +718,33 @@ h3 {
 .pilot-footer p + p {
   margin-top: 6px;
 }
+
+.report-section-gap {
+  margin-top: 14px;
+}
+
+.charter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 18px;
+  margin-top: 8px;
+}
+
+.charter-grid p,
+.snapshot-grid p,
+.snapshot-grid li {
+  line-height: 1.55;
+  color: #34403b;
+}
+
+.snapshot-grid ul {
+  margin-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+@media (max-width: 760px) {
+  .charter-grid {
+    grid-template-columns: 1fr;
+  }
+}
