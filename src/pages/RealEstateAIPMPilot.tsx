@@ -1,4 +1,7 @@
 import { useMemo, useState } from 'react';
+
+const APPS_SCRIPT_WEB_APP_URL =
+  'https://script.google.com/macros/s/AKfycbw-4odu_K3po27Dv3n5hEzjezxBR-kM06fBNWMdkU1RwRhDucpdSpt7LE1NzKpS1f8fMw/exec';
 import { Link } from 'react-router-dom';
 import { REAL_ESTATE_AI_PM_PROXY_ENDPOINT } from '../config/endpoints';
 
@@ -20,23 +23,6 @@ type IntakeData = {
   additionalNotes: string;
 };
 
-type Snapshot = {
-  workflowDetected?: string;
-  mainBottleneck?: string;
-  recommendedFirstStep?: string;
-  suggestedSimpleSystem?: string;
-  aiOpportunities?: string[];
-  nextStep?: string;
-  disclaimer?: string;
-};
-
-type ApiResponse = {
-  success?: boolean;
-  message?: string;
-  submissionId?: string;
-  instantSnapshot?: Snapshot;
-};
-
 const initialData: IntakeData = {
   name: '',
   email: '',
@@ -55,26 +41,11 @@ const initialData: IntakeData = {
   additionalNotes: '',
 };
 
-const requiredFields: Array<keyof IntakeData> = [
-  'name',
-  'email',
-  'role',
-  'marketLocation',
-  'workflowType',
-  'currentProcess',
-  'mainPainPoints',
-  'desiredOutput',
-];
-
 const stepLabels = ['About you', 'Workflow to improve', 'Current process', 'Pain points', 'AI and tools', 'Desired output'];
 
 export function RealEstateAIPMPilot() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<IntakeData>(initialData);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [response, setResponse] = useState<ApiResponse | null>(null);
-  const [fallbackSuccess, setFallbackSuccess] = useState(false);
   const [error, setError] = useState('');
 
   const progressText = useMemo(() => `Step ${step + 1} of ${stepLabels.length}: ${stepLabels[step]}`, [step]);
@@ -112,100 +83,6 @@ export function RealEstateAIPMPilot() {
     setStep((prev) => Math.max(prev - 1, 0));
   }
 
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    const missing = requiredFields.filter((field) => !data[field].trim());
-    if (missing.length > 0) {
-      setError('Please complete all required fields before submitting.');
-      return;
-    }
-
-    setSubmitting(true);
-    setError('');
-
-    try {
-      const res = await fetch(REAL_ESTATE_AI_PM_PROXY_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        throw new Error('Proxy request failed');
-      }
-
-      const json = (await res.json()) as ApiResponse;
-      console.log('[pilot-submit] status:', res.status);
-      console.log('[pilot-submit] success:', Boolean(json.success));
-      console.log('[pilot-submit] hasInstantSnapshot:', Boolean(json.instantSnapshot));
-      console.log('[pilot-submit] message:', json.message || '');
-
-      setResponse(json);
-      setSubmitted(true);
-      setFallbackSuccess(!(json.success === true && Boolean(json.instantSnapshot)));
-
-      if (json.success !== true) {
-        setError('The intake was submitted, but the instant AI snapshot could not be displayed. Full report will still be reviewed within 3 business days.');
-      }
-    } catch {
-      setSubmitted(true);
-      setFallbackSuccess(true);
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  if (submitted) {
-    return (
-      <section className="section-shell pilot-success">
-        <p className="eyebrow">Real Estate AI PM Pilot</p>
-        <h1>Thank you — your intake was received.</h1>
-        <p className="hero-lede">Here is your preliminary AI PM Workflow Snapshot.</p>
-        <p className="success-note">
-          This snapshot is automatically generated from your intake answers and has not yet been reviewed by a human. A
-          complete human-reviewed AI PM Workflow Report will be prepared within 3 business days.
-        </p>
-
-        {!fallbackSuccess && response?.instantSnapshot ? (
-          <div className="resource-card snapshot-card">
-            <p><strong>Submission ID:</strong> {response.submissionId || 'Pending assignment'}</p>
-            <div className="snapshot-grid">
-              <div><h3>Workflow Detected</h3><p>{response.instantSnapshot.workflowDetected || 'N/A'}</p></div>
-              <div><h3>Main Bottleneck</h3><p>{response.instantSnapshot.mainBottleneck || 'N/A'}</p></div>
-              <div><h3>Recommended First PM Step</h3><p>{response.instantSnapshot.recommendedFirstStep || 'N/A'}</p></div>
-              <div><h3>Suggested Simple System</h3><p>{response.instantSnapshot.suggestedSimpleSystem || 'N/A'}</p></div>
-              <div>
-                <h3>AI PM Opportunities</h3>
-                <ul>
-                  {(response.instantSnapshot.aiOpportunities || ['N/A']).map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-              <div><h3>What Happens Next</h3><p>{response.instantSnapshot.nextStep || 'N/A'}</p></div>
-              <div className="snapshot-full"><h3>Disclaimer</h3><p>{response.instantSnapshot.disclaimer || 'N/A'}</p></div>
-            </div>
-          </div>
-        ) : (
-          <div className="resource-card">
-            <p>The intake was submitted, but the instant AI snapshot could not be displayed. Full report will still be reviewed within 3 business days.</p>
-            <p>Thank you — your intake was received. We will review it and prepare a full human-reviewed AI PM Workflow Report within 3 business days.</p>
-            {response?.message ? <p><strong>Debug message:</strong> {response.message}</p> : null}
-          </div>
-        )}
-
-        <div className="hero-actions">
-          <a className="button primary" href="https://calendly.com/propertydext/30min" target="_blank" rel="noreferrer">
-            Book a 15-minute review
-          </a>
-          <Link className="button secondary" to="/">
-            Back to Home
-          </Link>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <>
       <section className="page-intro section-shell">
@@ -235,50 +112,34 @@ export function RealEstateAIPMPilot() {
           Not tokenization. Not legal, financial, tax, investment, brokerage, or compliance advice.
         </p>
 
-        <form className="pilot-form" onSubmit={onSubmit}>
+        <form className="pilot-form" method="POST" action={APPS_SCRIPT_WEB_APP_URL}>
           {step === 0 && (
             <div className="form-grid two-col">
-              <label>
-                Name *
-                <input value={data.name} onChange={(e) => updateField('name', e.target.value)} />
-              </label>
-              <label>
-                Email *
-                <input type="email" value={data.email} onChange={(e) => updateField('email', e.target.value)} />
-              </label>
+              <label>Name *<input name="name" value={data.name} onChange={(e) => updateField('name', e.target.value)} /></label>
+              <label>Email *<input name="email" type="email" value={data.email} onChange={(e) => updateField('email', e.target.value)} /></label>
               <label>
                 Role *
-                <select value={data.role} onChange={(e) => updateField('role', e.target.value)}>
+                <select name="role" value={data.role} onChange={(e) => updateField('role', e.target.value)}>
                   <option value="">Select</option>
-                  {['Realtor', 'Broker', 'Property Manager', 'Real Estate Investor', 'Contractor', 'Small Real Estate Team', 'Other'].map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
+                  {['Realtor', 'Broker', 'Property Manager', 'Real Estate Investor', 'Contractor', 'Small Real Estate Team', 'Other'].map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
-              <label>
-                Market location *
-                <input value={data.marketLocation} onChange={(e) => updateField('marketLocation', e.target.value)} />
-              </label>
+              <label>Market location *<input name="marketLocation" value={data.marketLocation} onChange={(e) => updateField('marketLocation', e.target.value)} /></label>
               <label>
                 Team size
-                <select value={data.teamSize} onChange={(e) => updateField('teamSize', e.target.value)}>
+                <select name="teamSize" value={data.teamSize} onChange={(e) => updateField('teamSize', e.target.value)}>
                   <option value="">Select</option>
-                  {['Just me', '2–5 people', '6–10 people', '10+ people'].map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
+                  {['Just me', '2–5 people', '6–10 people', '10+ people'].map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
             </div>
           )}
 
           {step === 1 && (
-            <label>
-              Workflow type to improve *
-              <select value={data.workflowType} onChange={(e) => updateField('workflowType', e.target.value)}>
+            <label>Workflow type to improve *
+              <select name="workflowType" value={data.workflowType} onChange={(e) => updateField('workflowType', e.target.value)}>
                 <option value="">Select</option>
-                {['Lead intake', 'Buyer follow-up', 'Seller follow-up', 'Listing preparation', 'Open house preparation', 'Transaction checklist', 'Vendor coordination', 'Client communication', 'Weekly client updates', 'Property project tracking', 'Content-to-client follow-up', 'Other'].map((item) => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
+                {['Lead intake', 'Buyer follow-up', 'Seller follow-up', 'Listing preparation', 'Open house preparation', 'Transaction checklist', 'Vendor coordination', 'Client communication', 'Weekly client updates', 'Property project tracking', 'Content-to-client follow-up', 'Other'].map((item) => <option key={item} value={item}>{item}</option>)}
               </select>
             </label>
           )}
@@ -287,38 +148,29 @@ export function RealEstateAIPMPilot() {
             <div className="form-grid">
               <label>
                 Information usually starts from
-                <select value={data.informationStartsFrom} onChange={(e) => updateField('informationStartsFrom', e.target.value)}>
+                <select name="informationStartsFrom" value={data.informationStartsFrom} onChange={(e) => updateField('informationStartsFrom', e.target.value)}>
                   <option value="">Select</option>
-                  {['Email', 'Phone calls', 'Text messages', 'Instagram / Social media', 'Zillow / Realtor.com / leads platform', 'CRM', 'Google Sheets', 'Paper / memory', 'Other'].map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
+                  {['Email', 'Phone calls', 'Text messages', 'Instagram / Social media', 'Zillow / Realtor.com / leads platform', 'CRM', 'Google Sheets', 'Paper / memory', 'Other'].map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
-              <label>
-                Describe how this workflow happens today *
-                <textarea value={data.currentProcess} onChange={(e) => updateField('currentProcess', e.target.value)} rows={6} />
+              <label>Describe how this workflow happens today *
+                <textarea name="currentProcess" value={data.currentProcess} onChange={(e) => updateField('currentProcess', e.target.value)} rows={6} />
               </label>
             </div>
           )}
 
           {step === 3 && (
             <div className="form-grid two-col">
-              <label>
-                Main pain points *
-                <select value={data.mainPainPoints} onChange={(e) => updateField('mainPainPoints', e.target.value)}>
+              <label>Main pain points *
+                <select name="mainPainPoints" value={data.mainPainPoints} onChange={(e) => updateField('mainPainPoints', e.target.value)}>
                   <option value="">Select</option>
-                  {['Missed follow-ups', 'Scattered notes', 'Repeated messages', 'No clear next steps', 'Tasks are not organized', 'I lose time after calls or meetings', 'No system for updates', 'Too many tools', 'Everything is manual', 'Other'].map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
+                  {['Missed follow-ups', 'Scattered notes', 'Repeated messages', 'No clear next steps', 'Tasks are not organized', 'I lose time after calls or meetings', 'No system for updates', 'Too many tools', 'Everything is manual', 'Other'].map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
-              <label>
-                Time lost per week
-                <select value={data.timeLostPerWeek} onChange={(e) => updateField('timeLostPerWeek', e.target.value)}>
+              <label>Time lost per week
+                <select name="timeLostPerWeek" value={data.timeLostPerWeek} onChange={(e) => updateField('timeLostPerWeek', e.target.value)}>
                   <option value="">Select</option>
-                  {['Less than 1 hour', '1–3 hours', '3–5 hours', '5+ hours'].map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
+                  {['Less than 1 hour', '1–3 hours', '3–5 hours', '5+ hours'].map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
             </div>
@@ -326,22 +178,16 @@ export function RealEstateAIPMPilot() {
 
           {step === 4 && (
             <div className="form-grid two-col">
-              <label>
-                AI usage today
-                <select value={data.aiUsageToday} onChange={(e) => updateField('aiUsageToday', e.target.value)}>
+              <label>AI usage today
+                <select name="aiUsageToday" value={data.aiUsageToday} onChange={(e) => updateField('aiUsageToday', e.target.value)}>
                   <option value="">Select</option>
-                  {['Yes, often', 'Sometimes', 'I tried it but not consistently', 'Not really'].map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
+                  {['Yes, often', 'Sometimes', 'I tried it but not consistently', 'Not really'].map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
-              <label>
-                Current tools
-                <select value={data.currentTools} onChange={(e) => updateField('currentTools', e.target.value)}>
+              <label>Current tools
+                <select name="currentTools" value={data.currentTools} onChange={(e) => updateField('currentTools', e.target.value)}>
                   <option value="">Select</option>
-                  {['Gmail / Outlook', 'Google Sheets', 'Google Docs', 'Trello', 'ClickUp', 'Asana', 'Notion', 'CRM', 'No real system', 'Other'].map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
+                  {['Gmail / Outlook', 'Google Sheets', 'Google Docs', 'Trello', 'ClickUp', 'Asana', 'Notion', 'CRM', 'No real system', 'Other'].map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
             </div>
@@ -349,27 +195,20 @@ export function RealEstateAIPMPilot() {
 
           {step === 5 && (
             <div className="form-grid">
-              <label>
-                Desired output *
-                <select value={data.desiredOutput} onChange={(e) => updateField('desiredOutput', e.target.value)}>
+              <label>Desired output *
+                <select name="desiredOutput" value={data.desiredOutput} onChange={(e) => updateField('desiredOutput', e.target.value)}>
                   <option value="">Select</option>
-                  {['Workflow map', 'Simple task tracker', 'Follow-up templates', 'AI prompt templates', 'Client communication templates', 'Weekly update structure', 'Recommended tools', '7-day implementation plan', 'Short call to review the workflow'].map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
+                  {['Workflow map', 'Simple task tracker', 'Follow-up templates', 'AI prompt templates', 'Client communication templates', 'Weekly update structure', 'Recommended tools', '7-day implementation plan', 'Short call to review the workflow'].map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
-              <label>
-                Open to call?
-                <select value={data.openToCall} onChange={(e) => updateField('openToCall', e.target.value)}>
+              <label>Open to call?
+                <select name="openToCall" value={data.openToCall} onChange={(e) => updateField('openToCall', e.target.value)}>
                   <option value="">Select</option>
-                  {['Yes', 'No', 'Maybe'].map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
+                  {['Yes', 'No', 'Maybe'].map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
-              <label>
-                Additional notes
-                <textarea value={data.additionalNotes} onChange={(e) => updateField('additionalNotes', e.target.value)} rows={5} />
+              <label>Additional notes
+                <textarea name="additionalNotes" value={data.additionalNotes} onChange={(e) => updateField('additionalNotes', e.target.value)} rows={5} />
               </label>
             </div>
           )}
@@ -377,19 +216,11 @@ export function RealEstateAIPMPilot() {
           {error && <p className="form-error">{error}</p>}
 
           <div className="wizard-actions">
-            {step > 0 && (
-              <button type="button" className="button secondary" onClick={prevStep}>
-                Back
-              </button>
-            )}
+            {step > 0 && <button type="button" className="button secondary" onClick={prevStep}>Back</button>}
             {step < stepLabels.length - 1 ? (
-              <button type="button" className="button primary" onClick={nextStep}>
-                Next
-              </button>
+              <button type="button" className="button primary" onClick={nextStep}>Next</button>
             ) : (
-              <button type="submit" className="button primary" disabled={submitting}>
-                {submitting ? 'Submitting...' : 'Submit pilot intake'}
-              </button>
+              <button type="submit" className="button primary">Submit pilot intake</button>
             )}
           </div>
         </form>
