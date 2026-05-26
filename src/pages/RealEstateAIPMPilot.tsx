@@ -151,7 +151,7 @@ export function RealEstateAIPMPilot() {
         )}
 
         <div className="hero-actions">
-          <a className="button primary" href="https://calendly.com/propertydext/30min" target="_blank" rel="noreferrer">Book a 15-minute review</a>
+          <a className="button primary" href="https://calendly.com/propertydext/15min" target="_blank" rel="noreferrer">Book a 15-minute review</a>
           <Link className="button secondary" to="/">Back to Home</Link>
         </div>
       </section>
@@ -186,7 +186,7 @@ export function RealEstateAIPMPilot() {
       <footer className="section-shell pilot-footer">
         <div className="pilot-footer-grid">
           <div><p className="pilot-footer-brand">Practical AI Systems</p><p>AI + Project Management workflow consulting for small businesses.</p></div>
-          <div><p className="pilot-footer-title">Contact</p><p><a href="mailto:hello@practicalaisystems.com">hello@practicalaisystems.com</a></p><p><a href="https://calendly.com/propertydext/30min" target="_blank" rel="noreferrer">Book a 15-minute review</a></p></div>
+          <div><p className="pilot-footer-title">Contact</p><p><a href="mailto:hello@practicalaisystems.com">hello@practicalaisystems.com</a></p><p><a href="https://calendly.com/propertydext/15min" target="_blank" rel="noreferrer">Book a 15-minute review</a></p></div>
           <div><p className="pilot-footer-title">Navigation</p><p><a href="/">Home</a></p><p><a href="/real-estate-ai-pm-pilot">Real Estate AI PM Pilot</a></p></div>
         </div>
       </footer>

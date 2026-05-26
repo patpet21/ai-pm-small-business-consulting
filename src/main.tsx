@@ -157,7 +157,7 @@ function SiteHeader() {
   return (
     <header className="site-header section-shell">
       <Link className="brand" to="/" aria-label="Practical AI Systems home">
-        <span className="brand-mark">PA</span>
+        <img className="brand-logo" src="https://i.ibb.co/5g7gFLQz/Logo-PRDX.jpg" alt="Practical AI Systems logo" />
         Practical AI Systems
       </Link>
       <nav className="nav-links" aria-label="Main navigation">
