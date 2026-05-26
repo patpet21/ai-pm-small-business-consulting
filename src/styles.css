@@ -655,3 +655,28 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
+
+.back-home-link {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--forest);
+  font-weight: 700;
+}
+
+.form-wait-message {
+  margin-top: 12px;
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.pilot-footer {
+  border-top: 1px solid var(--line);
+  margin-top: 44px;
+  padding: 24px 0 48px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.pilot-footer a {
+  text-decoration: underline;
+}

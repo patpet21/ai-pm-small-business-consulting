@@ -2,8 +2,6 @@ import { useMemo, useState } from 'react';
 
 const APPS_SCRIPT_WEB_APP_URL =
   'https://script.google.com/macros/s/AKfycbw-4odu_K3po27Dv3n5hEzjezxBR-kM06fBNWMdkU1RwRhDucpdSpt7LE1NzKpS1f8fMw/exec';
-import { Link } from 'react-router-dom';
-import { REAL_ESTATE_AI_PM_PROXY_ENDPOINT } from '../config/endpoints';
 
 type IntakeData = {
   name: string;
@@ -47,6 +45,7 @@ export function RealEstateAIPMPilot() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<IntakeData>(initialData);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const progressText = useMemo(() => `Step ${step + 1} of ${stepLabels.length}: ${stepLabels[step]}`, [step]);
 
@@ -83,6 +82,17 @@ export function RealEstateAIPMPilot() {
     setStep((prev) => Math.max(prev - 1, 0));
   }
 
+  function onNativeSubmit(event: React.FormEvent<HTMLFormElement>) {
+    const validation = validateStep(step);
+    if (validation) {
+      event.preventDefault();
+      setError(validation);
+      return;
+    }
+    setError('');
+    setSubmitting(true);
+  }
+
   return (
     <>
       <section className="page-intro section-shell">
@@ -107,12 +117,13 @@ export function RealEstateAIPMPilot() {
       <section id="pilot-wizard" className="section-shell detail-card">
         <p className="eyebrow">Pilot intake wizard</p>
         <h2>{progressText}</h2>
+        <a className="back-home-link" href="/">← Back to Home</a>
         <p className="hero-lede">This is an AI + Project Management workflow diagnostic for real estate operations.</p>
         <p className="tiny-disclaimer">
           Not tokenization. Not legal, financial, tax, investment, brokerage, or compliance advice.
         </p>
 
-        <form className="pilot-form" method="POST" action={APPS_SCRIPT_WEB_APP_URL}>
+        <form className="pilot-form" method="POST" action={APPS_SCRIPT_WEB_APP_URL} onSubmit={onNativeSubmit}>
           {step === 0 && (
             <div className="form-grid two-col">
               <label>Name *<input name="name" value={data.name} onChange={(e) => updateField('name', e.target.value)} /></label>
@@ -214,17 +225,26 @@ export function RealEstateAIPMPilot() {
           )}
 
           {error && <p className="form-error">{error}</p>}
+          {submitting && (
+            <p className="form-wait-message">Please wait while we prepare your result page...</p>
+          )}
 
           <div className="wizard-actions">
             {step > 0 && <button type="button" className="button secondary" onClick={prevStep}>Back</button>}
             {step < stepLabels.length - 1 ? (
               <button type="button" className="button primary" onClick={nextStep}>Next</button>
             ) : (
-              <button type="submit" className="button primary">Submit pilot intake</button>
+              <button type="submit" className="button primary" disabled={submitting}>{submitting ? "Please wait..." : "Submit pilot intake"}</button>
             )}
           </div>
         </form>
       </section>
+
+      <footer className="section-shell pilot-footer">
+        <p><strong>Practical AI Systems</strong></p>
+        <p>Email: hello@practicalaisystems.com</p>
+        <p>Book a 15-minute review: <a href="https://calendly.com/propertydext/30min" target="_blank" rel="noreferrer">calendly.com/propertydext/30min</a></p>
+      </footer>
     </>
   );
 }
