@@ -124,14 +124,16 @@ export function RealEstateAIPMPilot() {
     setError('');
 
     try {
-      const res = await fetch(REAL_ESTATE_AI_PM_ENDPOINT, {
+      await fetch(REAL_ESTATE_AI_PM_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(data),
       });
 
-      const json = (await res.json()) as ApiResponse;
-      setResponse(json);
+      // NOTE: Keep snapshot response handling structure for later re-enable
+      // when a server-side proxy is introduced (no-cors returns opaque response).
+      setResponse(null);
       setSubmitted(true);
       setFallbackSuccess(false);
     } catch {
@@ -146,37 +148,18 @@ export function RealEstateAIPMPilot() {
     return (
       <section className="section-shell pilot-success">
         <p className="eyebrow">Real Estate AI PM Pilot</p>
-        <h1>Thank you — your intake was received.</h1>
-        <p className="hero-lede">Here is your preliminary AI Workflow Snapshot.</p>
-        <p className="success-note">
-          This is automatically generated from your intake answers and has not yet been reviewed by a human. A complete
-          AI PM Workflow Report will be reviewed and prepared within 3 business days.
-        </p>
+        <h1>Thank you — your intake was received. We will review it and prepare a full human-reviewed AI PM Workflow Report within 3 business days.</h1>
+        <p className="hero-lede">Your preliminary AI snapshot is being generated internally and will be reviewed before the full report.</p>
 
-        {!fallbackSuccess && response?.instantSnapshot ? (
-          <div className="resource-card">
-            <p><strong>Submission ID:</strong> {response.submissionId || 'Pending assignment'}</p>
-            <p><strong>Workflow detected:</strong> {response.instantSnapshot.workflowDetected || 'N/A'}</p>
-            <p><strong>Main bottleneck:</strong> {response.instantSnapshot.mainBottleneck || 'N/A'}</p>
-            <p><strong>Recommended first step:</strong> {response.instantSnapshot.recommendedFirstStep || 'N/A'}</p>
-            <p><strong>Suggested simple system:</strong> {response.instantSnapshot.suggestedSimpleSystem || 'N/A'}</p>
-            <div>
-              <strong>AI opportunities:</strong>
-              <ul>
-                {(response.instantSnapshot.aiOpportunities || ['N/A']).map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-            <p><strong>Next step:</strong> {response.instantSnapshot.nextStep || 'N/A'}</p>
-            <p><strong>Disclaimer:</strong> {response.instantSnapshot.disclaimer || 'N/A'}</p>
-          </div>
-        ) : (
-          <p className="resource-card">
-            Your intake was received. We will review it and prepare a full human-reviewed AI PM Workflow Report within 3
-            business days.
-          </p>
-        )}
+        {/* Snapshot view kept for future proxy-based response parsing.
+            Example legacy rendering preserved for re-enable:
+            {!fallbackSuccess && response?.instantSnapshot ? (...snapshot card...) : (...fallback...) }
+        */}
+
+        <p className="resource-card">
+          Your intake was received. We will review it and prepare a full human-reviewed AI PM Workflow Report within 3
+          business days.
+        </p>
 
         <div className="hero-actions">
           <a className="button primary" href="https://calendly.com/propertydext/30min" target="_blank" rel="noreferrer">
