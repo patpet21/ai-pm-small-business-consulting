@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { REAL_ESTATE_AI_PM_ENDPOINT } from '../config/endpoints';
+import { REAL_ESTATE_AI_PM_PROXY_ENDPOINT } from '../config/endpoints';
 
 type IntakeData = {
   name: string;
@@ -124,18 +124,20 @@ export function RealEstateAIPMPilot() {
     setError('');
 
     try {
-      await fetch(REAL_ESTATE_AI_PM_ENDPOINT, {
+      const res = await fetch(REAL_ESTATE_AI_PM_PROXY_ENDPOINT, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
 
-      // NOTE: Keep snapshot response handling structure for later re-enable
-      // when a server-side proxy is introduced (no-cors returns opaque response).
-      setResponse(null);
+      if (!res.ok) {
+        throw new Error('Proxy request failed');
+      }
+
+      const json = (await res.json()) as ApiResponse;
+      setResponse(json);
       setSubmitted(true);
-      setFallbackSuccess(false);
+      setFallbackSuccess(!(json.success && json.instantSnapshot));
     } catch {
       setSubmitted(true);
       setFallbackSuccess(true);
@@ -148,18 +150,38 @@ export function RealEstateAIPMPilot() {
     return (
       <section className="section-shell pilot-success">
         <p className="eyebrow">Real Estate AI PM Pilot</p>
-        <h1>Thank you — your intake was received. We will review it and prepare a full human-reviewed AI PM Workflow Report within 3 business days.</h1>
-        <p className="hero-lede">Your preliminary AI snapshot is being generated internally and will be reviewed before the full report.</p>
-
-        {/* Snapshot view kept for future proxy-based response parsing.
-            Example legacy rendering preserved for re-enable:
-            {!fallbackSuccess && response?.instantSnapshot ? (...snapshot card...) : (...fallback...) }
-        */}
-
-        <p className="resource-card">
-          Your intake was received. We will review it and prepare a full human-reviewed AI PM Workflow Report within 3
-          business days.
+        <h1>Thank you — your intake was received.</h1>
+        <p className="hero-lede">Here is your preliminary AI PM Workflow Snapshot.</p>
+        <p className="success-note">
+          This snapshot is automatically generated from your intake answers and has not yet been reviewed by a human. A
+          complete human-reviewed AI PM Workflow Report will be prepared within 3 business days.
         </p>
+
+        {!fallbackSuccess && response?.instantSnapshot ? (
+          <div className="resource-card snapshot-card">
+            <p><strong>Submission ID:</strong> {response.submissionId || 'Pending assignment'}</p>
+            <div className="snapshot-grid">
+              <div><h3>Workflow Detected</h3><p>{response.instantSnapshot.workflowDetected || 'N/A'}</p></div>
+              <div><h3>Main Bottleneck</h3><p>{response.instantSnapshot.mainBottleneck || 'N/A'}</p></div>
+              <div><h3>Recommended First PM Step</h3><p>{response.instantSnapshot.recommendedFirstStep || 'N/A'}</p></div>
+              <div><h3>Suggested Simple System</h3><p>{response.instantSnapshot.suggestedSimpleSystem || 'N/A'}</p></div>
+              <div>
+                <h3>AI PM Opportunities</h3>
+                <ul>
+                  {(response.instantSnapshot.aiOpportunities || ['N/A']).map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div><h3>What Happens Next</h3><p>{response.instantSnapshot.nextStep || 'N/A'}</p></div>
+              <div className="snapshot-full"><h3>Disclaimer</h3><p>{response.instantSnapshot.disclaimer || 'N/A'}</p></div>
+            </div>
+          </div>
+        ) : (
+          <p className="resource-card">
+            We will review it and prepare a full human-reviewed AI PM Workflow Report within 3 business days.
+          </p>
+        )}
 
         <div className="hero-actions">
           <a className="button primary" href="https://calendly.com/propertydext/30min" target="_blank" rel="noreferrer">
