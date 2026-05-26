@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom';
+import { RealEstateAIPMPilot } from './pages/RealEstateAIPMPilot';
 import './styles.css';
 
 const calendlyLink = 'https://calendly.com/propertydext/15min';
@@ -141,6 +142,7 @@ const navItems = [
   { label: 'Resources', to: '/resources' },
   { label: 'Use Cases', to: '/use-cases' },
   { label: 'About', to: '/about' },
+  { label: 'Real Estate Pilot', to: '/real-estate-ai-pm-pilot' },
 ];
 
 function CTAButton({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
@@ -289,6 +291,28 @@ function Home() {
               <h3>{deliverable}</h3>
             </article>
           ))}
+        </div>
+      </section>
+
+
+      <section className="section-shell detail-card pilot-home-cta">
+        <p className="eyebrow">New: Real Estate AI PM Pilot</p>
+        <h2>New: Real Estate AI PM Pilot</h2>
+        <p>
+          Most real estate professionals are not losing time because they lack another AI tool. They lose time because
+          leads, follow-ups, tasks, documents, vendors, and decisions are not connected.
+        </p>
+        <p>
+          This free pilot helps realtors, brokers, property managers, and small real estate teams turn one messy
+          workflow into a simple AI-assisted project management system.
+        </p>
+        <div className="hero-actions">
+          <Link className="button primary" to="/real-estate-ai-pm-pilot">
+            Apply for the Free Pilot
+          </Link>
+          <Link className="button secondary" to="/real-estate-ai-pm-pilot">
+            See How It Works
+          </Link>
         </div>
       </section>
 
@@ -445,6 +469,7 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/use-cases" element={<UseCases />} />
           <Route path="/about" element={<About />} />
+          <Route path="/real-estate-ai-pm-pilot" element={<RealEstateAIPMPilot />} />
         </Routes>
       </main>
     </BrowserRouter>
