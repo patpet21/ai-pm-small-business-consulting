@@ -1064,3 +1064,5 @@ h1 {
   min-height: 50px;
   padding-inline: 20px;
 }
+
+.partial-note{margin-top:10px;color:#1d4ed8;font-weight:600;}
