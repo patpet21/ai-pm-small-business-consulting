@@ -57,6 +57,7 @@ const DEFAULT_DISCLAIMER = 'This preliminary snapshot is AI-generated and has no
 
 const asText = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
 const asArray = <T,>(value: unknown): T[] => (Array.isArray(value) ? value as T[] : []);
+const hasText = (value: unknown): boolean => asText(value).length > 0;
 
 export function RealEstateAIPMPilot() {
   const [step, setStep] = useState(0);
@@ -149,7 +150,7 @@ export function RealEstateAIPMPilot() {
 
   const ctaPrimary = asText(report?.ctaPrimary) || 'Book a 15-minute review';
   const ctaSecondary = asText(report?.ctaSecondary) || 'Request human-reviewed report';
-  const calendlyUrl = asText(report?.calendlyUrl) || 'https://calendly.com/propertydext/30min';
+  const calendlyUrl = asText(report?.calendlyUrl) || 'https://calendly.com/propertydext/15min';
 
   if (submitted) {
     return (
@@ -188,25 +189,23 @@ export function RealEstateAIPMPilot() {
                 {topGaps.length ? <ul>{topGaps.map((item) => <li key={item}>{item}</li>)}</ul> : <p>{REVIEW_PENDING}</p>}
               </div>
 
-              <div className="snapshot-full">
+              {wbs.length > 0 && <div className="snapshot-full">
                 <h3>WBS-Based Task Breakdown</h3>
-                {wbs.length ? (
-                  <div className="rows-list">
-                    {wbs.map((item, idx) => (
-                      <div className="row-card" key={`${asText(item.taskName)}-${idx}`}>
-                        <p><strong>Task:</strong> {asText(item.taskName) || REVIEW_PENDING}</p>
-                        <p><strong>Owner Type:</strong> {asText(item.ownerType) || REVIEW_PENDING}</p>
-                        <p><strong>Output:</strong> {asText(item.output) || REVIEW_PENDING}</p>
-                        <p><strong>Acceptance Criteria:</strong> {asText(item.acceptanceCriteria) || REVIEW_PENDING}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : <p>{REVIEW_PENDING}</p>}
-              </div>
+                <div className="rows-list">
+                  {wbs.map((item, idx) => (
+                    <div className="row-card" key={`${asText(item.taskName)}-${idx}`}>
+                      <p><strong>Task:</strong> {asText(item.taskName) || REVIEW_PENDING}</p>
+                      <p><strong>Owner Type:</strong> {asText(item.ownerType) || REVIEW_PENDING}</p>
+                      <p><strong>Output:</strong> {asText(item.output) || REVIEW_PENDING}</p>
+                      <p><strong>Acceptance Criteria:</strong> {asText(item.acceptanceCriteria) || REVIEW_PENDING}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>}
             </div>
 
             <div className="snapshot-grid report-section-gap">
-              <div className="snapshot-full">
+              {scarfEntries.some((entry) => entry.data && (hasText(entry.data.risk) || hasText(entry.data.recommendation))) && <div className="snapshot-full">
                 <h3>SCARF Trust & AI Adoption Check</h3>
                 <div className="scarf-grid">
                   {scarfEntries.map((entry) => (
@@ -221,19 +220,17 @@ export function RealEstateAIPMPilot() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </div>}
 
-              <div className="snapshot-full">
+              {report.aiUseTransparencySummary && <div className="snapshot-full">
                 <h3>AI Use Transparency Summary</h3>
-                {report.aiUseTransparencySummary ? (
-                  <div className="charter-grid">
-                    <p><strong>Input Used:</strong> {asText(report.aiUseTransparencySummary.inputUsed) || REVIEW_PENDING}</p>
-                    <p><strong>Output Generated:</strong> {asText(report.aiUseTransparencySummary.outputGenerated) || REVIEW_PENDING}</p>
-                    <p><strong>Human Validation:</strong> {asText(report.aiUseTransparencySummary.humanValidation) || REVIEW_PENDING}</p>
-                    <p><strong>Sensitive Data Warning:</strong> {asText(report.aiUseTransparencySummary.sensitiveDataWarning) || REVIEW_PENDING}</p>
-                  </div>
-                ) : <p>{REVIEW_PENDING}</p>}
-              </div>
+                <div className="charter-grid">
+                  <p><strong>Input Used:</strong> {asText(report.aiUseTransparencySummary.inputUsed) || REVIEW_PENDING}</p>
+                  <p><strong>Output Generated:</strong> {asText(report.aiUseTransparencySummary.outputGenerated) || REVIEW_PENDING}</p>
+                  <p><strong>Human Validation:</strong> {asText(report.aiUseTransparencySummary.humanValidation) || REVIEW_PENDING}</p>
+                  <p><strong>Sensitive Data Warning:</strong> {asText(report.aiUseTransparencySummary.sensitiveDataWarning) || REVIEW_PENDING}</p>
+                </div>
+              </div>}
             </div>
 
             <div className="snapshot-grid report-section-gap">
