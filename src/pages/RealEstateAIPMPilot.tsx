@@ -8,19 +8,41 @@ type IntakeData = {
   timeLostPerWeek: string; aiUsageToday: string; desiredOutput: string; openToCall: string; additionalNotes: string;
 };
 
-type WorkflowCharter = { purpose?: string; objective?: string; scope?: string; outOfScope?: string; assumptions?: string; successCriteria?: string };
-type StakeholderRow = { stakeholder?: string; role?: string; interestNeed?: string; communicationNeed?: string };
-type RiskRow = { risk?: string; impact?: string; likelihood?: string; mitigation?: string };
-type TaskRow = { task?: string; owner?: string; priority?: string; nextAction?: string };
-type RoadmapRow = { day?: string; focus?: string; action?: string };
+type WbsItem = { taskName?: string; ownerType?: string; output?: string; acceptanceCriteria?: string };
+type ScarfItem = { risk?: string; recommendation?: string };
+type ScarfCheck = { status?: ScarfItem; certainty?: ScarfItem; autonomy?: ScarfItem; relatedness?: ScarfItem; fairness?: ScarfItem };
+type TransparencySummary = { inputUsed?: string; outputGenerated?: string; humanValidation?: string; sensitiveDataWarning?: string };
 
 type Snapshot = {
-  workflowDetected?: string; mainBottleneck?: string; recommendedFirstStep?: string; suggestedSimpleSystem?: string;
-  aiOpportunities?: string[]; nextStep?: string; disclaimer?: string;
-  executivePmSummary?: string; pmProblemStatement?: string; workflowChart?: string;
-  initialWorkflowCharter?: WorkflowCharter; stakeholderMap?: StakeholderRow[]; riskRegister?: RiskRow[];
-  taskBreakdown?: TaskRow[]; aiPmWorkflowOpportunities?: string[]; recommendedSimpleSystem?: string;
-  sevenDayImplementationRoadmap?: RoadmapRow[]; humanReviewNextStep?: string;
+  workflowReadinessScore?: number | string;
+  workflowMaturity?: string;
+  workflowDetected?: string;
+  executiveSummary?: string;
+  executivePmSummary?: string;
+  problemStatement?: string;
+  pmProblemStatement?: string;
+  mainBottleneck?: string;
+  recommendedPriority?: string;
+  recommendedFirstStep?: string;
+  suggestedSimpleSystem?: string;
+  recommendedSimpleSystem?: string;
+  topWorkflowGaps?: string[];
+  wbsTaskBreakdown?: WbsItem[];
+  taskBreakdown?: WbsItem[];
+  scarfTrustCheck?: ScarfCheck;
+  aiUseTransparencySummary?: TransparencySummary;
+  humanReviewedReportPreview?: string[];
+  aiOpportunities?: string[];
+  aiPmWorkflowOpportunities?: string[];
+  quickWin?: string;
+  sevenDayRoadmap?: string[];
+  sevenDayImplementationRoadmap?: Array<{ day?: string; focus?: string; action?: string }>;
+  riskNotes?: string;
+  nextStep?: string;
+  ctaPrimary?: string;
+  ctaSecondary?: string;
+  calendlyUrl?: string;
+  disclaimer?: string;
 };
 
 type ApiResponse = { success?: boolean; message?: string; submissionId?: string; instantSnapshot?: Snapshot; preliminaryReport?: Snapshot };
@@ -30,8 +52,11 @@ const initialData: IntakeData = {
   informationStartsFrom: '', currentTools: '', mainPainPoints: '', timeLostPerWeek: '', aiUsageToday: '', desiredOutput: '', openToCall: '', additionalNotes: '',
 };
 const stepLabels = ['About you', 'Workflow to improve', 'Current process', 'Pain points', 'AI and tools', 'Desired output'];
+const REVIEW_PENDING = 'This will be reviewed in the human-reviewed report.';
+const DEFAULT_DISCLAIMER = 'This preliminary snapshot is AI-generated and has not been reviewed by a human. It is not legal, tax, financial, investment, brokerage, or compliance advice.';
 
-const normalizeArray = <T,>(value: unknown): T[] => Array.isArray(value) ? value as T[] : [];
+const asText = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
+const asArray = <T,>(value: unknown): T[] => (Array.isArray(value) ? value as T[] : []);
 
 export function RealEstateAIPMPilot() {
   const [step, setStep] = useState(0);
@@ -65,7 +90,11 @@ export function RealEstateAIPMPilot() {
     setError('');
     setStep((prev) => Math.min(prev + 1, stepLabels.length - 1));
   };
-  const prevStep = () => { setError(''); setStep((prev) => Math.max(prev - 1, 0)); };
+
+  const prevStep = () => {
+    setError('');
+    setStep((prev) => Math.max(prev - 1, 0));
+  };
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -76,12 +105,14 @@ export function RealEstateAIPMPilot() {
 
     try {
       const res = await fetch(REAL_ESTATE_AI_PM_PROXY_ENDPOINT, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
       });
       const json = (await res.json()) as ApiResponse;
       setResponse(json);
       setSubmitted(true);
-      setFallbackSuccess(!(json.success && (json.preliminaryReport || json.instantSnapshot)));
+      setFallbackSuccess(!(json.success && json.instantSnapshot));
     } catch {
       setSubmitted(true);
       setFallbackSuccess(true);
@@ -90,60 +121,141 @@ export function RealEstateAIPMPilot() {
     }
   }
 
-  const report = response?.preliminaryReport || response?.instantSnapshot;
-  const stakeholderMap = normalizeArray<StakeholderRow>(report?.stakeholderMap);
-  const riskRegister = normalizeArray<RiskRow>(report?.riskRegister);
-  const taskBreakdown = normalizeArray<TaskRow>(report?.taskBreakdown);
-  const roadmap = normalizeArray<RoadmapRow>(report?.sevenDayImplementationRoadmap);
-  const opportunities = report?.aiPmWorkflowOpportunities || report?.aiOpportunities || [];
+  const report = response?.instantSnapshot || response?.preliminaryReport;
+  const score = Number(report?.workflowReadinessScore);
+  const hasScore = Number.isFinite(score);
+  const topGaps = asArray<string>(report?.topWorkflowGaps).filter(Boolean).slice(0, 3);
+  const wbs = asArray<WbsItem>(report?.wbsTaskBreakdown?.length ? report?.wbsTaskBreakdown : report?.taskBreakdown);
+  const opportunities = asArray<string>(report?.aiOpportunities?.length ? report?.aiOpportunities : report?.aiPmWorkflowOpportunities).filter(Boolean).slice(0, 3);
+  const roadmap = asArray<string>(report?.sevenDayRoadmap).filter(Boolean);
+  const roadmapLegacy = asArray<{ day?: string; focus?: string; action?: string }>(report?.sevenDayImplementationRoadmap)
+    .map((item, idx) => {
+      const day = asText(item.day) || `Day ${idx + 1}`;
+      const body = [asText(item.focus), asText(item.action)].filter(Boolean).join(' — ');
+      return body ? `${day}: ${body}` : '';
+    })
+    .filter(Boolean);
+  const finalRoadmap = roadmap.length ? roadmap : roadmapLegacy;
+  const reportPreview = asArray<string>(report?.humanReviewedReportPreview).filter(Boolean);
+
+  const scarf = report?.scarfTrustCheck;
+  const scarfEntries: Array<{ title: string; data?: ScarfItem }> = [
+    { title: 'Status', data: scarf?.status },
+    { title: 'Certainty', data: scarf?.certainty },
+    { title: 'Autonomy', data: scarf?.autonomy },
+    { title: 'Relatedness', data: scarf?.relatedness },
+    { title: 'Fairness', data: scarf?.fairness },
+  ];
+
+  const ctaPrimary = asText(report?.ctaPrimary) || 'Book a 15-minute review';
+  const ctaSecondary = asText(report?.ctaSecondary) || 'Request human-reviewed report';
+  const calendlyUrl = asText(report?.calendlyUrl) || 'https://calendly.com/propertydext/30min';
 
   if (submitted) {
     return (
       <section className="section-shell pilot-success">
         <p className="eyebrow">Real Estate AI PM Pilot</p>
         <h1>Thank you — your intake was received.</h1>
-        <p className="hero-lede">Here is your Preliminary AI PM Workflow Report.</p>
-        <p className="success-note">This report is automatically generated from your intake answers and has not yet been reviewed by a human. A complete human-reviewed AI PM Workflow Report will be prepared within 3 business days.</p>
+        <p className="hero-lede">Here is your Preliminary AI PM Workflow Snapshot.</p>
+        <p className="success-note">This report is automatically generated from your intake answers and has not yet been reviewed by a human. A complete human-reviewed AI PM Workflow Report can be prepared within 3 business days.</p>
 
         {!fallbackSuccess && report ? (
           <div className="resource-card snapshot-card">
-            <p><strong>Submission ID:</strong> {response?.submissionId || 'Pending assignment'}</p>
+            <p><strong>Submission ID:</strong> {asText(response?.submissionId) || 'Pending assignment'}</p>
 
-            <div className="snapshot-grid">
-              <div className="snapshot-full"><h3>Executive PM Summary</h3><p>{report.executivePmSummary || report.workflowDetected || 'N/A'}</p></div>
-              <div className="snapshot-full"><h3>PM Problem Statement</h3><p>{report.pmProblemStatement || report.mainBottleneck || 'N/A'}</p></div>
+            <div className="snapshot-grid report-section-gap">
+              <div className="score-card">
+                <p className="score-label">AI PM Workflow Readiness Score</p>
+                <p className="score-value">{hasScore ? `${score}/100` : REVIEW_PENDING}</p>
+              </div>
+              {!!asText(report.workflowMaturity) && <div><h3>Workflow Maturity</h3><p>{asText(report.workflowMaturity)}</p></div>}
+              {!!asText(report.workflowDetected) && <div><h3>Workflow Detected</h3><p>{asText(report.workflowDetected)}</p></div>}
+              {!!asText(report.mainBottleneck) && <div><h3>Main Bottleneck</h3><p>{asText(report.mainBottleneck)}</p></div>}
+              {!!asText(report.recommendedPriority) && <div><h3>Recommended Priority</h3><p>{asText(report.recommendedPriority)}</p></div>}
+            </div>
+
+            {!!asText(report.executiveSummary) && (
+              <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Executive Summary</h3><p>{asText(report.executiveSummary)}</p></div></div>
+            )}
+
+            {!!(asText(report.problemStatement) || asText(report.pmProblemStatement)) && (
+              <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Problem Statement</h3><p>{asText(report.problemStatement) || asText(report.pmProblemStatement)}</p></div></div>
+            )}
+
+            <div className="snapshot-grid report-section-gap">
+              <div className="snapshot-full">
+                <h3>Top 3 Workflow Gaps</h3>
+                {topGaps.length ? <ul>{topGaps.map((item) => <li key={item}>{item}</li>)}</ul> : <p>{REVIEW_PENDING}</p>}
+              </div>
+
+              <div className="snapshot-full">
+                <h3>WBS-Based Task Breakdown</h3>
+                {wbs.length ? (
+                  <div className="rows-list">
+                    {wbs.map((item, idx) => (
+                      <div className="row-card" key={`${asText(item.taskName)}-${idx}`}>
+                        <p><strong>Task:</strong> {asText(item.taskName) || REVIEW_PENDING}</p>
+                        <p><strong>Owner Type:</strong> {asText(item.ownerType) || REVIEW_PENDING}</p>
+                        <p><strong>Output:</strong> {asText(item.output) || REVIEW_PENDING}</p>
+                        <p><strong>Acceptance Criteria:</strong> {asText(item.acceptanceCriteria) || REVIEW_PENDING}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : <p>{REVIEW_PENDING}</p>}
+              </div>
             </div>
 
             <div className="snapshot-grid report-section-gap">
               <div className="snapshot-full">
-                <h3>Initial Workflow Charter</h3>
-                <div className="charter-grid">
-                  <p><strong>Purpose:</strong> {report.initialWorkflowCharter?.purpose || 'N/A'}</p>
-                  <p><strong>Objective:</strong> {report.initialWorkflowCharter?.objective || report.recommendedFirstStep || 'N/A'}</p>
-                  <p><strong>Scope:</strong> {report.initialWorkflowCharter?.scope || data.workflowType || 'N/A'}</p>
-                  <p><strong>Out of scope:</strong> {report.initialWorkflowCharter?.outOfScope || 'Legal, tax, financial, brokerage and compliance advisory decisions.'}</p>
-                  <p><strong>Assumptions:</strong> {report.initialWorkflowCharter?.assumptions || 'Current workflow data is based on intake answers.'}</p>
-                  <p><strong>Success criteria:</strong> {report.initialWorkflowCharter?.successCriteria || data.desiredOutput || 'N/A'}</p>
+                <h3>SCARF Trust & AI Adoption Check</h3>
+                <div className="scarf-grid">
+                  {scarfEntries.map((entry) => (
+                    <div key={entry.title} className="scarf-card">
+                      <h4>{entry.title}</h4>
+                      {entry.data ? (
+                        <>
+                          <p><strong>Risk:</strong> {asText(entry.data.risk) || REVIEW_PENDING}</p>
+                          <p><strong>Recommendation:</strong> {asText(entry.data.recommendation) || REVIEW_PENDING}</p>
+                        </>
+                      ) : <p>{REVIEW_PENDING}</p>}
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="snapshot-full"><h3>Workflow Chart</h3><p>{report.workflowChart || 'Information comes in → Review/qualify → Assign next action → Track status → Follow up → Weekly review'}</p></div>
-            </div>
 
-            <div className="snapshot-grid report-section-gap">
-              <div className="snapshot-full"><h3>Stakeholder Map</h3>{stakeholderMap.length ? stakeholderMap.map((row, idx) => <p key={idx}><strong>{row.stakeholder || 'Stakeholder'}:</strong> {row.role || 'Role not specified'} · {row.interestNeed || 'Need not specified'} · {row.communicationNeed || 'Communication need not specified'}</p>) : <p>N/A</p>}</div>
-              <div className="snapshot-full"><h3>Risk Register</h3>{riskRegister.length ? riskRegister.map((row, idx) => <p key={idx}><strong>{row.risk || 'Risk'}:</strong> Impact: {row.impact || 'N/A'} · Likelihood: {row.likelihood || 'N/A'} · Mitigation: {row.mitigation || 'N/A'}</p>) : <p>N/A</p>}</div>
-              <div className="snapshot-full"><h3>Task Breakdown</h3>{taskBreakdown.length ? taskBreakdown.map((row, idx) => <p key={idx}><strong>{row.task || 'Task'}:</strong> Owner: {row.owner || 'N/A'} · Priority: {row.priority || 'N/A'} · Next action: {row.nextAction || 'N/A'}</p>) : <p>N/A</p>}</div>
+              <div className="snapshot-full">
+                <h3>AI Use Transparency Summary</h3>
+                {report.aiUseTransparencySummary ? (
+                  <div className="charter-grid">
+                    <p><strong>Input Used:</strong> {asText(report.aiUseTransparencySummary.inputUsed) || REVIEW_PENDING}</p>
+                    <p><strong>Output Generated:</strong> {asText(report.aiUseTransparencySummary.outputGenerated) || REVIEW_PENDING}</p>
+                    <p><strong>Human Validation:</strong> {asText(report.aiUseTransparencySummary.humanValidation) || REVIEW_PENDING}</p>
+                    <p><strong>Sensitive Data Warning:</strong> {asText(report.aiUseTransparencySummary.sensitiveDataWarning) || REVIEW_PENDING}</p>
+                  </div>
+                ) : <p>{REVIEW_PENDING}</p>}
+              </div>
             </div>
 
             <div className="snapshot-grid report-section-gap">
               <div>
                 <h3>AI + PM Opportunities</h3>
-                <ul>{opportunities.map((item) => <li key={item}>{item}</li>)}</ul>
+                {opportunities.length ? <ul>{opportunities.map((item) => <li key={item}>{item}</li>)}</ul> : <p>{REVIEW_PENDING}</p>}
               </div>
-              <div><h3>Recommended Simple System</h3><p>{report.recommendedSimpleSystem || report.suggestedSimpleSystem || 'N/A'}</p></div>
-              <div className="snapshot-full"><h3>7-Day Implementation Roadmap</h3>{roadmap.length ? roadmap.map((row, idx) => <p key={idx}><strong>{row.day || `Day ${idx + 1}`}:</strong> {row.focus || ''}{row.action ? ` — ${row.action}` : ''}</p>) : <p>Day 1 map workflow → Day 2 define stages → Day 3 create tracker → Day 4 AI templates → Day 5 test on one live workflow → Day 6 review bottlenecks → Day 7 standardize process.</p>}</div>
-              <div className="snapshot-full"><h3>Human Review Next Step</h3><p>{report.humanReviewNextStep || report.nextStep || 'A complete human-reviewed AI PM Workflow Report will be prepared within 3 business days.'}</p></div>
-              <div className="snapshot-full"><h3>Disclaimer</h3><p>{report.disclaimer || 'This preliminary AI PM Workflow Report is automatically generated from the intake answers and has not yet been reviewed by a human. It is not legal, financial, tax, investment, brokerage, or compliance advice.'}</p></div>
+              {!!asText(report.quickWin) && <div className="quick-win-card"><h3>Quick Win</h3><p>{asText(report.quickWin)}</p></div>}
+              <div className="snapshot-full">
+                <h3>7-Day Implementation Roadmap</h3>
+                {finalRoadmap.length ? <ol className="roadmap-list">{finalRoadmap.map((item, idx) => <li key={`${idx}-${item}`}>{item}</li>)}</ol> : <p>{REVIEW_PENDING}</p>}
+              </div>
+            </div>
+
+            <div className="snapshot-grid report-section-gap">
+              <div className="snapshot-full">
+                <h3>Human-Reviewed Report Preview</h3>
+                <p>The complete human-reviewed report can include:</p>
+                {reportPreview.length ? <ul>{reportPreview.map((item) => <li key={item}>{item}</li>)}</ul> : <p>{REVIEW_PENDING}</p>}
+              </div>
+              <div className="snapshot-full"><h3>Next Step</h3><p>{asText(report.nextStep) || 'Free AI Snapshot → Human-Reviewed Report → Workflow Setup Sprint → Monthly Support'}</p></div>
+              <div className="snapshot-full"><h3>Disclaimer</h3><p>{asText(report.disclaimer) || DEFAULT_DISCLAIMER}</p></div>
             </div>
           </div>
         ) : (
@@ -151,7 +263,8 @@ export function RealEstateAIPMPilot() {
         )}
 
         <div className="hero-actions">
-          <a className="button primary" href="https://calendly.com/propertydext/15min" target="_blank" rel="noreferrer">Book a 15-minute review</a>
+          <a className="button primary" href={calendlyUrl} target="_blank" rel="noreferrer">{ctaPrimary}</a>
+          <a className="button secondary" href={calendlyUrl} target="_blank" rel="noreferrer">{ctaSecondary}</a>
           <Link className="button secondary" to="/">Back to Home</Link>
         </div>
       </section>
