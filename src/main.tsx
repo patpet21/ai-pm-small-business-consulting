@@ -196,6 +196,31 @@ function FinalCTA() {
   );
 }
 
+function SiteFooter() {
+  return (
+    <footer className="site-footer section-shell">
+      <div className="site-footer-grid">
+        <div>
+          <img className="site-footer-logo" src="https://i.ibb.co/5g7gFLQz/Logo-PRDX.jpg" alt="Practical AI Systems logo" />
+          <p className="site-footer-brand">Practical AI Systems</p>
+          <p>AI + Project Management systems for real operations.</p>
+        </div>
+        <div>
+          <p className="site-footer-title">Contact</p>
+          <p><a href="mailto:hello@practicalaisystems.com">hello@practicalaisystems.com</a></p>
+          <p><a href={calendlyLink} target="_blank" rel="noreferrer">Book a 15-minute review</a></p>
+        </div>
+        <div>
+          <p className="site-footer-title">Navigation</p>
+          {navItems.map((item) => (
+            <p key={item.to}><Link to={item.to}>{item.label}</Link></p>
+          ))}
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 function Home() {
   return (
     <>
@@ -472,6 +497,7 @@ function App() {
           <Route path="/real-estate-ai-pm-pilot" element={<RealEstateAIPMPilot />} />
         </Routes>
       </main>
+      <SiteFooter />
     </BrowserRouter>
   );
 }

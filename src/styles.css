@@ -924,3 +924,74 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+/* global card redesign + universal footer */
+.hero-card,
+.solution-panel,
+.about-card,
+.cta-panel,
+.detail-card,
+.resource-card,
+.deliverable-card,
+.snapshot-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(99, 119, 255, 0.2);
+  background: linear-gradient(160deg, rgba(255,255,255,0.94), rgba(244,248,255,0.82));
+  box-shadow: 0 22px 48px rgba(11, 35, 90, 0.12);
+}
+
+.hero-card::before,
+.solution-panel::before,
+.about-card::before,
+.cta-panel::before,
+.detail-card::before,
+.resource-card::before,
+.deliverable-card::before,
+.snapshot-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(72, 116, 255, 0.14), transparent 38%);
+  pointer-events: none;
+}
+
+.site-footer {
+  margin: 64px auto 26px;
+  padding: 30px;
+  border-radius: 24px;
+  border: 1px solid rgba(111, 133, 255, 0.35);
+  background: linear-gradient(140deg, #0b1328, #111a34);
+  color: #c7d2e8;
+}
+
+.site-footer-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 24px;
+}
+
+.site-footer-logo {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+  margin-bottom: 10px;
+}
+
+.site-footer-brand,
+.site-footer-title {
+  color: #fff;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.site-footer a { color: #e5edff; text-decoration: underline; text-underline-offset: 3px; }
+.site-footer p + p { margin-top: 6px; }
+
+@media (max-width: 900px) {
+  .site-footer-grid { grid-template-columns: 1fr; }
+}
