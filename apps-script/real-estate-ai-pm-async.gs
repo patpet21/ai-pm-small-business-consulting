@@ -1,7 +1,7 @@
 /************************************************************
  * PROPERTYDEX / REAL ESTATE AI PM PILOT — ASYNC CODE.GS PATCH
  *
- * Paste this block into Code.gs and replace the old doPost(e).
+ * Paste this block into Code.gs and DELETE/REPLACE the old synchronous doPost(e).
  * This patch assumes your existing Code.gs still provides:
  * - CONFIG
  * - getSpreadsheet()
@@ -12,7 +12,7 @@
  * - ensureSheetWithHeaders(ss, sheetName, headers)
  * - createDiagnostic(data)
  * - createInstantSnapshotWithGemini(data)
- * - processSubmission(data) only for explicit legacy fallback requests
+ * - processSubmission(data) only if you intentionally add a separate legacy route
  ************************************************************/
 
 const ASYNC_STATUS_PROCESSING = 'PROCESSING';
@@ -73,16 +73,13 @@ function doPost(e) {
       return jsonResponse(handleGenerate(data));
     }
 
-    // Legacy fallback only for old clients that do not send an action.
-    // Do not use this path for /start or /status.
-    if (typeof processSubmission === 'function') {
-      return jsonResponse(processSubmission(data));
-    }
-
+    // No default processSubmission() fallback here.
+    // Missing or unknown actions must fail fast so /start and /status can never
+    // accidentally run the old synchronous Gemini/report-generation flow.
     return jsonResponse({
       success: false,
       status: ASYNC_STATUS_FAILED,
-      message: 'Unsupported action.'
+      message: 'Unsupported action. Send action=start, action=status, or action=generate.'
     });
   } catch (error) {
     return jsonResponse({
