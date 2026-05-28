@@ -18,7 +18,7 @@ type ApiResponse = { success?: boolean; message?: string; submissionId?: string;
 
 const initialData: IntakeData = { name: '', email: '', role: '', marketLocation: '', teamSize: '', workflowType: '', currentProcess: '', informationStartsFrom: '', currentTools: '', mainPainPoints: '', timeLostPerWeek: '', aiUsageToday: '', desiredOutput: '', openToCall: '', additionalNotes: '' };
 const stepLabels = ['About you', 'Workflow to improve', 'Current process', 'Pain points', 'AI and tools', 'Desired output'];
-const ERR_MSG = 'Personalized AI generation failed. Please request a human-reviewed report.';
+const ERR_MSG = 'We could not generate a personalized AI PM Workflow Snapshot for this submission. Please request a human-reviewed report.';
 const FALLBACK_DISCLAIMER = 'This preliminary snapshot is AI-generated and has not been reviewed by a human. It is not legal, tax, financial, investment, brokerage, or compliance advice.';
 const CALENDLY = 'https://calendly.com/propertydext/15min';
 
@@ -55,19 +55,7 @@ export function RealEstateAIPMPilot() {
   }
 
   const report = response?.instantSnapshot;
-  const requiredValid = !!report
-    && Number.isFinite(Number(report.workflowReadinessScore))
-    && hasValue(report.workflowDetected)
-    && hasValue(report.mainBottleneck)
-    && safeArray<string>(report.topWorkflowGaps).length > 0
-    && hasValue(report.first48HourFix)
-    && safeObjectArray<WbsItem>(report.wbsTaskBreakdown).length > 0
-    && safeObjectArray<PromptItem>(report.aiPromptPack).length > 0
-    && safeArray<string>(report.sevenDayRoadmap).length > 0
-    && hasValue(report.aiUseTransparencySummary?.inputUsed)
-    && hasValue(report.aiUseTransparencySummary?.outputGenerated)
-    && hasValue(report.aiUseTransparencySummary?.humanValidation)
-    && hasValue(report.aiUseTransparencySummary?.sensitiveDataWarning);
+  const requiredValid = !!report && (hasValue(report.workflowDetected) || hasValue(report.mainBottleneck) || safeArray<string>(report.aiOpportunities).length > 0);
 
   if (submitted) {
     if (!requiredValid) {
@@ -97,15 +85,15 @@ export function RealEstateAIPMPilot() {
           <div className="snapshot-grid report-section-gap"><div className="score-card"><p className="score-label">AI PM Workflow Readiness Score</p><p className="score-value">{scoreLabel}</p></div><div><h3>Workflow Detected</h3><p>{safeText(report.workflowDetected)}</p></div><div><h3>Workflow Maturity</h3><p>{safeText(report.workflowMaturity)}</p></div><div><h3>Main Bottleneck</h3><p>{safeText(report.mainBottleneck)}</p></div><div><h3>Recommended Priority</h3><p>{safeText(report.recommendedPriority)}</p></div></div>
           {hasValue(report.executiveSummary) && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Executive Summary</h3><p>{safeText(report.executiveSummary)}</p></div></div>}
           {hasValue(report.problemStatement) && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Problem Statement</h3><p>{safeText(report.problemStatement)}</p></div></div>}
-          <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Top 3 Workflow Gaps</h3><ul>{topGaps.map((g) => <li key={g}>{g}</li>)}</ul></div></div>
-          <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>{safeText(fix.title, 'Your First 48-Hour Fix')}</h3><><p>{safeText(fix.description)}</p>{hasValue(fix.trackerName) && <p><strong>Tracker:</strong> {safeText(fix.trackerName)}</p>}{safeArray<string>(fix.columns).length > 0 && <><p><strong>Columns:</strong></p><ul>{safeArray<string>(fix.columns).map((c) => <li key={c}>{c}</li>)}</ul></>}{safeArray<string>(fix.statuses).length > 0 && <><p><strong>Statuses:</strong></p><ul>{safeArray<string>(fix.statuses).map((s) => <li key={s}>{s}</li>)}</ul></>}</></div></div>
-          <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>WBS-Based Workflow Breakdown</h3><div className="rows-list">{wbs.map((i,idx)=><div className="row-card" key={idx}><p><strong>Task:</strong> {safeText(i.taskName)}</p><p><strong>Owner Type:</strong> {safeText(i.ownerType)}</p><p><strong>Output:</strong> {safeText(i.output)}</p><p><strong>Acceptance Criteria:</strong> {safeText(i.acceptanceCriteria)}</p></div>)}</div></div></div>
-          <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Copy/Paste AI Prompt Pack</h3><div className="rows-list">{prompts.map((p,idx)=><div className="row-card" key={idx}><p><strong>{safeText(p.title, `Prompt ${idx+1}`)}</strong></p><p>{safeText(p.prompt)}</p></div>)}</div></div></div>
+          {topGaps.length > 0 && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Top 3 Workflow Gaps</h3><ul>{topGaps.map((g) => <li key={g}>{g}</li>)}</ul></div></div>}
+          {hasValue(report.first48HourFix) && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>{safeText(fix.title, 'Your First 48-Hour Fix')}</h3><p>{safeText(fix.description)}</p>{hasValue(fix.trackerName) && <p><strong>Tracker:</strong> {safeText(fix.trackerName)}</p>}{safeArray<string>(fix.columns).length > 0 && <><p><strong>Columns:</strong></p><ul>{safeArray<string>(fix.columns).map((c) => <li key={c}>{c}</li>)}</ul></>}{safeArray<string>(fix.statuses).length > 0 && <><p><strong>Statuses:</strong></p><ul>{safeArray<string>(fix.statuses).map((s) => <li key={s}>{s}</li>)}</ul></>}</div></div>}
+          {wbs.length > 0 && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>WBS-Based Workflow Breakdown</h3><div className="rows-list">{wbs.map((i,idx)=><div className="row-card" key={idx}><p><strong>Task:</strong> {safeText(i.taskName)}</p><p><strong>Owner Type:</strong> {safeText(i.ownerType)}</p><p><strong>Output:</strong> {safeText(i.output)}</p><p><strong>Acceptance Criteria:</strong> {safeText(i.acceptanceCriteria)}</p></div>)}</div></div></div>}
+          {prompts.length > 0 && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Copy/Paste AI Prompt Pack</h3><div className="rows-list">{prompts.map((p,idx)=><div className="row-card" key={idx}><p><strong>{safeText(p.title, `Prompt ${idx+1}`)}</strong></p><p>{safeText(p.prompt)}</p></div>)}</div></div></div>}
           {scarf.length > 0 && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>SCARF Trust & AI Adoption Check</h3><div className="scarf-grid">{scarf.map((s,idx)=><div className="scarf-card" key={idx}><h4>{safeText(s.domain, `Domain ${idx+1}`)}</h4><p><strong>Risk:</strong> {safeText(s.risk)}</p><p><strong>Recommendation:</strong> {safeText(s.recommendation)}</p></div>)}</div></div></div>}
-          {hasValue(t) && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>AI Use Transparency Summary</h3><div className="charter-grid"><p><strong>Input used:</strong> {safeText(t.inputUsed)}</p><p><strong>Output generated:</strong> {safeText(t.outputGenerated)}</p><p><strong>Human validation:</strong> {safeText(t.humanValidation)}</p><p><strong>Sensitive data warning:</strong> {safeText(t.sensitiveDataWarning)}</p></div></div></div>}
+          {(hasValue(t.inputUsed) || hasValue(t.outputGenerated) || hasValue(t.humanValidation) || hasValue(t.sensitiveDataWarning)) && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>AI Use Transparency Summary</h3><div className="charter-grid">{hasValue(t.inputUsed) && <p><strong>Input used:</strong> {safeText(t.inputUsed)}</p>}{hasValue(t.outputGenerated) && <p><strong>Output generated:</strong> {safeText(t.outputGenerated)}</p>}{hasValue(t.humanValidation) && <p><strong>Human validation:</strong> {safeText(t.humanValidation)}</p>}{hasValue(t.sensitiveDataWarning) && <p><strong>Sensitive data warning:</strong> {safeText(t.sensitiveDataWarning)}</p>}</div></div></div>}
           {opportunities.length > 0 && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>AI + PM Opportunities</h3><ul>{opportunities.map((o)=><li key={o}>{o}</li>)}</ul></div></div>}
           {hasValue(report.quickWin) && <div className="snapshot-grid report-section-gap"><div className="snapshot-full quick-win-card"><h3>Quick Win</h3><p>{safeText(report.quickWin)}</p></div></div>}
-          <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>7-Day Implementation Roadmap</h3><ol className="roadmap-list">{roadmap.map((r,i)=><li key={`${i}-${r}`}>{r}</li>)}</ol></div></div>
+          {roadmap.length > 0 && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>7-Day Implementation Roadmap</h3><ol className="roadmap-list">{roadmap.map((r,i)=><li key={`${i}-${r}`}>{r}</li>)}</ol></div></div>}
           {preview.length > 0 && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>What the Human-Reviewed Report Adds</h3><ul>{preview.map((p)=><li key={p}>{p}</li>)}</ul></div></div>}
           <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Disclaimer</h3><p>{safeText(report.disclaimer, FALLBACK_DISCLAIMER)}</p></div></div>
         </div>
