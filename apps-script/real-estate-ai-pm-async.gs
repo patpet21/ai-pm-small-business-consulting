@@ -10,6 +10,24 @@ const ASYNC_STATUS_PROCESSING = 'PROCESSING';
 const ASYNC_STATUS_GENERATED = 'AI_GENERATED';
 const ASYNC_STATUS_FAILED = 'AI_GENERATION_FAILED';
 
+const CLIENT_FACING_VOICE_PROMPT_RULE = [
+  'CLIENT-FACING VOICE:',
+  'Write directly to the person reading the report.',
+  'Use “you,” “your,” and “your team.”',
+  'Do not use the submitter’s name in the generated report.',
+  'Do not describe the submitter in third person.',
+  'Do not write “the client,” “the submitter,” or “the user.”',
+  'Do not write like an internal analyst memo.'
+].join('\n');
+
+const COMPLIANCE_SENSITIVE_PROMPT_RULE = [
+  'LIMITATIONS FOR COMPLIANCE-SENSITIVE WORK:',
+  'Do not provide legal, tax, financial, investment, brokerage, licensing, or compliance advice.',
+  'If a workflow touches recordkeeping, brokerage, legal, licensing, or compliance-sensitive requirements, describe it as an item for professional review.',
+  'Use this wording when needed: “Confirm compliance-sensitive requirements with your broker, legal counsel, or appropriate professional advisor.”',
+  'Do not tell the user they must comply with a specific rule or guideline unless that information is provided by the user.'
+].join('\n');
+
 function getStatusSheetName() {
   return getConfigValue('snapshotStatusSheet', 'AI Snapshot Status');
 }
@@ -220,8 +238,10 @@ function createInstantSnapshotForAsyncIntake(intake) {
   const diagnostic = createDiagnostic(intake);
   const instantSnapshot = createInstantSnapshotWithGemini({
     submissionId: intake.submissionId,
-    name: '',
-    email: '',
+    reportPromptInstructions: [
+      CLIENT_FACING_VOICE_PROMPT_RULE,
+      COMPLIANCE_SENSITIVE_PROMPT_RULE
+    ].join('\n\n'),
     role: intake.role,
     marketLocation: intake.marketLocation,
     teamSize: intake.teamSize,

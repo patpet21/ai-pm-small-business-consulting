@@ -5,21 +5,21 @@ const APPS_SCRIPT_ENDPOINT =
   'https://script.google.com/macros/s/AKfycbw-4odu_K3po27Dv3n5hEzjezxBR-kM06fBNWMdkU1RwRhDucpdSpt7LE1NzKpS1f8fMw/exec';
 
 const REPORT_VOICE_REQUIREMENTS = [
-  'REPORT VOICE: The report is displayed directly to the form submitter.',
-  'REPORT VOICE: Write directly to the reader.',
-  'REPORT VOICE: Use second-person language: “you,” “your,” and “your team.”',
-  'REPORT VOICE: Do not describe the submitter in third person.',
-  'REPORT VOICE: Do not use the submitter’s name as the grammatical subject of a sentence.',
-  'REPORT VOICE: The submitter name is internal metadata only and must not be used in the instantSnapshot report text.',
-  'REPORT VOICE: Do not use the submitter’s name or the possessive form of the submitter’s name in client-facing prose.',
-  'REPORT VOICE: Do not use phrases like “the client,” “the submitter,” or “the user” in client-facing fields.',
-  'REPORT VOICE: Do not write as an internal analyst memo.',
-  'REPORT VOICE: Do not write as if the audience is PropertyDEX reviewing a lead.',
-  'REPORT VOICE: Write as a practical consultant giving direct operational advice to the person who submitted the intake.',
-  'REPORT VOICE: Keep the output specific to the intake data.',
-  'REPORT VOICE: Do not use generic filler.',
-  'REPORT VOICE: Do not hardcode any example sentence from these instructions into the output.',
-  'REPORT VOICE: Apply this voice requirement to every generated client-facing field, including executiveSummary, problemStatement, mainBottleneck, recommendedPriority, recommendedFirstStep, suggestedSimpleSystem, topWorkflowGaps, first48HourFix, wbsTaskBreakdown, aiPromptPack, scarfTrustCheck, aiOpportunities, quickWin, sevenDayRoadmap, riskNotes, and nextStep.',
+  'CLIENT-FACING VOICE: Write directly to the person reading the report.',
+  'CLIENT-FACING VOICE: Use “you,” “your,” and “your team.”',
+  'CLIENT-FACING VOICE: Do not use the submitter’s name in the generated report.',
+  'CLIENT-FACING VOICE: Do not describe the submitter in third person.',
+  'CLIENT-FACING VOICE: Do not write “the client,” “the submitter,” or “the user.”',
+  'CLIENT-FACING VOICE: Do not write like an internal analyst memo.',
+  'CLIENT-FACING VOICE: Keep the output specific to the intake data.',
+  'CLIENT-FACING VOICE: Apply this voice requirement to every generated client-facing field, including executiveSummary, problemStatement, mainBottleneck, recommendedPriority, recommendedFirstStep, suggestedSimpleSystem, topWorkflowGaps, first48HourFix, wbsTaskBreakdown, aiPromptPack, scarfTrustCheck, aiOpportunities, quickWin, sevenDayRoadmap, riskNotes, and nextStep.',
+];
+
+const COMPLIANCE_SENSITIVE_REQUIREMENTS = [
+  'Do not provide legal, tax, financial, investment, brokerage, licensing, or compliance advice.',
+  'If a workflow touches recordkeeping, brokerage, legal, licensing, or compliance-sensitive requirements, describe it as an item for professional review.',
+  'Use this wording when needed: “Confirm compliance-sensitive requirements with your broker, legal counsel, or appropriate professional advisor.”',
+  'Do not tell the user they must comply with a specific rule or guideline unless that information is provided by the user.',
 ];
 type Event = { httpMethod?: string; body?: string | null; path?: string; queryStringParameters?: Record<string, string | undefined> | null };
 type Result = { statusCode: number; headers?: Record<string, string>; body: string };
@@ -59,11 +59,12 @@ function buildStartPayload(intakePayload: IntakePayload) {
       'For open house preparation, generate open-house-specific report content.',
       'For vendor coordination, generate vendor-specific report content.',
       'For transaction coordination, generate transaction-specific report content.',
-      'No legal, financial, tax, investment, brokerage, licensing, or compliance advice.',
+      ...COMPLIANCE_SENSITIVE_REQUIREMENTS,
       'Do not invent facts not present in intake; if needed, mark operational assumptions explicitly.',
       ...REPORT_VOICE_REQUIREMENTS,
     ],
     reportVoiceRequirements: REPORT_VOICE_REQUIREMENTS,
+    complianceSensitiveRequirements: COMPLIANCE_SENSITIVE_REQUIREMENTS,
     intakeFieldsForAI: {
       role: intakePayload.role, marketLocation: intakePayload.marketLocation, teamSize: intakePayload.teamSize,
       workflowType: intakePayload.workflowType, currentProcess: intakePayload.currentProcess,
