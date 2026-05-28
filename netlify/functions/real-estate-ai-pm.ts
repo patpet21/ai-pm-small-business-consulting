@@ -215,8 +215,7 @@ async function handleStatus(event: Event): Promise<Result> {
 
     const structuralValidation = validateSnapshotStructure(parsed.instantSnapshot);
     if (!structuralValidation.valid) {
-      console.error('AI snapshot structural validation failed:', structuralValidation.missing);
-      return jsonResponse(422, { success: false, submissionId, status: 'AI_GENERATION_FAILED', message: 'The AI snapshot was incomplete. Please try again or request a human-reviewed report.', errorSource: 'snapshot_validation', structuralValidation });
+      console.warn('AI snapshot structural validation warning:', structuralValidation.missing);
     }
 
     const voiceValidation = validateClientFacingVoice(parsed.instantSnapshot, undefined);
@@ -224,7 +223,11 @@ async function handleStatus(event: Event): Promise<Result> {
       console.warn('AI snapshot voice validation warning:', voiceValidation.matches);
     }
 
-    return jsonResponse(200, { ...parsed, status: 'AI_GENERATED' } as Record<string, unknown>);
+    return jsonResponse(200, {
+      ...parsed,
+      status: 'AI_GENERATED',
+      structuralValidationWarning: structuralValidation.valid ? undefined : structuralValidation,
+    } as Record<string, unknown>);
   }
 
   console.warn('Apps Script returned no recognized status and no snapshot; treating as PROCESSING.', parsed);
