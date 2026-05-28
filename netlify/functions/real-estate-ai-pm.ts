@@ -26,10 +26,12 @@ type Result = { statusCode: number; headers?: Record<string, string>; body: stri
 type IntakePayload = Record<string, unknown>;
 type Snapshot = Record<string, unknown>;
 type UpstreamResponse = { success?: boolean; message?: string; submissionId?: string; status?: string; instantSnapshot?: Snapshot };
-type AppsScriptResult = { ok: boolean; status: number; body: string; parsed?: UpstreamResponse; parseError?: string };
+type AppsScriptResult = { ok: boolean; status: number; body: string; parsed?: UpstreamResponse; parseError?: string; timedOut?: boolean };
 type VoiceValidationResult = { valid: boolean; matches: string[] };
 type StructuralValidationResult = { valid: boolean; missing: string[] };
 
+const APPS_SCRIPT_START_TIMEOUT_MS = 7000;
+const APPS_SCRIPT_STATUS_TIMEOUT_MS = 7000;
 
 function createSubmissionId(): string {
   const now = new Date();
@@ -77,18 +79,35 @@ function shortDetails(value: string, maxLength = 700): string {
   return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
 }
 
-async function postToAppsScript(payload: Record<string, unknown>): Promise<AppsScriptResult> {
-  const upstream = await fetch(APPS_SCRIPT_ENDPOINT, {
-    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload),
-  });
-  const body = await upstream.text();
-  console.log('Apps Script response status:', upstream.status);
-  if (!upstream.ok) console.error('Apps Script response body if non-OK:', shortDetails(body));
+async function postToAppsScript(payload: Record<string, unknown>, timeoutMs: number): Promise<AppsScriptResult> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    return { ok: upstream.ok, status: upstream.status, body, parsed: JSON.parse(body) as UpstreamResponse };
+    const upstream = await fetch(APPS_SCRIPT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    const body = await upstream.text();
+    console.log('Apps Script response status:', upstream.status);
+    if (!upstream.ok) console.error('Apps Script response body if non-OK:', shortDetails(body));
+
+    try {
+      return { ok: upstream.ok, status: upstream.status, body, parsed: JSON.parse(body) as UpstreamResponse };
+    } catch (error) {
+      return { ok: upstream.ok, status: upstream.status, body, parseError: error instanceof Error ? error.message : 'Unknown JSON parse error' };
+    }
   } catch (error) {
-    return { ok: upstream.ok, status: upstream.status, body, parseError: error instanceof Error ? error.message : 'Unknown JSON parse error' };
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error('Apps Script request timed out before Netlify sandbox timeout.', { timeoutMs, action: payload.action });
+      return { ok: false, status: 504, body: `Apps Script request timed out after ${timeoutMs}ms.`, timedOut: true };
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -154,11 +173,21 @@ async function handleStart(event: Event): Promise<Result> {
 
   const appsScriptStartCallStartedAt = Date.now();
   console.log('appsScriptStartCallStartedAt:', new Date(appsScriptStartCallStartedAt).toISOString());
-  const appsScriptResult = await postToAppsScript(payload);
+  const appsScriptResult = await postToAppsScript(payload, APPS_SCRIPT_START_TIMEOUT_MS);
   const appsScriptStartCallFinishedAt = Date.now();
   console.log('appsScriptStartCallFinishedAt:', new Date(appsScriptStartCallFinishedAt).toISOString());
   console.log('appsScriptStartCallDurationMs:', appsScriptStartCallFinishedAt - appsScriptStartCallStartedAt);
 
+  if (appsScriptResult.timedOut) {
+    return jsonResponse(504, {
+      success: false,
+      submissionId,
+      status: 'AI_GENERATION_FAILED',
+      message: 'Apps Script start did not return quickly. The live Code.gs deployment is likely still running the legacy synchronous processSubmission() flow.',
+      errorSource: 'apps_script_start_timeout',
+      details: appsScriptResult.body,
+    });
+  }
   if (!appsScriptResult.ok) {
     return jsonResponse(502, { success: false, message: 'AI PM workflow generation could not start.', errorSource: 'apps_script', details: shortDetails(appsScriptResult.body) });
   }
@@ -166,9 +195,24 @@ async function handleStart(event: Event): Promise<Result> {
     return jsonResponse(502, { success: false, message: 'AI PM workflow generation could not start.', errorSource: 'apps_script_parse', details: appsScriptResult.parseError || 'Apps Script did not return valid JSON.' });
   }
 
+  const returnedSubmissionId = typeof appsScriptResult.parsed.submissionId === 'string' ? appsScriptResult.parsed.submissionId : '';
+  const normalizedStatus = normalizeWorkflowStatus(appsScriptResult.parsed.status);
+  if ((returnedSubmissionId && returnedSubmissionId !== submissionId) || appsScriptResult.parsed.instantSnapshot || normalizedStatus === 'AI_GENERATED') {
+    return jsonResponse(502, {
+      success: false,
+      submissionId,
+      status: 'AI_GENERATION_FAILED',
+      message: 'Apps Script start returned a legacy synchronous submission response instead of a fast PROCESSING job. Replace Code.gs with the async dispatcher and redeploy the Web App.',
+      errorSource: 'legacy_apps_script_start_response',
+      upstreamSubmissionId: returnedSubmissionId || undefined,
+      upstreamStatus: appsScriptResult.parsed.status || 'MISSING_STATUS',
+      upstreamMessage: appsScriptResult.parsed.message,
+    });
+  }
+
   const response = jsonResponse(200, {
     success: appsScriptResult.parsed.success !== false,
-    submissionId: appsScriptResult.parsed.submissionId || submissionId,
+    submissionId: returnedSubmissionId || submissionId,
     status: appsScriptResult.parsed.status || 'PROCESSING',
   });
   console.log('startEndpointDurationMs:', Date.now() - startEndpointReceivedAt);
@@ -185,7 +229,17 @@ async function handleStatus(event: Event): Promise<Result> {
     return jsonResponse(400, { success: false, message: 'Missing submissionId.', errorSource: 'missing_submission_id' });
   }
 
-  const appsScriptResult = await postToAppsScript(buildStatusPayload(submissionId));
+  const appsScriptResult = await postToAppsScript(buildStatusPayload(submissionId), APPS_SCRIPT_STATUS_TIMEOUT_MS);
+  if (appsScriptResult.timedOut) {
+    return jsonResponse(504, {
+      success: false,
+      submissionId,
+      status: 'AI_GENERATION_FAILED',
+      message: 'Apps Script status did not return quickly. The live Code.gs deployment is likely still running the legacy synchronous processSubmission() flow.',
+      errorSource: 'apps_script_status_timeout',
+      details: appsScriptResult.body,
+    });
+  }
   if (!appsScriptResult.ok) {
     return jsonResponse(502, { success: false, message: 'AI PM workflow status could not be loaded.', errorSource: 'apps_script', details: shortDetails(appsScriptResult.body) });
   }
