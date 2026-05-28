@@ -39,34 +39,41 @@ const ASYNC_STATUS_HEADERS = [
   'Error Message'
 ];
 
+function getAiSnapshotStatusSheetConfig() {
+  return {
+    name: getStatusSheetName(),
+    headers: ASYNC_STATUS_HEADERS
+  };
+}
+
 function doPost(e) {
   const data = parseRequestData(e);
   const action = cleanValue(data.action || '').toLowerCase();
 
   try {
     if (action === 'start') {
-      return asyncJsonResponse(handleStart(data));
+      return jsonResponse(handleStart(data));
     }
 
     if (action === 'status') {
-      return asyncJsonResponse(handleStatus(data));
+      return jsonResponse(handleStatus(data));
     }
 
     if (action === 'generate') {
-      return asyncJsonResponse(handleGenerate(data));
+      return jsonResponse(handleGenerate(data));
     }
 
     if (typeof processSubmission === 'function') {
-      return asyncJsonResponse(processSubmission(data));
+      return jsonResponse(processSubmission(data));
     }
 
-    return asyncJsonResponse({
+    return jsonResponse({
       success: false,
       message: 'Unsupported action.',
       status: ASYNC_STATUS_FAILED
     });
   } catch (error) {
-    return asyncJsonResponse({
+    return jsonResponse({
       success: false,
       message: error.message,
       status: ASYNC_STATUS_FAILED
@@ -74,7 +81,7 @@ function doPost(e) {
   }
 }
 
-function asyncJsonResponse(payload) {
+function jsonResponse(payload) {
   return ContentService
     .createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
@@ -141,8 +148,14 @@ function handleStart(data) {
 }
 
 function handleStatus(data) {
+  const startedAt = Date.now();
+  Logger.log('handleStatusStarted: ' + new Date(startedAt).toISOString());
+
   const submissionId = cleanValue(data.submissionId);
+  Logger.log('submissionId: ' + submissionId);
+
   if (!submissionId) {
+    Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
     return {
       success: false,
       message: 'Missing submissionId.',
@@ -151,7 +164,10 @@ function handleStatus(data) {
   }
 
   const row = findAsyncSnapshotStatusRow(submissionId);
+  Logger.log('status found: ' + (row ? row.status : 'NOT_FOUND'));
+
   if (!row) {
+    Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
     return {
       success: false,
       submissionId: submissionId,
@@ -161,6 +177,7 @@ function handleStatus(data) {
   }
 
   if (row.status === ASYNC_STATUS_PROCESSING || row.status === ASYNC_STATUS_GENERATING) {
+    Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
     return {
       success: true,
       submissionId: submissionId,
@@ -169,6 +186,7 @@ function handleStatus(data) {
   }
 
   if (row.status === ASYNC_STATUS_GENERATED) {
+    Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
     return {
       success: true,
       submissionId: submissionId,
@@ -176,6 +194,8 @@ function handleStatus(data) {
       instantSnapshot: JSON.parse(row.snapshotJson)
     };
   }
+
+  Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
 
   return {
     success: false,
@@ -204,10 +224,14 @@ function enqueueAsyncSnapshotGeneration() {
 }
 
 function processPendingAiSnapshots() {
+  Logger.log('generationStarted: processPendingAiSnapshots');
   removeAsyncSnapshotTriggers();
 
   const sheet = getAsyncSnapshotStatusSheet();
-  if (!sheet || sheet.getLastRow() < 2) return;
+  if (!sheet || sheet.getLastRow() < 2) {
+    Logger.log('generationFinished: no pending rows');
+    return;
+  }
 
   const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, ASYNC_STATUS_HEADERS.length).getValues();
   for (let i = 0; i < rows.length; i += 1) {
@@ -216,10 +240,14 @@ function processPendingAiSnapshots() {
     const status = cleanValue(row[3]);
 
     if (submissionId && status === ASYNC_STATUS_PROCESSING) {
+      Logger.log('submissionId: ' + submissionId);
       generateAsyncSnapshot(submissionId);
+      Logger.log('generationFinished: ' + submissionId);
       return;
     }
   }
+
+  Logger.log('generationFinished: no PROCESSING rows');
 }
 
 function processPendingAsyncSnapshots() {
@@ -264,10 +292,12 @@ function generateAsyncSnapshot(submissionId) {
     }
 
     upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_GENERATING, statusRow.intakeJson, '', '');
+    Logger.log('status updated: ' + ASYNC_STATUS_GENERATING + ' for ' + submissionId);
 
     const intake = JSON.parse(statusRow.intakeJson);
     const instantSnapshot = createInstantSnapshotForAsyncIntake(intake);
     upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_GENERATED, statusRow.intakeJson, JSON.stringify(instantSnapshot), '');
+    Logger.log('status updated: ' + ASYNC_STATUS_GENERATED + ' for ' + submissionId);
 
     return {
       success: true,
@@ -284,6 +314,7 @@ function generateAsyncSnapshot(submissionId) {
       '',
       error.message
     );
+    Logger.log('status updated: ' + ASYNC_STATUS_FAILED + ' for ' + submissionId);
     return {
       success: false,
       submissionId: submissionId,
