@@ -99,6 +99,10 @@ function jsonResponse(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+function normalizeAsyncStatus(value) {
+  return cleanValue(value).toUpperCase();
+}
+
 /************************************************************
  * 3. setupSheets update: AI Snapshot Status tab
  *
@@ -221,16 +225,18 @@ function handleStatus(data) {
     };
   }
 
-  if (row.status === ASYNC_STATUS_PROCESSING || row.status === ASYNC_STATUS_GENERATING) {
+  const normalizedStatus = normalizeAsyncStatus(row.status) || ASYNC_STATUS_PROCESSING;
+
+  if (normalizedStatus === ASYNC_STATUS_PROCESSING || normalizedStatus === ASYNC_STATUS_GENERATING) {
     Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
     return {
       success: true,
       submissionId: submissionId,
-      status: row.status
+      status: normalizedStatus
     };
   }
 
-  if (row.status === ASYNC_STATUS_GENERATED) {
+  if (normalizedStatus === ASYNC_STATUS_GENERATED || row.snapshotJson) {
     Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
     return {
       success: true,
@@ -240,12 +246,21 @@ function handleStatus(data) {
     };
   }
 
+  if (normalizedStatus === ASYNC_STATUS_FAILED) {
+    Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
+    return {
+      success: false,
+      submissionId: submissionId,
+      status: ASYNC_STATUS_FAILED,
+      message: row.errorMessage || 'AI PM workflow generation failed.'
+    };
+  }
+
   Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
   return {
-    success: false,
+    success: true,
     submissionId: submissionId,
-    status: ASYNC_STATUS_FAILED,
-    message: row.errorMessage || 'AI PM workflow generation failed.'
+    status: ASYNC_STATUS_PROCESSING
   };
 }
 

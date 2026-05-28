@@ -65,6 +65,10 @@ function buildStatusPayload(submissionId: string) {
   return { action: 'status', submissionId };
 }
 
+function normalizeWorkflowStatus(status: unknown): string {
+  return typeof status === 'string' ? status.trim().toUpperCase() : '';
+}
+
 function jsonResponse(statusCode: number, body: Record<string, unknown>): Result {
   return { statusCode, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
 }
@@ -190,21 +194,23 @@ async function handleStatus(event: Event): Promise<Result> {
   }
 
   const parsed = appsScriptResult.parsed;
+  const normalizedStatus = normalizeWorkflowStatus(parsed.status);
   console.log('Polling status:', parsed.status);
+  console.log('Normalized polling status:', normalizedStatus || 'MISSING_STATUS');
   console.log('instantSnapshot exists:', Boolean(parsed.instantSnapshot));
   console.log('instantSnapshot.aiStatus:', parsed.instantSnapshot?.aiStatus);
 
-  if (parsed.status === 'PROCESSING' || parsed.status === 'GENERATING') {
-    return jsonResponse(200, { success: true, submissionId: parsed.submissionId || submissionId, status: parsed.status });
+  if (normalizedStatus === 'PROCESSING' || normalizedStatus === 'GENERATING') {
+    return jsonResponse(200, { success: true, submissionId: parsed.submissionId || submissionId, status: normalizedStatus });
   }
 
-  if (parsed.status === 'AI_GENERATION_FAILED' || parsed.success === false) {
+  if (normalizedStatus === 'AI_GENERATION_FAILED' || parsed.success === false) {
     return jsonResponse(200, { success: false, submissionId: parsed.submissionId || submissionId, status: 'AI_GENERATION_FAILED', message: parsed.message || 'AI PM workflow generation failed.' });
   }
 
-  if (parsed.status === 'AI_GENERATED') {
+  if (normalizedStatus === 'AI_GENERATED' || parsed.instantSnapshot) {
     if (!parsed.instantSnapshot) {
-      return jsonResponse(502, { success: false, submissionId, status: 'AI_GENERATION_FAILED', message: 'AI snapshot was not returned by the backend.', errorSource: 'missing_instant_snapshot' });
+      return jsonResponse(200, { success: true, submissionId: parsed.submissionId || submissionId, status: 'PROCESSING', upstreamStatus: parsed.status || 'AI_GENERATED_WITHOUT_SNAPSHOT' });
     }
 
     const structuralValidation = validateSnapshotStructure(parsed.instantSnapshot);
@@ -218,10 +224,11 @@ async function handleStatus(event: Event): Promise<Result> {
       console.warn('AI snapshot voice validation warning:', voiceValidation.matches);
     }
 
-    return jsonResponse(200, parsed as Record<string, unknown>);
+    return jsonResponse(200, { ...parsed, status: 'AI_GENERATED' } as Record<string, unknown>);
   }
 
-  return jsonResponse(502, { success: false, submissionId, status: 'AI_GENERATION_FAILED', message: 'AI PM workflow returned an unknown status.', errorSource: 'unknown_status' });
+  console.warn('Apps Script returned no recognized status and no snapshot; treating as PROCESSING.', parsed);
+  return jsonResponse(200, { success: true, submissionId: parsed.submissionId || submissionId, status: 'PROCESSING', upstreamStatus: parsed.status || 'MISSING_STATUS' });
 }
 
 export async function handler(event: Event): Promise<Result> {
