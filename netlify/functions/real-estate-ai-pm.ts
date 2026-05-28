@@ -10,6 +10,7 @@ const REPORT_VOICE_REQUIREMENTS = [
   'REPORT VOICE: Use second-person language: “you,” “your,” and “your team.”',
   'REPORT VOICE: Do not describe the submitter in third person.',
   'REPORT VOICE: Do not use the submitter’s name as the grammatical subject of a sentence.',
+  'REPORT VOICE: Do not use the submitter’s name or the possessive form of the submitter’s name in client-facing prose.',
   'REPORT VOICE: Do not use phrases like “the client,” “the submitter,” or “the user” in client-facing fields.',
   'REPORT VOICE: Do not write as an internal analyst memo.',
   'REPORT VOICE: Do not write as if the audience is PropertyDEX reviewing a lead.',
@@ -84,7 +85,7 @@ function validateClientFacingVoice(snapshot: Snapshot | undefined, submitterName
 
   const blockedPhrases = ['the client', 'the submitter', 'the user'];
   const name = typeof submitterName === 'string' ? submitterName.trim().toLowerCase() : '';
-  const namePatterns = name ? [`${name} is`, `${name} has`, `${name} manages`, `${name} needs`] : [];
+  const namePatterns = name ? [`${name} is`, `${name} has`, `${name} manages`, `${name} needs`, `${name}’s`, `${name}'s`] : [];
   const blocked = [...blockedPhrases, ...namePatterns];
   const texts: string[] = [];
   const pushText = (value: unknown) => {

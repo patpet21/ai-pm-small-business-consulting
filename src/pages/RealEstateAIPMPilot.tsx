@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { REAL_ESTATE_AI_PM_PROXY_ENDPOINT } from '../config/endpoints';
 
@@ -73,7 +73,7 @@ const initialData: IntakeData = {
   additionalNotes: '',
 };
 const stepLabels = ['About you', 'Workflow to improve', 'Current process', 'Pain points', 'AI and tools', 'Desired output'];
-const ERR_MSG = 'Personalized AI generation failed. Please request a human-reviewed report.';
+const ERR_MSG = 'The AI report took too long to generate. Please try again or request a human-reviewed report.';
 const FALLBACK_DISCLAIMER = 'This preliminary snapshot is AI-generated and has not been reviewed by a human. It is not legal, tax, financial, investment, brokerage, or compliance advice.';
 const CALENDLY = 'https://calendly.com/propertydext/15min';
 
@@ -106,8 +106,39 @@ export function RealEstateAIPMPilot() {
   const [submitted, setSubmitted] = useState(false);
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [copiedPrompt, setCopiedPrompt] = useState<number | null>(null);
+  const [selectedTools, setSelectedTools] = useState<string[]>([]);
+  const [selectedOutputs, setSelectedOutputs] = useState<string[]>([]);
+  const [otherTools, setOtherTools] = useState('');
+  const [otherDesiredOutput, setOtherDesiredOutput] = useState('');
   const progressText = useMemo(() => `Step ${step + 1} of ${stepLabels.length}: ${stepLabels[step]}`, [step]);
   const updateField = (field: keyof IntakeData, value: string) => setData((previous) => ({ ...previous, [field]: value }));
+  const combineMultiSelect = (items: string[], otherValue: string) => {
+    const filteredItems = items.filter((item) => item !== 'Other');
+    const trimmedOther = otherValue.trim();
+    return [...filteredItems, ...(items.includes('Other') && trimmedOther ? [trimmedOther] : [])].join(', ');
+  };
+  const syncCurrentTools = (items: string[], otherValue = otherTools) => updateField('currentTools', combineMultiSelect(items, otherValue));
+  const syncDesiredOutput = (items: string[], otherValue = otherDesiredOutput) => updateField('desiredOutput', combineMultiSelect(items, otherValue));
+  const toggleCurrentTool = (item: string) => {
+    const nextItems = selectedTools.includes(item) ? selectedTools.filter((selected) => selected !== item) : [...selectedTools, item];
+    setSelectedTools(nextItems);
+    syncCurrentTools(nextItems);
+  };
+  const toggleDesiredOutput = (item: string) => {
+    const nextItems = selectedOutputs.includes(item) ? selectedOutputs.filter((selected) => selected !== item) : [...selectedOutputs, item];
+    setSelectedOutputs(nextItems);
+    syncDesiredOutput(nextItems);
+  };
+
+  useEffect(() => {
+    if (!submitting) return undefined;
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [submitting]);
 
   const validateStep = (currentStep: number): string | null => {
     if (currentStep === 0) {
@@ -119,21 +150,31 @@ export function RealEstateAIPMPilot() {
     if (currentStep === 1 && !data.workflowType.trim()) return 'Please select a workflow type.';
     if (currentStep === 2 && !data.currentProcess.trim()) return 'Please describe your current process.';
     if (currentStep === 3 && !data.mainPainPoints.trim()) return 'Please select your main pain points.';
-    if (currentStep === 5 && !data.desiredOutput.trim()) return 'Please select your desired output.';
+    if (currentStep === 5 && selectedOutputs.length === 0) return 'Please select your desired output.';
+    if (currentStep === 5 && selectedOutputs.includes('Other') && !otherDesiredOutput.trim()) return 'Please specify desired output.';
     return null;
   };
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting) return;
     const validationError = validateStep(step);
     if (validationError) return setError(validationError);
     setError('');
     setSubmitting(true);
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 60000);
     try {
+      const payload = {
+        ...data,
+        currentTools: combineMultiSelect(selectedTools, otherTools),
+        desiredOutput: combineMultiSelect(selectedOutputs, otherDesiredOutput),
+      };
       const res = await fetch(REAL_ESTATE_AI_PM_PROXY_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
+        signal: controller.signal,
       });
       const json = (await res.json()) as ApiResponse;
       console.log('instantSnapshot received:', json.instantSnapshot);
@@ -143,9 +184,10 @@ export function RealEstateAIPMPilot() {
       setResponse(json);
       setSubmitted(true);
     } catch {
-      setResponse({ success: false, message: ERR_MSG });
+      setResponse({ success: false, message: ERR_MSG, instantSnapshot: { aiStatus: 'AI_GENERATION_FAILED' } });
       setSubmitted(true);
     } finally {
+      window.clearTimeout(timeoutId);
       setSubmitting(false);
     }
   }
@@ -355,13 +397,23 @@ export function RealEstateAIPMPilot() {
           {step === 1 && <label>Workflow type to improve *<select value={data.workflowType} onChange={(e) => updateField('workflowType', e.target.value)}><option value="">Select</option>{['Lead intake','Buyer follow-up','Seller follow-up','Listing preparation','Open house preparation','Transaction checklist','Vendor coordination','Client communication','Weekly client updates','Property project tracking','Content-to-client follow-up','Other'].map((item)=><option key={item} value={item}>{item}</option>)}</select></label>}
           {step === 2 && <div className="form-grid"><label>Information usually starts from<select value={data.informationStartsFrom} onChange={(e) => updateField('informationStartsFrom', e.target.value)}><option value="">Select</option>{['Email','Phone calls','Text messages','Instagram / Social media','Zillow / Realtor.com / leads platform','CRM','Google Sheets','Paper / memory','Other'].map((item)=><option key={item} value={item}>{item}</option>)}</select></label><label>Describe how this workflow happens today *<textarea value={data.currentProcess} onChange={(e) => updateField('currentProcess', e.target.value)} rows={6} /></label></div>}
           {step === 3 && <div className="form-grid two-col"><label>Main pain points *<select value={data.mainPainPoints} onChange={(e) => updateField('mainPainPoints', e.target.value)}><option value="">Select</option>{['Missed follow-ups','Scattered notes','Repeated messages','No clear next steps','Tasks are not organized','I lose time after calls or meetings','No system for updates','Too many tools','Everything is manual','Other'].map((item)=><option key={item} value={item}>{item}</option>)}</select></label><label>Time lost per week<select value={data.timeLostPerWeek} onChange={(e) => updateField('timeLostPerWeek', e.target.value)}><option value="">Select</option>{['Less than 1 hour','1–3 hours','3–5 hours','5+ hours'].map((item)=><option key={item} value={item}>{item}</option>)}</select></label></div>}
-          {step === 4 && <div className="form-grid two-col"><label>AI usage today<select value={data.aiUsageToday} onChange={(e) => updateField('aiUsageToday', e.target.value)}><option value="">Select</option>{['Yes, often','Sometimes','I tried it but not consistently','Not really'].map((item)=><option key={item} value={item}>{item}</option>)}</select></label><label>Current tools<select value={data.currentTools} onChange={(e) => updateField('currentTools', e.target.value)}><option value="">Select</option>{['Gmail / Outlook','Google Sheets','Google Docs','Trello','ClickUp','Asana','Notion','CRM','No real system','Other'].map((item)=><option key={item} value={item}>{item}</option>)}</select></label></div>}
-          {step === 5 && <div className="form-grid"><label>Desired output *<select value={data.desiredOutput} onChange={(e) => updateField('desiredOutput', e.target.value)}><option value="">Select</option>{['Workflow map','Simple task tracker','Follow-up templates','AI prompt templates','Client communication templates','Weekly update structure','Recommended tools','7-day implementation plan','Short call to review the workflow'].map((item)=><option key={item} value={item}>{item}</option>)}</select></label><label>Open to call?<select value={data.openToCall} onChange={(e) => updateField('openToCall', e.target.value)}><option value="">Select</option>{['Yes','No','Maybe'].map((item)=><option key={item} value={item}>{item}</option>)}</select></label><label>Additional notes<textarea value={data.additionalNotes} onChange={(e) => updateField('additionalNotes', e.target.value)} rows={5} /></label></div>}
+          {step === 4 && <div className="form-grid two-col"><label>AI usage today<select value={data.aiUsageToday} onChange={(e) => updateField('aiUsageToday', e.target.value)}><option value="">Select</option>{['Yes, often','Sometimes','I tried it but not consistently','Not really'].map((item)=><option key={item} value={item}>{item}</option>)}</select></label><fieldset className="multi-select-field"><legend>Current tools</legend><div className="multi-select-options">{['Gmail / Outlook','Google Sheets','Google Docs','Trello','ClickUp','Asana','Notion','CRM','No real system','Other'].map((item)=><label className="checkbox-pill" key={item}><input type="checkbox" checked={selectedTools.includes(item)} onChange={() => toggleCurrentTool(item)} />{item}</label>)}</div>{selectedTools.includes('Other') && <label className="small-followup-input">Please specify other tools<input value={otherTools} onChange={(e) => { setOtherTools(e.target.value); syncCurrentTools(selectedTools, e.target.value); }} /></label>}</fieldset></div>}
+          {step === 5 && <div className="form-grid"><fieldset className="multi-select-field"><legend>Desired output *</legend><div className="multi-select-options">{['Workflow map','Simple task tracker','Follow-up templates','AI prompt templates','Client communication templates','Weekly update structure','Recommended tools','7-day implementation plan','Short call to review the workflow','Other'].map((item)=><label className="checkbox-pill" key={item}><input type="checkbox" checked={selectedOutputs.includes(item)} onChange={() => toggleDesiredOutput(item)} />{item}</label>)}</div>{selectedOutputs.includes('Other') && <label className="small-followup-input">Please specify desired output<input value={otherDesiredOutput} onChange={(e) => { setOtherDesiredOutput(e.target.value); syncDesiredOutput(selectedOutputs, e.target.value); }} /></label>}</fieldset><label>Open to call?<select value={data.openToCall} onChange={(e) => updateField('openToCall', e.target.value)}><option value="">Select</option>{['Yes','No','Maybe'].map((item)=><option key={item} value={item}>{item}</option>)}</select></label><label>Additional notes<textarea value={data.additionalNotes} onChange={(e) => updateField('additionalNotes', e.target.value)} rows={5} /></label></div>}
           {error && <p className="form-error">{error}</p>}
           {submitting && <p className="form-wait-message">Please wait while we prepare your result page...</p>}
-          <div className="wizard-actions">{step > 0 && <button type="button" className="button secondary" onClick={() => { setError(''); setStep((previous) => Math.max(previous - 1, 0)); }}>Back</button>}{step < stepLabels.length - 1 ? <button type="button" className="button primary" onClick={() => { const validationError = validateStep(step); if (validationError) setError(validationError); else { setError(''); setStep((previous) => Math.min(previous + 1, stepLabels.length - 1)); } }}>Next</button> : <button type="submit" className="button primary" disabled={submitting}>{submitting ? 'Please wait...' : 'Submit pilot intake'}</button>}</div>
+          <div className="wizard-actions">{step > 0 && <button type="button" className="button secondary" onClick={() => { setError(''); setStep((previous) => Math.max(previous - 1, 0)); }}>Back</button>}{step < stepLabels.length - 1 ? <button type="button" className="button primary" onClick={() => { const validationError = validateStep(step); if (validationError) setError(validationError); else { setError(''); setStep((previous) => Math.min(previous + 1, stepLabels.length - 1)); } }}>Next</button> : <button type="submit" className="button primary" disabled={submitting}>{submitting ? 'Generating your snapshot...' : 'Submit pilot intake'}</button>}</div>
         </form>
       </section>
+      {submitting && (
+        <div className="loading-modal-overlay" role="alertdialog" aria-modal="true" aria-labelledby="snapshot-loading-title">
+          <div className="loading-modal-card">
+            <div className="loading-spinner" aria-hidden="true" />
+            <h2 id="snapshot-loading-title">Generating your personalized AI PM Workflow Snapshot</h2>
+            <p>Please do not refresh or close this page. Your report is being generated from your intake answers and may take up to 60 seconds.</p>
+            <p className="loading-modal-note">Click submit only once. The system is preparing your workflow diagnosis, tracker structure, AI prompt pack, and 7-day roadmap.</p>
+          </div>
+        </div>
+      )}
     </>
   );
 }
