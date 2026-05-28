@@ -41,47 +41,23 @@ function createSubmissionId(): string {
 
 function buildStartPayload(intakePayload: IntakePayload) {
   return {
-    ...intakePayload,
     action: 'start',
-    reportMode: 'preliminary_ai_pm_workflow_snapshot',
-    reportSchemaVersion: '2026-05-28',
-    requiredInstantSnapshotSchema: {
-      workflowReadinessScore: 'number', workflowMaturity: 'string', workflowDetected: 'string', executiveSummary: 'string',
-      problemStatement: 'string', mainBottleneck: 'string', recommendedPriority: 'string', recommendedFirstStep: 'string',
-      suggestedSimpleSystem: 'string', topWorkflowGaps: ['string', 'string', 'string'],
-      first48HourFix: { title: 'string', description: 'string', trackerName: 'string', columns: ['string'], statuses: ['string'] },
-      wbsTaskBreakdown: [{ taskName: 'string', ownerType: 'string', output: 'string', acceptanceCriteria: 'string' }],
-      aiPromptPack: [{ title: 'string', prompt: 'string' }],
-      scarfTrustCheck: [{ domain: 'Status|Certainty|Autonomy|Relatedness|Fairness', risk: 'string', recommendation: 'string' }],
-      aiUseTransparencySummary: { inputUsed: 'string', outputGenerated: 'string', humanValidation: 'string', sensitiveDataWarning: 'string' },
-      aiOpportunities: ['string', 'string', 'string'], quickWin: 'string', sevenDayRoadmap: ['string'],
-      humanReviewedReportPreview: ['string'], riskNotes: ['string'], nextStep: 'string',
-      ctaPrimary: 'Book a 15-minute review', ctaSecondary: 'Request human-reviewed report', calendlyUrl: 'https://calendly.com/propertydext/15min', disclaimer: 'string',
-    },
-    consultantPromptRules: [
-      'Generate the full client-facing report from intake data only.',
-      'Do not use predefined examples or template report text.',
-      'Do not reuse the same tracker columns, WBS, prompt pack, gaps, or roadmap across workflows.',
-      'Match all content to the submitted workflow type and process details.',
-      'Do not use lead-tracking content unless workflow is lead tracking or buyer follow-up.',
-      'For listing preparation, generate listing-specific report content.',
-      'For open house preparation, generate open-house-specific report content.',
-      'For vendor coordination, generate vendor-specific report content.',
-      'For transaction coordination, generate transaction-specific report content.',
-      ...COMPLIANCE_SENSITIVE_REQUIREMENTS,
-      'Do not invent facts not present in intake; if needed, mark operational assumptions explicitly.',
-      ...REPORT_VOICE_REQUIREMENTS,
-    ],
-    reportVoiceRequirements: REPORT_VOICE_REQUIREMENTS,
-    complianceSensitiveRequirements: COMPLIANCE_SENSITIVE_REQUIREMENTS,
-    intakeFieldsForAI: {
-      role: intakePayload.role, marketLocation: intakePayload.marketLocation, teamSize: intakePayload.teamSize,
-      workflowType: intakePayload.workflowType, currentProcess: intakePayload.currentProcess,
-      informationStartsFrom: intakePayload.informationStartsFrom, currentTools: intakePayload.currentTools,
-      mainPainPoints: intakePayload.mainPainPoints, timeLostPerWeek: intakePayload.timeLostPerWeek,
-      aiUsageToday: intakePayload.aiUsageToday, desiredOutput: intakePayload.desiredOutput,
-      openToCall: intakePayload.openToCall, additionalNotes: intakePayload.additionalNotes,
-    },
+    submissionId: intakePayload.submissionId,
+    name: intakePayload.name,
+    email: intakePayload.email,
+    role: intakePayload.role,
+    marketLocation: intakePayload.marketLocation,
+    teamSize: intakePayload.teamSize,
+    workflowType: intakePayload.workflowType,
+    currentProcess: intakePayload.currentProcess,
+    informationStartsFrom: intakePayload.informationStartsFrom,
+    currentTools: intakePayload.currentTools,
+    mainPainPoints: intakePayload.mainPainPoints,
+    timeLostPerWeek: intakePayload.timeLostPerWeek,
+    aiUsageToday: intakePayload.aiUsageToday,
+    desiredOutput: intakePayload.desiredOutput,
+    openToCall: intakePayload.openToCall,
+    additionalNotes: intakePayload.additionalNotes,
   };
 }
 
@@ -158,6 +134,9 @@ function isStatusRoute(event: Event): boolean {
 }
 
 async function handleStart(event: Event): Promise<Result> {
+  const startEndpointReceivedAt = Date.now();
+  console.log('startEndpointReceivedAt:', new Date(startEndpointReceivedAt).toISOString());
+
   if (event.httpMethod !== 'POST') {
     return jsonResponse(405, { success: false, message: 'Method not allowed', errorSource: 'method_not_allowed' });
   }
@@ -168,7 +147,13 @@ async function handleStart(event: Event): Promise<Result> {
     : createSubmissionId();
   const payload = buildStartPayload({ ...intakePayload, submissionId });
   console.log('Start payload sent to Apps Script:', JSON.stringify(payload));
+
+  const appsScriptStartCallStartedAt = Date.now();
+  console.log('appsScriptStartCallStartedAt:', new Date(appsScriptStartCallStartedAt).toISOString());
   const appsScriptResult = await postToAppsScript(payload);
+  const appsScriptStartCallFinishedAt = Date.now();
+  console.log('appsScriptStartCallFinishedAt:', new Date(appsScriptStartCallFinishedAt).toISOString());
+  console.log('appsScriptStartCallDurationMs:', appsScriptStartCallFinishedAt - appsScriptStartCallStartedAt);
 
   if (!appsScriptResult.ok) {
     return jsonResponse(502, { success: false, message: 'AI PM workflow generation could not start.', errorSource: 'apps_script', details: shortDetails(appsScriptResult.body) });
@@ -176,11 +161,14 @@ async function handleStart(event: Event): Promise<Result> {
   if (!appsScriptResult.parsed) {
     return jsonResponse(502, { success: false, message: 'AI PM workflow generation could not start.', errorSource: 'apps_script_parse', details: appsScriptResult.parseError || 'Apps Script did not return valid JSON.' });
   }
-  return jsonResponse(200, {
+
+  const response = jsonResponse(200, {
     success: appsScriptResult.parsed.success !== false,
     submissionId: appsScriptResult.parsed.submissionId || submissionId,
     status: appsScriptResult.parsed.status || 'PROCESSING',
   });
+  console.log('startEndpointDurationMs:', Date.now() - startEndpointReceivedAt);
+  return response;
 }
 
 async function handleStatus(event: Event): Promise<Result> {
@@ -206,8 +194,8 @@ async function handleStatus(event: Event): Promise<Result> {
   console.log('instantSnapshot exists:', Boolean(parsed.instantSnapshot));
   console.log('instantSnapshot.aiStatus:', parsed.instantSnapshot?.aiStatus);
 
-  if (parsed.status === 'PROCESSING') {
-    return jsonResponse(200, { success: true, submissionId: parsed.submissionId || submissionId, status: 'PROCESSING' });
+  if (parsed.status === 'PROCESSING' || parsed.status === 'GENERATING') {
+    return jsonResponse(200, { success: true, submissionId: parsed.submissionId || submissionId, status: parsed.status });
   }
 
   if (parsed.status === 'AI_GENERATION_FAILED' || parsed.success === false) {

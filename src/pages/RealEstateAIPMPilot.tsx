@@ -187,7 +187,7 @@ export function RealEstateAIPMPilot() {
         };
       }
 
-      if (statusJson?.status === 'PROCESSING') continue;
+      if (statusJson?.status === 'PROCESSING' || statusJson?.status === 'GENERATING') continue;
 
       if (statusJson?.status === 'AI_GENERATED' && statusJson.instantSnapshot) {
         console.log('instantSnapshot received:', statusJson.instantSnapshot);

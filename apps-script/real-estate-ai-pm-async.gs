@@ -7,6 +7,7 @@
  ************************************************************/
 
 const ASYNC_STATUS_PROCESSING = 'PROCESSING';
+const ASYNC_STATUS_GENERATING = 'GENERATING';
 const ASYNC_STATUS_GENERATED = 'AI_GENERATED';
 const ASYNC_STATUS_FAILED = 'AI_GENERATION_FAILED';
 
@@ -28,21 +29,59 @@ const COMPLIANCE_SENSITIVE_PROMPT_RULE = [
   'Do not tell the user they must comply with a specific rule or guideline unless that information is provided by the user.'
 ].join('\n');
 
-function getStatusSheetName() {
-  return getConfigValue('snapshotStatusSheet', 'AI Snapshot Status');
-}
-
 const ASYNC_STATUS_HEADERS = [
   'Submission ID',
   'Created At',
   'Updated At',
   'Status',
+  'Intake JSON',
   'Snapshot JSON',
   'Error Message'
 ];
 
-function setupAsyncSnapshotStatusSheet() {
-  getAsyncSnapshotStatusSheet();
+function doPost(e) {
+  const data = parseRequestData(e);
+  const action = cleanValue(data.action || '').toLowerCase();
+
+  try {
+    if (action === 'start') {
+      return asyncJsonResponse(handleStart(data));
+    }
+
+    if (action === 'status') {
+      return asyncJsonResponse(handleStatus(data));
+    }
+
+    if (action === 'generate') {
+      return asyncJsonResponse(handleGenerate(data));
+    }
+
+    if (typeof processSubmission === 'function') {
+      return asyncJsonResponse(processSubmission(data));
+    }
+
+    return asyncJsonResponse({
+      success: false,
+      message: 'Unsupported action.',
+      status: ASYNC_STATUS_FAILED
+    });
+  } catch (error) {
+    return asyncJsonResponse({
+      success: false,
+      message: error.message,
+      status: ASYNC_STATUS_FAILED
+    });
+  }
+}
+
+function asyncJsonResponse(payload) {
+  return ContentService
+    .createTextOutput(JSON.stringify(payload))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getStatusSheetName() {
+  return getConfigValue('snapshotStatusSheet', 'AI Snapshot Status');
 }
 
 function getAsyncSnapshotStatusSheet() {
@@ -57,7 +96,15 @@ function getAsyncSnapshotStatusSheet() {
     return sheet;
   }
 
-  if (sheet.getLastRow() === 0) {
+  const currentHeaderWidth = Math.max(sheet.getLastColumn(), ASYNC_STATUS_HEADERS.length);
+  const existingHeaders = sheet.getLastRow() > 0
+    ? sheet.getRange(1, 1, 1, currentHeaderWidth).getValues()[0].map(cleanValue)
+    : [];
+  const needsHeaderRefresh = ASYNC_STATUS_HEADERS.some(function(header, index) {
+    return existingHeaders[index] !== header;
+  });
+
+  if (sheet.getLastRow() === 0 || needsHeaderRefresh) {
     sheet.getRange(1, 1, 1, ASYNC_STATUS_HEADERS.length).setValues([ASYNC_STATUS_HEADERS]);
     sheet.setFrozenRows(1);
   }
@@ -65,82 +112,36 @@ function getAsyncSnapshotStatusSheet() {
   return sheet;
 }
 
-function doPost(e) {
-  const data = parseRequestData(e);
-  const action = cleanValue(data.action || 'start').toLowerCase();
-
-  try {
-    if (action === 'start') {
-      return jsonOutput(startAsyncSnapshotJob(data));
-    }
-
-    if (action === 'status') {
-      return jsonOutput(getAsyncSnapshotStatus(cleanValue(data.submissionId)));
-    }
-
-    if (action === 'generate') {
-      return jsonOutput(generateAsyncSnapshot(cleanValue(data.submissionId)));
-    }
-
-    return jsonOutput({
-      success: false,
-      message: 'Unsupported action.',
-      status: ASYNC_STATUS_FAILED
-    });
-  } catch (error) {
-    return jsonOutput({
-      success: false,
-      message: error.message,
-      status: ASYNC_STATUS_FAILED
-    });
-  }
-}
-
-function jsonOutput(payload) {
-  return ContentService
-    .createTextOutput(JSON.stringify(payload))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-function startAsyncSnapshotJob(data) {
+function setupAsyncSnapshotStatusSheet() {
   getAsyncSnapshotStatusSheet();
+}
+
+function handleStart(data) {
+  const startedAt = Date.now();
+  Logger.log('handleStartStarted: ' + new Date(startedAt).toISOString());
 
   const submissionId = cleanValue(data.submissionId) || createSubmissionId();
-  const timestamp = new Date();
+  Logger.log('submissionId created: ' + submissionId);
+
   const intake = normalizeAsyncIntake(data, submissionId);
+  const intakeJson = JSON.stringify(intake);
 
-  appendRow(getConfigValue('intakeSheet', 'Intake Responses'), [
-    timestamp,
-    submissionId,
-    intake.name,
-    intake.email,
-    intake.role,
-    intake.marketLocation,
-    intake.teamSize,
-    intake.workflowType,
-    intake.currentProcess,
-    intake.informationStartsFrom,
-    intake.currentTools,
-    intake.mainPainPoints,
-    intake.timeLostPerWeek,
-    intake.aiUsageToday,
-    intake.desiredOutput,
-    intake.openToCall,
-    intake.additionalNotes,
-    ASYNC_STATUS_PROCESSING
-  ]);
+  upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_PROCESSING, intakeJson, '', '');
+  Logger.log('status row written: ' + submissionId);
 
-  upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_PROCESSING, '', '');
   enqueueAsyncSnapshotGeneration();
+  Logger.log('trigger scheduled: processPendingAiSnapshots');
+  Logger.log('handleStartFinished: ' + (Date.now() - startedAt) + 'ms');
 
   return {
     success: true,
-    submissionId,
+    submissionId: submissionId,
     status: ASYNC_STATUS_PROCESSING
   };
 }
 
-function getAsyncSnapshotStatus(submissionId) {
+function handleStatus(data) {
+  const submissionId = cleanValue(data.submissionId);
   if (!submissionId) {
     return {
       success: false,
@@ -153,71 +154,82 @@ function getAsyncSnapshotStatus(submissionId) {
   if (!row) {
     return {
       success: false,
-      submissionId,
+      submissionId: submissionId,
       message: 'Submission status was not found.',
       status: ASYNC_STATUS_FAILED
+    };
+  }
+
+  if (row.status === ASYNC_STATUS_PROCESSING || row.status === ASYNC_STATUS_GENERATING) {
+    return {
+      success: true,
+      submissionId: submissionId,
+      status: row.status
     };
   }
 
   if (row.status === ASYNC_STATUS_GENERATED) {
     return {
       success: true,
-      submissionId,
+      submissionId: submissionId,
       status: ASYNC_STATUS_GENERATED,
       instantSnapshot: JSON.parse(row.snapshotJson)
     };
   }
 
-  if (row.status === ASYNC_STATUS_FAILED) {
-    return {
-      success: false,
-      submissionId,
-      status: ASYNC_STATUS_FAILED,
-      message: row.errorMessage || 'AI PM workflow generation failed.'
-    };
-  }
-
   return {
-    success: true,
-    submissionId,
-    status: ASYNC_STATUS_PROCESSING
+    success: false,
+    submissionId: submissionId,
+    status: ASYNC_STATUS_FAILED,
+    message: row.errorMessage || 'AI PM workflow generation failed.'
   };
+}
+
+function handleGenerate(data) {
+  return generateAsyncSnapshot(cleanValue(data.submissionId));
 }
 
 function enqueueAsyncSnapshotGeneration() {
   const triggers = ScriptApp.getProjectTriggers();
   const alreadyQueued = triggers.some(function(trigger) {
-    return trigger.getHandlerFunction() === 'processPendingAsyncSnapshots';
+    return trigger.getHandlerFunction() === 'processPendingAiSnapshots';
   });
 
   if (!alreadyQueued) {
-    ScriptApp.newTrigger('processPendingAsyncSnapshots')
+    ScriptApp.newTrigger('processPendingAiSnapshots')
       .timeBased()
       .after(1000)
       .create();
   }
 }
 
-function processPendingAsyncSnapshots() {
+function processPendingAiSnapshots() {
   removeAsyncSnapshotTriggers();
 
-  const sheet = getSpreadsheet().getSheetByName(getStatusSheetName());
+  const sheet = getAsyncSnapshotStatusSheet();
   if (!sheet || sheet.getLastRow() < 2) return;
 
-  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 6).getValues();
-  values.forEach(function(row) {
+  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, ASYNC_STATUS_HEADERS.length).getValues();
+  for (let i = 0; i < rows.length; i += 1) {
+    const row = rows[i];
     const submissionId = cleanValue(row[0]);
     const status = cleanValue(row[3]);
 
     if (submissionId && status === ASYNC_STATUS_PROCESSING) {
       generateAsyncSnapshot(submissionId);
+      return;
     }
-  });
+  }
+}
+
+function processPendingAsyncSnapshots() {
+  processPendingAiSnapshots();
 }
 
 function removeAsyncSnapshotTriggers() {
   ScriptApp.getProjectTriggers().forEach(function(trigger) {
-    if (trigger.getHandlerFunction() === 'processPendingAsyncSnapshots') {
+    const handler = trigger.getHandlerFunction();
+    if (handler === 'processPendingAiSnapshots' || handler === 'processPendingAsyncSnapshots') {
       ScriptApp.deleteTrigger(trigger);
     }
   });
@@ -229,25 +241,52 @@ function generateAsyncSnapshot(submissionId) {
   }
 
   try {
-    const intake = getAsyncIntakeBySubmissionId(submissionId);
-    if (!intake) {
-      throw new Error('Could not find intake row for submissionId: ' + submissionId);
+    const statusRow = findAsyncSnapshotStatusRow(submissionId);
+    if (!statusRow) {
+      throw new Error('Could not find status row for submissionId: ' + submissionId);
     }
 
+    if (statusRow.status === ASYNC_STATUS_GENERATED) {
+      return {
+        success: true,
+        submissionId: submissionId,
+        status: ASYNC_STATUS_GENERATED,
+        instantSnapshot: JSON.parse(statusRow.snapshotJson)
+      };
+    }
+
+    if (statusRow.status === ASYNC_STATUS_GENERATING) {
+      return {
+        success: true,
+        submissionId: submissionId,
+        status: ASYNC_STATUS_GENERATING
+      };
+    }
+
+    upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_GENERATING, statusRow.intakeJson, '', '');
+
+    const intake = JSON.parse(statusRow.intakeJson);
     const instantSnapshot = createInstantSnapshotForAsyncIntake(intake);
-    upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_GENERATED, JSON.stringify(instantSnapshot), '');
+    upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_GENERATED, statusRow.intakeJson, JSON.stringify(instantSnapshot), '');
 
     return {
       success: true,
-      submissionId,
+      submissionId: submissionId,
       status: ASYNC_STATUS_GENERATED,
-      instantSnapshot
+      instantSnapshot: instantSnapshot
     };
   } catch (error) {
-    upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_FAILED, '', error.message);
+    const existing = findAsyncSnapshotStatusRow(submissionId);
+    upsertAsyncSnapshotStatus(
+      submissionId,
+      ASYNC_STATUS_FAILED,
+      existing ? existing.intakeJson : '',
+      '',
+      error.message
+    );
     return {
       success: false,
-      submissionId,
+      submissionId: submissionId,
       status: ASYNC_STATUS_FAILED,
       message: error.message
     };
@@ -275,7 +314,7 @@ function createInstantSnapshotForAsyncIntake(intake) {
     desiredOutput: intake.desiredOutput,
     openToCall: intake.openToCall,
     additionalNotes: intake.additionalNotes,
-    diagnostic
+    diagnostic: diagnostic
   });
 
   instantSnapshot.aiStatus = ASYNC_STATUS_GENERATED;
@@ -284,7 +323,7 @@ function createInstantSnapshotForAsyncIntake(intake) {
 
 function normalizeAsyncIntake(data, submissionId) {
   return {
-    submissionId,
+    submissionId: submissionId,
     name: cleanValue(data.name),
     email: cleanValue(data.email),
     role: cleanValue(data.role),
@@ -303,43 +342,11 @@ function normalizeAsyncIntake(data, submissionId) {
   };
 }
 
-function getAsyncIntakeBySubmissionId(submissionId) {
-  const sheet = getSpreadsheet().getSheetByName(getConfigValue('intakeSheet', 'Intake Responses'));
-  if (!sheet || sheet.getLastRow() < 2) return null;
-
-  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 18).getValues();
-  for (let i = 0; i < rows.length; i += 1) {
-    const row = rows[i];
-    if (cleanValue(row[1]) === submissionId) {
-      return {
-        submissionId,
-        name: cleanValue(row[2]),
-        email: cleanValue(row[3]),
-        role: cleanValue(row[4]),
-        marketLocation: cleanValue(row[5]),
-        teamSize: cleanValue(row[6]),
-        workflowType: cleanValue(row[7]),
-        currentProcess: cleanValue(row[8]),
-        informationStartsFrom: cleanValue(row[9]),
-        currentTools: cleanValue(row[10]),
-        mainPainPoints: cleanValue(row[11]),
-        timeLostPerWeek: cleanValue(row[12]),
-        aiUsageToday: cleanValue(row[13]),
-        desiredOutput: cleanValue(row[14]),
-        openToCall: cleanValue(row[15]),
-        additionalNotes: cleanValue(row[16])
-      };
-    }
-  }
-
-  return null;
-}
-
 function findAsyncSnapshotStatusRow(submissionId) {
-  const sheet = getSpreadsheet().getSheetByName(getStatusSheetName());
+  const sheet = getAsyncSnapshotStatusSheet();
   if (!sheet || sheet.getLastRow() < 2) return null;
 
-  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 6).getValues();
+  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, ASYNC_STATUS_HEADERS.length).getValues();
   for (let i = 0; i < rows.length; i += 1) {
     const row = rows[i];
     if (cleanValue(row[0]) === submissionId) {
@@ -349,8 +356,9 @@ function findAsyncSnapshotStatusRow(submissionId) {
         createdAt: row[1],
         updatedAt: row[2],
         status: cleanValue(row[3]),
-        snapshotJson: cleanValue(row[4]),
-        errorMessage: cleanValue(row[5])
+        intakeJson: cleanValue(row[4]),
+        snapshotJson: cleanValue(row[5]),
+        errorMessage: cleanValue(row[6])
       };
     }
   }
@@ -358,15 +366,16 @@ function findAsyncSnapshotStatusRow(submissionId) {
   return null;
 }
 
-function upsertAsyncSnapshotStatus(submissionId, status, snapshotJson, errorMessage) {
+function upsertAsyncSnapshotStatus(submissionId, status, intakeJson, snapshotJson, errorMessage) {
   const sheet = getAsyncSnapshotStatusSheet();
   const now = new Date();
   const existing = findAsyncSnapshotStatusRow(submissionId);
 
   if (existing) {
-    sheet.getRange(existing.rowNumber, 3, 1, 4).setValues([[
+    sheet.getRange(existing.rowNumber, 3, 1, 5).setValues([[
       now,
       status,
+      intakeJson,
       snapshotJson,
       errorMessage
     ]]);
@@ -378,6 +387,7 @@ function upsertAsyncSnapshotStatus(submissionId, status, snapshotJson, errorMess
     now,
     now,
     status,
+    intakeJson,
     snapshotJson,
     errorMessage
   ]);
