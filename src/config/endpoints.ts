@@ -1,6 +1,12 @@
 export const REAL_ESTATE_AI_PM_PROXY_ENDPOINT =
   import.meta.env.VITE_REAL_ESTATE_AI_PM_PROXY_ENDPOINT || '/api/real-estate-ai-pm';
 
+export const REAL_ESTATE_AI_PM_START_ENDPOINT =
+  import.meta.env.VITE_REAL_ESTATE_AI_PM_START_ENDPOINT || `${REAL_ESTATE_AI_PM_PROXY_ENDPOINT}/start`;
+
+export const REAL_ESTATE_AI_PM_STATUS_ENDPOINT =
+  import.meta.env.VITE_REAL_ESTATE_AI_PM_STATUS_ENDPOINT || `${REAL_ESTATE_AI_PM_PROXY_ENDPOINT}/status`;
+
 // Reserved fallback target for server-side proxy forwarding only.
 export const REAL_ESTATE_AI_PM_APPS_SCRIPT_ENDPOINT =
   import.meta.env.VITE_REAL_ESTATE_AI_PM_ENDPOINT ||

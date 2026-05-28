@@ -3,6 +3,16 @@
   publish = "dist"
 
 [[redirects]]
+  from = "/api/real-estate-ai-pm/start"
+  to = "/.netlify/functions/real-estate-ai-pm"
+  status = 200
+
+[[redirects]]
+  from = "/api/real-estate-ai-pm/status"
+  to = "/.netlify/functions/real-estate-ai-pm"
+  status = 200
+
+[[redirects]]
   from = "/api/real-estate-ai-pm"
   to = "/.netlify/functions/real-estate-ai-pm"
   status = 200

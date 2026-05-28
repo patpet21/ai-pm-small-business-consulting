@@ -21,18 +21,19 @@ const REPORT_VOICE_REQUIREMENTS = [
   'REPORT VOICE: Do not hardcode any example sentence from these instructions into the output.',
   'REPORT VOICE: Apply this voice requirement to every generated client-facing field, including executiveSummary, problemStatement, mainBottleneck, recommendedPriority, recommendedFirstStep, suggestedSimpleSystem, topWorkflowGaps, first48HourFix, wbsTaskBreakdown, aiPromptPack, scarfTrustCheck, aiOpportunities, quickWin, sevenDayRoadmap, riskNotes, and nextStep.',
 ];
-type Event = { httpMethod?: string; body?: string | null };
+type Event = { httpMethod?: string; body?: string | null; path?: string; queryStringParameters?: Record<string, string | undefined> | null };
 type Result = { statusCode: number; headers?: Record<string, string>; body: string };
 type IntakePayload = Record<string, unknown>;
 type Snapshot = Record<string, unknown>;
-type UpstreamResponse = { success?: boolean; message?: string; submissionId?: string; instantSnapshot?: Snapshot };
+type UpstreamResponse = { success?: boolean; message?: string; submissionId?: string; status?: string; instantSnapshot?: Snapshot };
 type AppsScriptResult = { ok: boolean; status: number; body: string; parsed?: UpstreamResponse; parseError?: string };
 type VoiceValidationResult = { valid: boolean; matches: string[] };
 type StructuralValidationResult = { valid: boolean; missing: string[] };
 
-function buildPayload(intakePayload: IntakePayload) {
+function buildStartPayload(intakePayload: IntakePayload) {
   return {
     ...intakePayload,
+    action: 'start',
     reportMode: 'preliminary_ai_pm_workflow_snapshot',
     reportSchemaVersion: '2026-05-28',
     requiredInstantSnapshotSchema: {
@@ -69,9 +70,13 @@ function buildPayload(intakePayload: IntakePayload) {
       informationStartsFrom: intakePayload.informationStartsFrom, currentTools: intakePayload.currentTools,
       mainPainPoints: intakePayload.mainPainPoints, timeLostPerWeek: intakePayload.timeLostPerWeek,
       aiUsageToday: intakePayload.aiUsageToday, desiredOutput: intakePayload.desiredOutput,
-      additionalNotes: intakePayload.additionalNotes,
+      openToCall: intakePayload.openToCall, additionalNotes: intakePayload.additionalNotes,
     },
   };
+}
+
+function buildStatusPayload(submissionId: string) {
+  return { action: 'status', submissionId };
 }
 
 function jsonResponse(statusCode: number, body: Record<string, unknown>): Result {
@@ -82,7 +87,7 @@ function shortDetails(value: string, maxLength = 700): string {
   return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
 }
 
-async function postToAppsScript(payload: ReturnType<typeof buildPayload>): Promise<AppsScriptResult> {
+async function postToAppsScript(payload: Record<string, unknown>): Promise<AppsScriptResult> {
   const upstream = await fetch(APPS_SCRIPT_ENDPOINT, {
     method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload),
   });
@@ -138,69 +143,99 @@ function validateSnapshotStructure(snapshot: Snapshot | undefined): StructuralVa
   return { valid: missing.length === 0, missing };
 }
 
-export async function handler(event: Event): Promise<Result> {
-  const startedAt = Date.now();
-  console.log('Real Estate AI PM request received:', { method: event.httpMethod });
+function isStatusRoute(event: Event): boolean {
+  return Boolean(event.path?.endsWith('/status') || event.queryStringParameters?.submissionId);
+}
 
-  try {
-    if (event.httpMethod !== 'POST') {
-      return jsonResponse(405, { success: false, message: 'Method not allowed', errorSource: 'method_not_allowed' });
-    }
+async function handleStart(event: Event): Promise<Result> {
+  if (event.httpMethod !== 'POST') {
+    return jsonResponse(405, { success: false, message: 'Method not allowed', errorSource: 'method_not_allowed' });
+  }
 
-    const intakePayload = JSON.parse(event.body || '{}') as IntakePayload;
-    const payload = buildPayload(intakePayload);
-    console.log('Payload sent to Apps Script:', JSON.stringify(payload));
+  const intakePayload = JSON.parse(event.body || '{}') as IntakePayload;
+  const payload = buildStartPayload(intakePayload);
+  console.log('Start payload sent to Apps Script:', JSON.stringify(payload));
+  const appsScriptResult = await postToAppsScript(payload);
 
-    const appsScriptResult = await postToAppsScript(payload);
-    if (!appsScriptResult.ok) {
-      console.error('Apps Script non-OK response:', { status: appsScriptResult.status, body: shortDetails(appsScriptResult.body) });
-      return jsonResponse(502, {
-        success: false,
-        message: 'AI PM workflow generation failed.',
-        errorSource: 'apps_script',
-        details: shortDetails(appsScriptResult.body),
-      });
-    }
+  if (!appsScriptResult.ok) {
+    return jsonResponse(502, { success: false, message: 'AI PM workflow generation could not start.', errorSource: 'apps_script', details: shortDetails(appsScriptResult.body) });
+  }
+  if (!appsScriptResult.parsed) {
+    return jsonResponse(502, { success: false, message: 'AI PM workflow generation could not start.', errorSource: 'apps_script_parse', details: appsScriptResult.parseError || 'Apps Script did not return valid JSON.' });
+  }
+  if (!appsScriptResult.parsed.submissionId) {
+    return jsonResponse(502, { success: false, message: 'AI PM workflow generation did not return a submission ID.', errorSource: 'missing_submission_id' });
+  }
 
-    if (!appsScriptResult.parsed) {
-      console.error('Apps Script response JSON parse failed:', { status: appsScriptResult.status, parseError: appsScriptResult.parseError, body: shortDetails(appsScriptResult.body) });
-      return jsonResponse(502, {
-        success: false,
-        message: 'AI PM workflow generation failed.',
-        errorSource: 'apps_script_parse',
-        details: appsScriptResult.parseError || 'Apps Script did not return valid JSON.',
-      });
-    }
+  return jsonResponse(200, {
+    success: appsScriptResult.parsed.success !== false,
+    submissionId: appsScriptResult.parsed.submissionId,
+    status: appsScriptResult.parsed.status || 'PROCESSING',
+  });
+}
 
-    const parsed = appsScriptResult.parsed;
-    console.log('instantSnapshot exists:', Boolean(parsed.instantSnapshot));
-    console.log('instantSnapshot.aiStatus:', parsed.instantSnapshot?.aiStatus);
+async function handleStatus(event: Event): Promise<Result> {
+  if (event.httpMethod !== 'GET') {
+    return jsonResponse(405, { success: false, message: 'Method not allowed', errorSource: 'method_not_allowed' });
+  }
 
+  const submissionId = event.queryStringParameters?.submissionId;
+  if (!submissionId) {
+    return jsonResponse(400, { success: false, message: 'Missing submissionId.', errorSource: 'missing_submission_id' });
+  }
+
+  const appsScriptResult = await postToAppsScript(buildStatusPayload(submissionId));
+  if (!appsScriptResult.ok) {
+    return jsonResponse(502, { success: false, message: 'AI PM workflow status could not be loaded.', errorSource: 'apps_script', details: shortDetails(appsScriptResult.body) });
+  }
+  if (!appsScriptResult.parsed) {
+    return jsonResponse(502, { success: false, message: 'AI PM workflow status could not be loaded.', errorSource: 'apps_script_parse', details: appsScriptResult.parseError || 'Apps Script did not return valid JSON.' });
+  }
+
+  const parsed = appsScriptResult.parsed;
+  console.log('Polling status:', parsed.status);
+  console.log('instantSnapshot exists:', Boolean(parsed.instantSnapshot));
+  console.log('instantSnapshot.aiStatus:', parsed.instantSnapshot?.aiStatus);
+
+  if (parsed.status === 'PROCESSING') {
+    return jsonResponse(200, { success: true, submissionId: parsed.submissionId || submissionId, status: 'PROCESSING' });
+  }
+
+  if (parsed.status === 'AI_GENERATION_FAILED' || parsed.success === false) {
+    return jsonResponse(200, { success: false, submissionId: parsed.submissionId || submissionId, status: 'AI_GENERATION_FAILED', message: parsed.message || 'AI PM workflow generation failed.' });
+  }
+
+  if (parsed.status === 'AI_GENERATED') {
     if (!parsed.instantSnapshot) {
-      return jsonResponse(502, {
-        success: false,
-        message: 'AI snapshot was not returned by the backend.',
-        errorSource: 'missing_instant_snapshot',
-      });
+      return jsonResponse(502, { success: false, submissionId, status: 'AI_GENERATION_FAILED', message: 'AI snapshot was not returned by the backend.', errorSource: 'missing_instant_snapshot' });
     }
 
     const structuralValidation = validateSnapshotStructure(parsed.instantSnapshot);
     if (!structuralValidation.valid) {
       console.error('AI snapshot structural validation failed:', structuralValidation.missing);
-      return jsonResponse(422, {
-        success: false,
-        message: 'The AI snapshot was incomplete. Please try again or request a human-reviewed report.',
-        errorSource: 'snapshot_validation',
-        structuralValidation,
-      });
+      return jsonResponse(422, { success: false, submissionId, status: 'AI_GENERATION_FAILED', message: 'The AI snapshot was incomplete. Please try again or request a human-reviewed report.', errorSource: 'snapshot_validation', structuralValidation });
     }
 
-    const voiceValidation = validateClientFacingVoice(parsed.instantSnapshot, intakePayload.name);
+    const voiceValidation = validateClientFacingVoice(parsed.instantSnapshot, undefined);
     if (!voiceValidation.valid) {
       console.warn('AI snapshot voice validation warning:', voiceValidation.matches);
     }
 
     return jsonResponse(200, parsed as Record<string, unknown>);
+  }
+
+  return jsonResponse(502, { success: false, submissionId, status: 'AI_GENERATION_FAILED', message: 'AI PM workflow returned an unknown status.', errorSource: 'unknown_status' });
+}
+
+export async function handler(event: Event): Promise<Result> {
+  const startedAt = Date.now();
+  console.log('Real Estate AI PM async request received:', { method: event.httpMethod, path: event.path });
+
+  try {
+    if (isStatusRoute(event)) {
+      return await handleStatus(event);
+    }
+    return await handleStart(event);
   } catch (error) {
     console.error('Netlify function error:', error instanceof Error ? error.message : error);
     return jsonResponse(500, {
@@ -210,6 +245,6 @@ export async function handler(event: Event): Promise<Result> {
       details: error instanceof Error ? error.message : 'Unknown error',
     });
   } finally {
-    console.log('Real Estate AI PM total duration:', `${Date.now() - startedAt}ms`);
+    console.log('Real Estate AI PM async duration:', `${Date.now() - startedAt}ms`);
   }
 }
