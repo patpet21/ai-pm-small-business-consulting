@@ -1,7 +1,10 @@
 /************************************************************
  * PROPERTYDEX / REAL ESTATE AI PM PILOT — ASYNC CODE.GS PATCH
  *
- * Paste this block into Code.gs and DELETE/REPLACE the old synchronous doPost(e).
+ * Paste this block at the VERY BOTTOM of Code.gs, or DELETE/REPLACE the old synchronous doPost(e).
+ * Apps Script uses the last function doPost(e) definition in the file; if an old
+ * doPost(e) appears after this block, action=start/status will still run the
+ * legacy processSubmission() flow.
  * This patch assumes your existing Code.gs still provides:
  * - CONFIG
  * - getSpreadsheet()
@@ -52,44 +55,11 @@ const COMPLIANCE_SENSITIVE_PROMPT_RULE = [
  * 1. doPost action dispatcher
  *
  * CRITICAL:
+ * - The doPost(e) dispatcher is intentionally placed at the END of this file.
  * - action=start must never call processSubmission().
  * - action=status must never call processSubmission().
  * - Gemini generation happens only in processPendingAiSnapshots().
  ************************************************************/
-function doPost(e) {
-  const data = parseRequestData(e);
-  const action = cleanValue(data.action || '').toLowerCase();
-
-  try {
-    if (action === 'start') {
-      return jsonResponse(handleStart(data));
-    }
-
-    if (action === 'status') {
-      return jsonResponse(handleStatus(data));
-    }
-
-    if (action === 'generate') {
-      return jsonResponse(handleGenerate(data));
-    }
-
-    // No default processSubmission() fallback here.
-    // Missing or unknown actions must fail fast so /start and /status can never
-    // accidentally run the old synchronous Gemini/report-generation flow.
-    return jsonResponse({
-      success: false,
-      status: ASYNC_STATUS_FAILED,
-      message: 'Unsupported action. Send action=start, action=status, or action=generate.'
-    });
-  } catch (error) {
-    return jsonResponse({
-      success: false,
-      status: ASYNC_STATUS_FAILED,
-      message: error.message
-    });
-  }
-}
-
 /************************************************************
  * 2. JSON response helper
  ************************************************************/
@@ -504,4 +474,47 @@ function upsertAsyncSnapshotStatus(submissionId, status, intakeJson, snapshotJso
     snapshotJson,
     errorMessage
   ]);
+}
+
+
+/************************************************************
+ * 10. doPost action dispatcher — MUST BE THE LAST doPost(e)
+ *
+ * CRITICAL INSTALL NOTE:
+ * If Code.gs still contains an older doPost(e) after this function, Apps Script
+ * will run the older legacy handler and /start will call processSubmission().
+ * Paste this async block at the bottom of Code.gs or delete the old doPost(e).
+ ************************************************************/
+function doPost(e) {
+  const data = parseRequestData(e);
+  const action = cleanValue(data.action || '').toLowerCase();
+
+  try {
+    if (action === 'start') {
+      return jsonResponse(handleStart(data));
+    }
+
+    if (action === 'status') {
+      return jsonResponse(handleStatus(data));
+    }
+
+    if (action === 'generate') {
+      return jsonResponse(handleGenerate(data));
+    }
+
+    // No default processSubmission() fallback here.
+    // Missing or unknown actions must fail fast so /start and /status can never
+    // accidentally run the old synchronous Gemini/report-generation flow.
+    return jsonResponse({
+      success: false,
+      status: ASYNC_STATUS_FAILED,
+      message: 'Unsupported action. Send action=start, action=status, or action=generate.'
+    });
+  } catch (error) {
+    return jsonResponse({
+      success: false,
+      status: ASYNC_STATUS_FAILED,
+      message: error.message
+    });
+  }
 }
