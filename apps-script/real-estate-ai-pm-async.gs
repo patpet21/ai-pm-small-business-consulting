@@ -32,16 +32,37 @@ function getStatusSheetName() {
   return getConfigValue('snapshotStatusSheet', 'AI Snapshot Status');
 }
 
+const ASYNC_STATUS_HEADERS = [
+  'Submission ID',
+  'Created At',
+  'Updated At',
+  'Status',
+  'Snapshot JSON',
+  'Error Message'
+];
+
 function setupAsyncSnapshotStatusSheet() {
+  getAsyncSnapshotStatusSheet();
+}
+
+function getAsyncSnapshotStatusSheet() {
   const ss = getSpreadsheet();
-  ensureSheetWithHeaders(ss, getStatusSheetName(), [
-    'Submission ID',
-    'Created At',
-    'Updated At',
-    'Status',
-    'Snapshot JSON',
-    'Error Message'
-  ]);
+  const sheetName = getStatusSheetName();
+  let sheet = ss.getSheetByName(sheetName);
+
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    sheet.getRange(1, 1, 1, ASYNC_STATUS_HEADERS.length).setValues([ASYNC_STATUS_HEADERS]);
+    sheet.setFrozenRows(1);
+    return sheet;
+  }
+
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, ASYNC_STATUS_HEADERS.length).setValues([ASYNC_STATUS_HEADERS]);
+    sheet.setFrozenRows(1);
+  }
+
+  return sheet;
 }
 
 function doPost(e) {
@@ -82,10 +103,9 @@ function jsonOutput(payload) {
 }
 
 function startAsyncSnapshotJob(data) {
-  setupSheets();
-  setupAsyncSnapshotStatusSheet();
+  getAsyncSnapshotStatusSheet();
 
-  const submissionId = createSubmissionId();
+  const submissionId = cleanValue(data.submissionId) || createSubmissionId();
   const timestamp = new Date();
   const intake = normalizeAsyncIntake(data, submissionId);
 
@@ -339,9 +359,7 @@ function findAsyncSnapshotStatusRow(submissionId) {
 }
 
 function upsertAsyncSnapshotStatus(submissionId, status, snapshotJson, errorMessage) {
-  setupAsyncSnapshotStatusSheet();
-
-  const sheet = getSpreadsheet().getSheetByName(getStatusSheetName());
+  const sheet = getAsyncSnapshotStatusSheet();
   const now = new Date();
   const existing = findAsyncSnapshotStatusRow(submissionId);
 

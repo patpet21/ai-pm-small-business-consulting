@@ -30,6 +30,15 @@ type AppsScriptResult = { ok: boolean; status: number; body: string; parsed?: Up
 type VoiceValidationResult = { valid: boolean; matches: string[] };
 type StructuralValidationResult = { valid: boolean; missing: string[] };
 
+
+function createSubmissionId(): string {
+  const now = new Date();
+  const pad = (value: number) => String(value).padStart(2, '0');
+  const datePart = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}-${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}`;
+  const randomPart = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  return `RE-AI-${datePart}-${randomPart}`;
+}
+
 function buildStartPayload(intakePayload: IntakePayload) {
   return {
     ...intakePayload,
@@ -154,7 +163,10 @@ async function handleStart(event: Event): Promise<Result> {
   }
 
   const intakePayload = JSON.parse(event.body || '{}') as IntakePayload;
-  const payload = buildStartPayload(intakePayload);
+  const submissionId = typeof intakePayload.submissionId === 'string' && intakePayload.submissionId.trim()
+    ? intakePayload.submissionId.trim()
+    : createSubmissionId();
+  const payload = buildStartPayload({ ...intakePayload, submissionId });
   console.log('Start payload sent to Apps Script:', JSON.stringify(payload));
   const appsScriptResult = await postToAppsScript(payload);
 
@@ -164,13 +176,9 @@ async function handleStart(event: Event): Promise<Result> {
   if (!appsScriptResult.parsed) {
     return jsonResponse(502, { success: false, message: 'AI PM workflow generation could not start.', errorSource: 'apps_script_parse', details: appsScriptResult.parseError || 'Apps Script did not return valid JSON.' });
   }
-  if (!appsScriptResult.parsed.submissionId) {
-    return jsonResponse(502, { success: false, message: 'AI PM workflow generation did not return a submission ID.', errorSource: 'missing_submission_id' });
-  }
-
   return jsonResponse(200, {
     success: appsScriptResult.parsed.success !== false,
-    submissionId: appsScriptResult.parsed.submissionId,
+    submissionId: appsScriptResult.parsed.submissionId || submissionId,
     status: appsScriptResult.parsed.status || 'PROCESSING',
   });
 }
