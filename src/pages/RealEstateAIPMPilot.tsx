@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { REAL_ESTATE_AI_PM_START_ENDPOINT, REAL_ESTATE_AI_PM_STATUS_ENDPOINT } from '../config/endpoints';
+import { REAL_ESTATE_AI_PM_APPS_SCRIPT_ENDPOINT } from '../config/endpoints';
 
 type IntakeData = {
   name: string;
@@ -73,7 +73,7 @@ const initialData: IntakeData = {
   additionalNotes: '',
 };
 const stepLabels = ['About you', 'Workflow to improve', 'Current process', 'Pain points', 'AI and tools', 'Desired output'];
-const ERR_MSG = 'The AI report took too long to generate. Please try again or request a human-reviewed report.';
+const ERR_MSG = 'The AI report could not be generated. Please try again or request a human-reviewed report.';
 const FALLBACK_DISCLAIMER = 'This preliminary snapshot is AI-generated and has not been reviewed by a human. It is not legal, tax, financial, investment, brokerage, or compliance advice.';
 const CALENDLY = 'https://calendly.com/propertydext/15min';
 
@@ -164,43 +164,6 @@ export function RealEstateAIPMPilot() {
     }
   };
 
-  const pollSnapshotStatus = async (submissionId: string, signal: AbortSignal): Promise<ApiResponse> => {
-    const startedAt = Date.now();
-    const maxPollingMs = 90000;
-
-    while (Date.now() - startedAt < maxPollingMs) {
-      await new Promise((resolve) => window.setTimeout(resolve, 5000));
-      if (signal.aborted) throw new Error('Polling aborted.');
-
-      const statusUrl = `${REAL_ESTATE_AI_PM_STATUS_ENDPOINT}?submissionId=${encodeURIComponent(submissionId)}`;
-      const res = await fetch(statusUrl, { method: 'GET', signal });
-      console.log('API status:', res.status);
-      const json = await readApiJson(res);
-      console.log('API raw response:', json);
-
-      if (!res.ok) {
-        return { success: false, message: safeText(json?.message, ERR_MSG), submissionId };
-      }
-
-      if (json?.status === 'PROCESSING') continue;
-
-      if (json?.status === 'AI_GENERATED' && json.instantSnapshot) {
-        console.log('instantSnapshot exists:', Boolean(json.instantSnapshot));
-        console.log('instantSnapshot received:', json.instantSnapshot);
-        console.log('instantSnapshot keys:', Object.keys(json.instantSnapshot));
-        console.log('first48HourFix:', json.instantSnapshot.first48HourFix);
-        console.log('aiPromptPack:', json.instantSnapshot.aiPromptPack);
-        return json;
-      }
-
-      if (json?.status === 'AI_GENERATION_FAILED' || json?.success === false) {
-        return { success: false, message: safeText(json.message, ERR_MSG), submissionId, status: 'AI_GENERATION_FAILED' };
-      }
-    }
-
-    return { success: false, message: ERR_MSG, submissionId, status: 'AI_GENERATION_FAILED' };
-  };
-
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting) return;
@@ -208,44 +171,44 @@ export function RealEstateAIPMPilot() {
     if (validationError) return setError(validationError);
     setError('');
     setSubmitting(true);
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 95000);
     try {
       const payload = {
         ...data,
         currentTools: combineMultiSelect(selectedTools, otherTools),
         desiredOutput: combineMultiSelect(selectedOutputs, otherDesiredOutput),
       };
-      const startRes = await fetch(REAL_ESTATE_AI_PM_START_ENDPOINT, {
+      const appsScriptResponse = await fetch(REAL_ESTATE_AI_PM_APPS_SCRIPT_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload),
-        signal: controller.signal,
       });
-      console.log('API status:', startRes.status);
-      const startJson = await readApiJson(startRes);
-      console.log('API raw response:', startJson);
+      console.log('API status:', appsScriptResponse.status);
+      const appsScriptJson = await readApiJson(appsScriptResponse);
+      console.log('API raw response:', appsScriptJson);
+      console.log('instantSnapshot exists:', Boolean(appsScriptJson?.instantSnapshot));
 
-      if (!startRes.ok || !startJson?.submissionId) {
-        setResponse({ success: false, message: safeText(startJson?.message, ERR_MSG) });
+      if (!appsScriptResponse.ok || !appsScriptJson?.success || !appsScriptJson.instantSnapshot) {
+        setResponse({
+          success: false,
+          message: safeText(appsScriptJson?.message, ERR_MSG),
+          submissionId: appsScriptJson?.submissionId,
+          status: appsScriptJson?.status,
+        });
         setSubmitted(true);
         return;
       }
 
-      const finalJson = await pollSnapshotStatus(startJson.submissionId, controller.signal);
-      if (!finalJson.instantSnapshot) {
-        setResponse({ success: false, message: safeText(finalJson.message, ERR_MSG), submissionId: finalJson.submissionId, status: finalJson.status });
-        setSubmitted(true);
-        return;
-      }
-
-      setResponse(finalJson);
+      console.log('instantSnapshot received:', appsScriptJson.instantSnapshot);
+      console.log('instantSnapshot keys:', Object.keys(appsScriptJson.instantSnapshot));
+      console.log('first48HourFix:', appsScriptJson.instantSnapshot.first48HourFix);
+      console.log('aiPromptPack:', appsScriptJson.instantSnapshot.aiPromptPack);
+      setResponse(appsScriptJson);
       setSubmitted(true);
-    } catch {
+    } catch (submitError) {
+      console.error('Apps Script submission failed:', submitError);
       setResponse({ success: false, message: ERR_MSG });
       setSubmitted(true);
     } finally {
-      window.clearTimeout(timeoutId);
       setSubmitting(false);
     }
   }
@@ -467,7 +430,7 @@ export function RealEstateAIPMPilot() {
           <div className="loading-modal-card">
             <div className="loading-spinner" aria-hidden="true" />
             <h2 id="snapshot-loading-title">Generating your personalized AI PM Workflow Snapshot</h2>
-            <p>Please do not refresh or close this page. Your report is being generated from your intake answers and may take up to 60 seconds.</p>
+            <p>Please do not refresh or close this page.</p>
             <p className="loading-modal-note">Click submit only once. The system is preparing your workflow diagnosis, tracker structure, AI prompt pack, and 7-day roadmap.</p>
           </div>
         </div>
