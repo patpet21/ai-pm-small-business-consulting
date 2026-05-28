@@ -222,7 +222,7 @@ export function RealEstateAIPMPilot() {
           <div className="snapshot-grid report-section-gap hero-metrics-grid">
             {hasValue(report.workflowMaturity) && <div className="metric-card"><h3>Workflow Maturity</h3><p>{safeText(report.workflowMaturity)}</p></div>}
             {hasValue(report.mainBottleneck) && <div className="metric-card"><h3>Main Bottleneck</h3><p>{safeText(report.mainBottleneck)}</p></div>}
-            {hasValue(report.recommendedPriority) && <div className="metric-card"><h3>Recommended Priority</h3><p>{safeText(report.recommendedPriority)}</p></div>}
+            {hasValue(report.recommendedPriority) && <div className="metric-card"><h3>Your Recommended Priority</h3><p>{safeText(report.recommendedPriority)}</p></div>}
           </div>
 
           {hasValue(fix) && (
@@ -255,8 +255,8 @@ export function RealEstateAIPMPilot() {
 
           {(hasValue(report.executiveSummary) || hasValue(report.problemStatement) || topGaps.length > 0) && (
             <div className="snapshot-grid report-section-gap diagnosis-grid">
-              {hasValue(report.executiveSummary) && <div className="snapshot-full diagnosis-card"><h3>Executive Summary</h3><p>{safeText(report.executiveSummary)}</p></div>}
-              {hasValue(report.problemStatement) && <div className="snapshot-full diagnosis-card"><h3>Problem Statement</h3><p>{safeText(report.problemStatement)}</p></div>}
+              {hasValue(report.executiveSummary) && <div className="snapshot-full diagnosis-card"><h3>Your Workflow Snapshot</h3><p>{safeText(report.executiveSummary)}</p></div>}
+              {hasValue(report.problemStatement) && <div className="snapshot-full diagnosis-card"><h3>What Is Slowing You Down</h3><p>{safeText(report.problemStatement)}</p></div>}
               {topGaps.length > 0 && <div className="snapshot-full diagnosis-card"><h3>Top 3 Workflow Gaps</h3><ul>{topGaps.map((gap) => <li key={gap}>{gap}</li>)}</ul></div>}
             </div>
           )}
