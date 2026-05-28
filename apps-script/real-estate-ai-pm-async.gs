@@ -1,15 +1,34 @@
 /************************************************************
- * PROPERTYDEX / REAL ESTATE AI PM PILOT — ASYNC STATUS LAYER
+ * PROPERTYDEX / REAL ESTATE AI PM PILOT — ASYNC CODE.GS PATCH
  *
- * Paste these changes into the existing Google Apps Script backend.
- * Keep the existing private CONFIG object, Gemini helpers, sheet helpers,
- * prompt/schema logic, and final instantSnapshot generator in the script.
+ * Paste this block into Code.gs and replace the old doPost(e).
+ * This patch assumes your existing Code.gs still provides:
+ * - CONFIG
+ * - getSpreadsheet()
+ * - getConfigValue(key, fallbackValue)
+ * - parseRequestData(e)
+ * - cleanValue(value)
+ * - createSubmissionId()
+ * - ensureSheetWithHeaders(ss, sheetName, headers)
+ * - createDiagnostic(data)
+ * - createInstantSnapshotWithGemini(data)
+ * - processSubmission(data) only for explicit legacy fallback requests
  ************************************************************/
 
 const ASYNC_STATUS_PROCESSING = 'PROCESSING';
 const ASYNC_STATUS_GENERATING = 'GENERATING';
 const ASYNC_STATUS_GENERATED = 'AI_GENERATED';
 const ASYNC_STATUS_FAILED = 'AI_GENERATION_FAILED';
+
+const ASYNC_STATUS_HEADERS = [
+  'Submission ID',
+  'Created At',
+  'Updated At',
+  'Status',
+  'Intake JSON',
+  'Snapshot JSON',
+  'Error Message'
+];
 
 const CLIENT_FACING_VOICE_PROMPT_RULE = [
   'CLIENT-FACING VOICE:',
@@ -29,23 +48,14 @@ const COMPLIANCE_SENSITIVE_PROMPT_RULE = [
   'Do not tell the user they must comply with a specific rule or guideline unless that information is provided by the user.'
 ].join('\n');
 
-const ASYNC_STATUS_HEADERS = [
-  'Submission ID',
-  'Created At',
-  'Updated At',
-  'Status',
-  'Intake JSON',
-  'Snapshot JSON',
-  'Error Message'
-];
-
-function getAiSnapshotStatusSheetConfig() {
-  return {
-    name: getStatusSheetName(),
-    headers: ASYNC_STATUS_HEADERS
-  };
-}
-
+/************************************************************
+ * 1. doPost action dispatcher
+ *
+ * CRITICAL:
+ * - action=start must never call processSubmission().
+ * - action=status must never call processSubmission().
+ * - Gemini generation happens only in processPendingAiSnapshots().
+ ************************************************************/
 function doPost(e) {
   const data = parseRequestData(e);
   const action = cleanValue(data.action || '').toLowerCase();
@@ -63,32 +73,61 @@ function doPost(e) {
       return jsonResponse(handleGenerate(data));
     }
 
+    // Legacy fallback only for old clients that do not send an action.
+    // Do not use this path for /start or /status.
     if (typeof processSubmission === 'function') {
       return jsonResponse(processSubmission(data));
     }
 
     return jsonResponse({
       success: false,
-      message: 'Unsupported action.',
-      status: ASYNC_STATUS_FAILED
+      status: ASYNC_STATUS_FAILED,
+      message: 'Unsupported action.'
     });
   } catch (error) {
     return jsonResponse({
       success: false,
-      message: error.message,
-      status: ASYNC_STATUS_FAILED
+      status: ASYNC_STATUS_FAILED,
+      message: error.message
     });
   }
 }
 
-function jsonResponse(payload) {
+/************************************************************
+ * 2. JSON response helper
+ ************************************************************/
+function jsonResponse(obj) {
   return ContentService
-    .createTextOutput(JSON.stringify(payload))
+    .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+/************************************************************
+ * 3. setupSheets update: AI Snapshot Status tab
+ *
+ * Add this object to the sheets array inside your existing setupSheets():
+ *
+ * {
+ *   name: getConfigValue('snapshotStatusSheet', 'AI Snapshot Status'),
+ *   headers: ASYNC_STATUS_HEADERS
+ * }
+ *
+ * Or call setupAsyncSnapshotStatusSheet() once after your existing setupSheets().
+ ************************************************************/
 function getStatusSheetName() {
   return getConfigValue('snapshotStatusSheet', 'AI Snapshot Status');
+}
+
+function getAiSnapshotStatusSheetConfig() {
+  return {
+    name: getStatusSheetName(),
+    headers: ASYNC_STATUS_HEADERS
+  };
+}
+
+function setupAsyncSnapshotStatusSheet() {
+  const ss = getSpreadsheet();
+  ensureSheetWithHeaders(ss, getStatusSheetName(), ASYNC_STATUS_HEADERS);
 }
 
 function getAsyncSnapshotStatusSheet() {
@@ -119,10 +158,16 @@ function getAsyncSnapshotStatusSheet() {
   return sheet;
 }
 
-function setupAsyncSnapshotStatusSheet() {
-  getAsyncSnapshotStatusSheet();
-}
-
+/************************************************************
+ * 4. handleStart(data)
+ *
+ * Fast path only:
+ * - create submissionId
+ * - save Intake JSON
+ * - status = PROCESSING
+ * - schedule background processing
+ * - return immediately
+ ************************************************************/
 function handleStart(data) {
   const startedAt = Date.now();
   Logger.log('handleStartStarted: ' + new Date(startedAt).toISOString());
@@ -147,6 +192,9 @@ function handleStart(data) {
   };
 }
 
+/************************************************************
+ * 5. handleStatus(data)
+ ************************************************************/
 function handleStatus(data) {
   const startedAt = Date.now();
   Logger.log('handleStatusStarted: ' + new Date(startedAt).toISOString());
@@ -158,8 +206,8 @@ function handleStatus(data) {
     Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
     return {
       success: false,
-      message: 'Missing submissionId.',
-      status: ASYNC_STATUS_FAILED
+      status: ASYNC_STATUS_FAILED,
+      message: 'Missing submissionId.'
     };
   }
 
@@ -171,8 +219,8 @@ function handleStatus(data) {
     return {
       success: false,
       submissionId: submissionId,
-      message: 'Submission status was not found.',
-      status: ASYNC_STATUS_FAILED
+      status: ASYNC_STATUS_FAILED,
+      message: 'Submission status was not found.'
     };
   }
 
@@ -196,7 +244,6 @@ function handleStatus(data) {
   }
 
   Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
-
   return {
     success: false,
     submissionId: submissionId,
@@ -205,10 +252,16 @@ function handleStatus(data) {
   };
 }
 
+/************************************************************
+ * 6. Optional manual generate endpoint
+ ************************************************************/
 function handleGenerate(data) {
   return generateAsyncSnapshot(cleanValue(data.submissionId));
 }
 
+/************************************************************
+ * 7. Trigger creation without duplicates
+ ************************************************************/
 function enqueueAsyncSnapshotGeneration() {
   const triggers = ScriptApp.getProjectTriggers();
   const alreadyQueued = triggers.some(function(trigger) {
@@ -223,6 +276,20 @@ function enqueueAsyncSnapshotGeneration() {
   }
 }
 
+function removeAsyncSnapshotTriggers() {
+  ScriptApp.getProjectTriggers().forEach(function(trigger) {
+    const handler = trigger.getHandlerFunction();
+    if (handler === 'processPendingAiSnapshots' || handler === 'processPendingAsyncSnapshots') {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+}
+
+/************************************************************
+ * 8. Background generation
+ *
+ * This is the only path that calls createInstantSnapshotWithGemini().
+ ************************************************************/
 function processPendingAiSnapshots() {
   Logger.log('generationStarted: processPendingAiSnapshots');
   removeAsyncSnapshotTriggers();
@@ -250,17 +317,9 @@ function processPendingAiSnapshots() {
   Logger.log('generationFinished: no PROCESSING rows');
 }
 
+// Backward-compatible alias for older triggers created by earlier versions.
 function processPendingAsyncSnapshots() {
   processPendingAiSnapshots();
-}
-
-function removeAsyncSnapshotTriggers() {
-  ScriptApp.getProjectTriggers().forEach(function(trigger) {
-    const handler = trigger.getHandlerFunction();
-    if (handler === 'processPendingAiSnapshots' || handler === 'processPendingAsyncSnapshots') {
-      ScriptApp.deleteTrigger(trigger);
-    }
-  });
 }
 
 function generateAsyncSnapshot(submissionId) {
@@ -296,7 +355,14 @@ function generateAsyncSnapshot(submissionId) {
 
     const intake = JSON.parse(statusRow.intakeJson);
     const instantSnapshot = createInstantSnapshotForAsyncIntake(intake);
-    upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_GENERATED, statusRow.intakeJson, JSON.stringify(instantSnapshot), '');
+
+    upsertAsyncSnapshotStatus(
+      submissionId,
+      ASYNC_STATUS_GENERATED,
+      statusRow.intakeJson,
+      JSON.stringify(instantSnapshot),
+      ''
+    );
     Logger.log('status updated: ' + ASYNC_STATUS_GENERATED + ' for ' + submissionId);
 
     return {
@@ -315,6 +381,7 @@ function generateAsyncSnapshot(submissionId) {
       error.message
     );
     Logger.log('status updated: ' + ASYNC_STATUS_FAILED + ' for ' + submissionId);
+
     return {
       success: false,
       submissionId: submissionId,
@@ -352,6 +419,9 @@ function createInstantSnapshotForAsyncIntake(intake) {
   return instantSnapshot;
 }
 
+/************************************************************
+ * 9. Helpers to normalize, find, and update status rows
+ ************************************************************/
 function normalizeAsyncIntake(data, submissionId) {
   return {
     submissionId: submissionId,
