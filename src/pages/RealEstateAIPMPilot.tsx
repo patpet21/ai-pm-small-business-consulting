@@ -10,7 +10,7 @@ type ScarfItem = { domain?: string; risk?: string; recommendation?: string };
 type Transparency = { inputUsed?: string; outputGenerated?: string; humanValidation?: string; sensitiveDataWarning?: string };
 type Snapshot = {
   workflowReadinessScore?: number | string; workflowMaturity?: string; workflowDetected?: string; executiveSummary?: string; problemStatement?: string;
-  mainBottleneck?: string; recommendedPriority?: string; topWorkflowGaps?: string[]; first48HourFix?: Fix; wbsTaskBreakdown?: WbsItem[];
+  mainBottleneck?: string; recommendedPriority?: string; recommendedFirstStep?: string; suggestedSimpleSystem?: string; topWorkflowGaps?: string[]; first48HourFix?: Fix; wbsTaskBreakdown?: WbsItem[];
   aiPromptPack?: PromptItem[]; scarfTrustCheck?: ScarfItem[]; aiUseTransparencySummary?: Transparency; aiOpportunities?: string[]; quickWin?: string;
   sevenDayRoadmap?: string[]; humanReviewedReportPreview?: string[]; nextStep?: string; ctaPrimary?: string; ctaSecondary?: string; calendlyUrl?: string; disclaimer?: string;
 };
@@ -69,22 +69,36 @@ export function RealEstateAIPMPilot() {
     const opportunities = safeArray<string>(report.aiOpportunities).filter(Boolean).slice(0, 3);
     const roadmap = safeArray<string>(report.sevenDayRoadmap).filter(Boolean);
     const preview = safeArray<string>(report.humanReviewedReportPreview).filter(Boolean);
-    const fix = report.first48HourFix || {};
+    const fix = report.first48HourFix || {
+      title: hasValue(report.recommendedFirstStep) ? 'Recommended First Step' : undefined,
+      description: safeText(report.recommendedFirstStep),
+      trackerName: safeText(report.suggestedSimpleSystem),
+    };
     const t = report.aiUseTransparencySummary || {};
     const readiness = Number(report.workflowReadinessScore);
-    const scoreLabel = Number.isFinite(readiness) ? `${readiness}/100` : 'Not provided by AI';
+    const hasScore = Number.isFinite(readiness);
+    const scoreLabel = hasScore ? `${readiness}/100` : '';
 
     return (
       <section className="section-shell pilot-success">
         <p className="eyebrow">Real Estate AI PM Pilot</p>
         <h1>Your Preliminary AI PM Workflow Snapshot is Ready</h1>
         <p className="success-note">This report is automatically generated from your intake answers and has not yet been reviewed by a human. A complete human-reviewed AI PM Workflow Report can be prepared within 3 business days.</p>
+        <p className="partial-note">AI snapshot loaded. If some sections are missing, it means the backend response for this submission was partial.</p>
         <div className="hero-actions"><a className="button primary" href={safeText(report.calendlyUrl, CALENDLY)} target="_blank" rel="noreferrer">{safeText(report.ctaPrimary, 'Book a 15-minute review')}</a><a className="button secondary" href={safeText(report.calendlyUrl, CALENDLY)} target="_blank" rel="noreferrer">{safeText(report.ctaSecondary, 'Request human-reviewed report')}</a></div>
         <div className="resource-card snapshot-card">
           <p><strong>Submission ID:</strong> {safeText(response?.submissionId, '')}</p>
-          <div className="snapshot-grid report-section-gap"><div className="score-card"><p className="score-label">AI PM Workflow Readiness Score</p><p className="score-value">{scoreLabel}</p></div><div><h3>Workflow Detected</h3><p>{safeText(report.workflowDetected)}</p></div><div><h3>Workflow Maturity</h3><p>{safeText(report.workflowMaturity)}</p></div><div><h3>Main Bottleneck</h3><p>{safeText(report.mainBottleneck)}</p></div><div><h3>Recommended Priority</h3><p>{safeText(report.recommendedPriority)}</p></div></div>
+          <div className="snapshot-grid report-section-gap">{hasScore && <div className="score-card"><p className="score-label">AI PM Workflow Readiness Score</p><p className="score-value">{scoreLabel}</p></div>}<div><h3>Workflow Detected</h3><p>{safeText(report.workflowDetected)}</p></div><div><h3>Main Bottleneck</h3><p>{safeText(report.mainBottleneck)}</p></div>{hasValue(report.workflowMaturity) && <div><h3>Workflow Maturity</h3><p>{safeText(report.workflowMaturity)}</p></div>}{hasValue(report.recommendedPriority) && <div><h3>Recommended Priority</h3><p>{safeText(report.recommendedPriority)}</p></div>}</div>
           {hasValue(report.executiveSummary) && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Executive Summary</h3><p>{safeText(report.executiveSummary)}</p></div></div>}
           {hasValue(report.problemStatement) && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Problem Statement</h3><p>{safeText(report.problemStatement)}</p></div></div>}
+
+          {(hasValue(report.recommendedFirstStep) || hasValue(report.suggestedSimpleSystem) || hasValue(report.nextStep)) && (
+            <div className="snapshot-grid report-section-gap">
+              {hasValue(report.recommendedFirstStep) && <div><h3>Recommended First Step</h3><p>{safeText(report.recommendedFirstStep)}</p></div>}
+              {hasValue(report.suggestedSimpleSystem) && <div><h3>Suggested Simple System</h3><p>{safeText(report.suggestedSimpleSystem)}</p></div>}
+              {hasValue(report.nextStep) && <div className="snapshot-full"><h3>Next Step</h3><p>{safeText(report.nextStep)}</p></div>}
+            </div>
+          )}
           {topGaps.length > 0 && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>Top 3 Workflow Gaps</h3><ul>{topGaps.map((g) => <li key={g}>{g}</li>)}</ul></div></div>}
           {hasValue(report.first48HourFix) && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>{safeText(fix.title, 'Your First 48-Hour Fix')}</h3><p>{safeText(fix.description)}</p>{hasValue(fix.trackerName) && <p><strong>Tracker:</strong> {safeText(fix.trackerName)}</p>}{safeArray<string>(fix.columns).length > 0 && <><p><strong>Columns:</strong></p><ul>{safeArray<string>(fix.columns).map((c) => <li key={c}>{c}</li>)}</ul></>}{safeArray<string>(fix.statuses).length > 0 && <><p><strong>Statuses:</strong></p><ul>{safeArray<string>(fix.statuses).map((s) => <li key={s}>{s}</li>)}</ul></>}</div></div>}
           {wbs.length > 0 && <div className="snapshot-grid report-section-gap"><div className="snapshot-full"><h3>WBS-Based Workflow Breakdown</h3><div className="rows-list">{wbs.map((i,idx)=><div className="row-card" key={idx}><p><strong>Task:</strong> {safeText(i.taskName)}</p><p><strong>Owner Type:</strong> {safeText(i.ownerType)}</p><p><strong>Output:</strong> {safeText(i.output)}</p><p><strong>Acceptance Criteria:</strong> {safeText(i.acceptanceCriteria)}</p></div>)}</div></div></div>}
