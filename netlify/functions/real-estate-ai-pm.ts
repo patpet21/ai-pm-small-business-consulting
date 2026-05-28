@@ -26,6 +26,7 @@ type Result = { statusCode: number; headers?: Record<string, string>; body: stri
 type IntakePayload = Record<string, unknown>;
 type Snapshot = Record<string, unknown>;
 type UpstreamResponse = { success?: boolean; message?: string; submissionId?: string; instantSnapshot?: Snapshot };
+type AppsScriptResult = { ok: boolean; status: number; body: string; parsed?: UpstreamResponse; parseError?: string };
 type VoiceValidationResult = { valid: boolean; matches: string[] };
 type StructuralValidationResult = { valid: boolean; missing: string[] };
 
@@ -73,12 +74,27 @@ function buildPayload(intakePayload: IntakePayload) {
   };
 }
 
-async function postToAppsScript(payload: ReturnType<typeof buildPayload>): Promise<UpstreamResponse> {
+function jsonResponse(statusCode: number, body: Record<string, unknown>): Result {
+  return { statusCode, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+}
+
+function shortDetails(value: string, maxLength = 700): string {
+  return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
+}
+
+async function postToAppsScript(payload: ReturnType<typeof buildPayload>): Promise<AppsScriptResult> {
   const upstream = await fetch(APPS_SCRIPT_ENDPOINT, {
     method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload),
   });
-  const text = await upstream.text();
-  return JSON.parse(text) as UpstreamResponse;
+  const body = await upstream.text();
+  console.log('Apps Script response status:', upstream.status);
+  if (!upstream.ok) console.error('Apps Script response body if non-OK:', shortDetails(body));
+
+  try {
+    return { ok: upstream.ok, status: upstream.status, body, parsed: JSON.parse(body) as UpstreamResponse };
+  } catch (error) {
+    return { ok: upstream.ok, status: upstream.status, body, parseError: error instanceof Error ? error.message : 'Unknown JSON parse error' };
+  }
 }
 
 function validateClientFacingVoice(snapshot: Snapshot | undefined, submitterName: unknown): VoiceValidationResult {
@@ -122,31 +138,61 @@ function validateSnapshotStructure(snapshot: Snapshot | undefined): StructuralVa
   return { valid: missing.length === 0, missing };
 }
 
-function aiGenerationFailedResponse(message: string, structuralValidation?: StructuralValidationResult): Result {
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      success: false,
-      message,
-      structuralValidation,
-      instantSnapshot: { aiStatus: 'AI_GENERATION_FAILED' },
-    }),
-  };
-}
-
 export async function handler(event: Event): Promise<Result> {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ success: false, message: 'Method not allowed' }) };
-  }
+  const startedAt = Date.now();
+  console.log('Real Estate AI PM request received:', { method: event.httpMethod });
 
   try {
-    const intakePayload = JSON.parse(event.body || '{}') as IntakePayload;
-    const parsed = await postToAppsScript(buildPayload(intakePayload));
-    const structuralValidation = validateSnapshotStructure(parsed.instantSnapshot);
+    if (event.httpMethod !== 'POST') {
+      return jsonResponse(405, { success: false, message: 'Method not allowed', errorSource: 'method_not_allowed' });
+    }
 
+    const intakePayload = JSON.parse(event.body || '{}') as IntakePayload;
+    const payload = buildPayload(intakePayload);
+    console.log('Payload sent to Apps Script:', JSON.stringify(payload));
+
+    const appsScriptResult = await postToAppsScript(payload);
+    if (!appsScriptResult.ok) {
+      console.error('Apps Script non-OK response:', { status: appsScriptResult.status, body: shortDetails(appsScriptResult.body) });
+      return jsonResponse(502, {
+        success: false,
+        message: 'AI PM workflow generation failed.',
+        errorSource: 'apps_script',
+        details: shortDetails(appsScriptResult.body),
+      });
+    }
+
+    if (!appsScriptResult.parsed) {
+      console.error('Apps Script response JSON parse failed:', { status: appsScriptResult.status, parseError: appsScriptResult.parseError, body: shortDetails(appsScriptResult.body) });
+      return jsonResponse(502, {
+        success: false,
+        message: 'AI PM workflow generation failed.',
+        errorSource: 'apps_script_parse',
+        details: appsScriptResult.parseError || 'Apps Script did not return valid JSON.',
+      });
+    }
+
+    const parsed = appsScriptResult.parsed;
+    console.log('instantSnapshot exists:', Boolean(parsed.instantSnapshot));
+    console.log('instantSnapshot.aiStatus:', parsed.instantSnapshot?.aiStatus);
+
+    if (!parsed.instantSnapshot) {
+      return jsonResponse(502, {
+        success: false,
+        message: 'AI snapshot was not returned by the backend.',
+        errorSource: 'missing_instant_snapshot',
+      });
+    }
+
+    const structuralValidation = validateSnapshotStructure(parsed.instantSnapshot);
     if (!structuralValidation.valid) {
-      return aiGenerationFailedResponse('AI snapshot structure is incomplete. Please request a human-reviewed report.', structuralValidation);
+      console.error('AI snapshot structural validation failed:', structuralValidation.missing);
+      return jsonResponse(422, {
+        success: false,
+        message: 'The AI snapshot was incomplete. Please try again or request a human-reviewed report.',
+        errorSource: 'snapshot_validation',
+        structuralValidation,
+      });
     }
 
     const voiceValidation = validateClientFacingVoice(parsed.instantSnapshot, intakePayload.name);
@@ -154,12 +200,16 @@ export async function handler(event: Event): Promise<Result> {
       console.warn('AI snapshot voice validation warning:', voiceValidation.matches);
     }
 
-    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(parsed) };
+    return jsonResponse(200, parsed as Record<string, unknown>);
   } catch (error) {
-    return {
-      statusCode: 500,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ success: false, message: 'AI generation failed for this submission. Please request a human-reviewed report.', error: error instanceof Error ? error.message : 'Unknown error', instantSnapshot: { aiStatus: 'AI_GENERATION_FAILED' } }),
-    };
+    console.error('Netlify function error:', error instanceof Error ? error.message : error);
+    return jsonResponse(500, {
+      success: false,
+      message: 'AI PM workflow generation failed.',
+      errorSource: 'netlify_function',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
+  } finally {
+    console.log('Real Estate AI PM total duration:', `${Date.now() - startedAt}ms`);
   }
 }

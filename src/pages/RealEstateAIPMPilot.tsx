@@ -176,15 +176,37 @@ export function RealEstateAIPMPilot() {
         body: JSON.stringify(payload),
         signal: controller.signal,
       });
-      const json = (await res.json()) as ApiResponse;
+      console.log('API status:', res.status);
+      const rawText = await res.text();
+      let json: ApiResponse | null = null;
+      try {
+        json = rawText ? (JSON.parse(rawText) as ApiResponse) : null;
+      } catch {
+        json = null;
+      }
+      console.log('API raw response:', json || rawText);
+
+      if (!res.ok) {
+        setResponse({ success: false, message: safeText(json?.message, ERR_MSG) });
+        setSubmitted(true);
+        return;
+      }
+
+      console.log('instantSnapshot exists:', Boolean(json?.instantSnapshot));
+      if (!json?.instantSnapshot) {
+        setResponse({ success: false, message: 'The AI report could not be generated. Please try again or request a human-reviewed report.' });
+        setSubmitted(true);
+        return;
+      }
+
       console.log('instantSnapshot received:', json.instantSnapshot);
-      console.log('instantSnapshot keys:', Object.keys(json.instantSnapshot || {}));
-      console.log('first48HourFix:', json.instantSnapshot?.first48HourFix);
-      console.log('aiPromptPack:', json.instantSnapshot?.aiPromptPack);
+      console.log('instantSnapshot keys:', Object.keys(json.instantSnapshot));
+      console.log('first48HourFix:', json.instantSnapshot.first48HourFix);
+      console.log('aiPromptPack:', json.instantSnapshot.aiPromptPack);
       setResponse(json);
       setSubmitted(true);
     } catch {
-      setResponse({ success: false, message: ERR_MSG, instantSnapshot: { aiStatus: 'AI_GENERATION_FAILED' } });
+      setResponse({ success: false, message: ERR_MSG });
       setSubmitted(true);
     } finally {
       window.clearTimeout(timeoutId);
@@ -209,7 +231,7 @@ export function RealEstateAIPMPilot() {
         <section className="section-shell pilot-success">
           <p className="eyebrow">Real Estate AI PM Pilot</p>
           <h1>Your Preliminary AI PM Workflow Snapshot is Ready</h1>
-          <p className="resource-card">{ERR_MSG}</p>
+          <p className="resource-card">{safeText(response?.message, ERR_MSG)}</p>
           <div className="hero-actions">
             <a className="button primary" href={CALENDLY} target="_blank" rel="noreferrer">Book a 15-minute review</a>
             <a className="button secondary" href={CALENDLY} target="_blank" rel="noreferrer">Request human-reviewed report</a>
