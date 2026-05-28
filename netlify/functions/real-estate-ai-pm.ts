@@ -210,10 +210,12 @@ async function handleStatus(event: Event): Promise<Result> {
       upstreamMessage: parsed.message,
     });
 
-    return jsonResponse(200, {
-      success: true,
+    return jsonResponse(502, {
+      success: false,
       submissionId,
-      status: 'PROCESSING',
+      status: 'AI_GENERATION_FAILED',
+      message: 'The Apps Script deployment is still running the legacy synchronous handler. Replace Code.gs with the async dispatcher and redeploy the Web App.',
+      errorSource: 'legacy_apps_script_dispatcher',
       upstreamSubmissionId: returnedSubmissionId,
       upstreamStatus: parsed.status || 'LEGACY_RESPONSE_IGNORED',
       upstreamMessage: parsed.message || 'Ignored mismatched Apps Script response.',
