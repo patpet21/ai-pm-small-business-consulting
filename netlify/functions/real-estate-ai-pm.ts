@@ -19,17 +19,15 @@ const REPORT_VOICE_REQUIREMENTS = [
   'REPORT VOICE: Do not hardcode any example sentence from these instructions into the output.',
   'REPORT VOICE: Apply this voice requirement to every generated client-facing field, including executiveSummary, problemStatement, mainBottleneck, recommendedPriority, recommendedFirstStep, suggestedSimpleSystem, topWorkflowGaps, first48HourFix, wbsTaskBreakdown, aiPromptPack, scarfTrustCheck, aiOpportunities, quickWin, sevenDayRoadmap, riskNotes, and nextStep.',
 ];
-const REPORT_VOICE_REPAIR_INSTRUCTION =
-  'Rewrite the same JSON content in direct second-person client-facing language. Preserve the same JSON structure and keep the same operational recommendations.';
-
 type Event = { httpMethod?: string; body?: string | null };
 type Result = { statusCode: number; headers?: Record<string, string>; body: string };
 type IntakePayload = Record<string, unknown>;
 type Snapshot = Record<string, unknown>;
 type UpstreamResponse = { success?: boolean; message?: string; submissionId?: string; instantSnapshot?: Snapshot };
 type VoiceValidationResult = { valid: boolean; matches: string[] };
+type StructuralValidationResult = { valid: boolean; missing: string[] };
 
-function buildPayload(intakePayload: IntakePayload, extraRules: string[] = [], previousInstantSnapshot?: Snapshot) {
+function buildPayload(intakePayload: IntakePayload) {
   return {
     ...intakePayload,
     reportMode: 'preliminary_ai_pm_workflow_snapshot',
@@ -60,11 +58,8 @@ function buildPayload(intakePayload: IntakePayload, extraRules: string[] = [], p
       'No legal, financial, tax, investment, brokerage, licensing, or compliance advice.',
       'Do not invent facts not present in intake; if needed, mark operational assumptions explicitly.',
       ...REPORT_VOICE_REQUIREMENTS,
-      ...extraRules,
     ],
     reportVoiceRequirements: REPORT_VOICE_REQUIREMENTS,
-    reportVoiceRepairInstruction: extraRules.includes(REPORT_VOICE_REPAIR_INSTRUCTION) ? REPORT_VOICE_REPAIR_INSTRUCTION : undefined,
-    previousInstantSnapshot,
     intakeFieldsForAI: {
       role: intakePayload.role, marketLocation: intakePayload.marketLocation, teamSize: intakePayload.teamSize,
       workflowType: intakePayload.workflowType, currentProcess: intakePayload.currentProcess,
@@ -110,14 +105,29 @@ function validateClientFacingVoice(snapshot: Snapshot | undefined, submitterName
   return { valid: matches.length === 0, matches };
 }
 
-function aiGenerationFailedResponse(message: string, voiceValidation?: VoiceValidationResult): Result {
+function validateSnapshotStructure(snapshot: Snapshot | undefined): StructuralValidationResult {
+  const missing: string[] = [];
+  const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
+  const hasArrayItems = (value: unknown): boolean => Array.isArray(value) && value.length > 0;
+
+  if (!isObject(snapshot?.first48HourFix)) missing.push('first48HourFix');
+  if (!isObject(snapshot?.first48HourFix) || !hasArrayItems(snapshot.first48HourFix.columns)) missing.push('first48HourFix.columns');
+  if (!hasArrayItems(snapshot?.aiPromptPack)) missing.push('aiPromptPack');
+  if (!hasArrayItems(snapshot?.topWorkflowGaps)) missing.push('topWorkflowGaps');
+  if (!hasArrayItems(snapshot?.wbsTaskBreakdown)) missing.push('wbsTaskBreakdown');
+  if (!hasArrayItems(snapshot?.sevenDayRoadmap)) missing.push('sevenDayRoadmap');
+
+  return { valid: missing.length === 0, missing };
+}
+
+function aiGenerationFailedResponse(message: string, structuralValidation?: StructuralValidationResult): Result {
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       success: false,
       message,
-      voiceValidation,
+      structuralValidation,
       instantSnapshot: { aiStatus: 'AI_GENERATION_FAILED' },
     }),
   };
@@ -131,20 +141,18 @@ export async function handler(event: Event): Promise<Result> {
   try {
     const intakePayload = JSON.parse(event.body || '{}') as IntakePayload;
     const parsed = await postToAppsScript(buildPayload(intakePayload));
+    const structuralValidation = validateSnapshotStructure(parsed.instantSnapshot);
+
+    if (!structuralValidation.valid) {
+      return aiGenerationFailedResponse('AI snapshot structure is incomplete. Please request a human-reviewed report.', structuralValidation);
+    }
+
     const voiceValidation = validateClientFacingVoice(parsed.instantSnapshot, intakePayload.name);
-
-    if (voiceValidation.valid) {
-      return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(parsed) };
+    if (!voiceValidation.valid) {
+      console.warn('AI snapshot voice validation warning:', voiceValidation.matches);
     }
 
-    const repaired = await postToAppsScript(buildPayload(intakePayload, [REPORT_VOICE_REPAIR_INSTRUCTION], parsed.instantSnapshot));
-    const repairedVoiceValidation = validateClientFacingVoice(repaired.instantSnapshot, intakePayload.name);
-
-    if (!repairedVoiceValidation.valid) {
-      return aiGenerationFailedResponse('AI generation failed voice validation. Please request a human-reviewed report.', repairedVoiceValidation);
-    }
-
-    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(repaired) };
+    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(parsed) };
   } catch (error) {
     return {
       statusCode: 500,
