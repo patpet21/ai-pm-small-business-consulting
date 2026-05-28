@@ -52,6 +52,8 @@ type Snapshot = {
   calendlyUrl?: string;
   disclaimer?: string;
   aiStatus?: string;
+  errorMessage?: string;
+  technicalError?: string;
 };
 type ApiResponse = { success?: boolean; message?: string; submissionId?: string; status?: string; instantSnapshot?: Snapshot };
 
@@ -188,6 +190,15 @@ export function RealEstateAIPMPilot() {
       }
 
       if (statusJson?.status === 'PROCESSING' || statusJson?.status === 'GENERATING') continue;
+
+      if (statusJson?.instantSnapshot?.aiStatus === 'AI_GENERATION_FAILED') {
+        return {
+          success: false,
+          message: safeText(statusJson.instantSnapshot.errorMessage, safeText(statusJson.message, ERR_MSG)),
+          submissionId,
+          status: 'AI_GENERATION_FAILED',
+        };
+      }
 
       if (statusJson?.status === 'AI_GENERATED' && statusJson.instantSnapshot) {
         console.log('instantSnapshot received:', statusJson.instantSnapshot);

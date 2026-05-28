@@ -195,10 +195,42 @@ async function handleStatus(event: Event): Promise<Result> {
 
   const parsed = appsScriptResult.parsed;
   const normalizedStatus = normalizeWorkflowStatus(parsed.status);
+  const returnedSubmissionId = typeof parsed.submissionId === 'string' ? parsed.submissionId : '';
+  const snapshotAiStatus = normalizeWorkflowStatus(parsed.instantSnapshot?.aiStatus);
   console.log('Polling status:', parsed.status);
   console.log('Normalized polling status:', normalizedStatus || 'MISSING_STATUS');
   console.log('instantSnapshot exists:', Boolean(parsed.instantSnapshot));
   console.log('instantSnapshot.aiStatus:', parsed.instantSnapshot?.aiStatus);
+
+  if (returnedSubmissionId && returnedSubmissionId !== submissionId) {
+    console.warn('Apps Script status response submissionId mismatch; treating upstream response as a legacy synchronous fallback.', {
+      requestedSubmissionId: submissionId,
+      returnedSubmissionId,
+      upstreamStatus: parsed.status,
+      upstreamMessage: parsed.message,
+    });
+
+    return jsonResponse(200, {
+      success: true,
+      submissionId,
+      status: 'PROCESSING',
+      upstreamSubmissionId: returnedSubmissionId,
+      upstreamStatus: parsed.status || 'LEGACY_RESPONSE_IGNORED',
+      upstreamMessage: parsed.message || 'Ignored mismatched Apps Script response.',
+    });
+  }
+
+  if (snapshotAiStatus === 'AI_GENERATION_FAILED') {
+    const snapshotErrorMessage = typeof parsed.instantSnapshot?.errorMessage === 'string' ? parsed.instantSnapshot.errorMessage : undefined;
+    const technicalError = typeof parsed.instantSnapshot?.technicalError === 'string' ? parsed.instantSnapshot.technicalError : undefined;
+    return jsonResponse(200, {
+      success: false,
+      submissionId: parsed.submissionId || submissionId,
+      status: 'AI_GENERATION_FAILED',
+      message: snapshotErrorMessage || parsed.message || 'AI PM workflow generation failed.',
+      technicalError,
+    });
+  }
 
   if (normalizedStatus === 'PROCESSING' || normalizedStatus === 'GENERATING') {
     return jsonResponse(200, { success: true, submissionId: parsed.submissionId || submissionId, status: normalizedStatus });
