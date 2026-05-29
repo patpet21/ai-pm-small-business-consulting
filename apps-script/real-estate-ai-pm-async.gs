@@ -23,6 +23,10 @@ const ASYNC_STATUS_GENERATING = 'GENERATING';
 const ASYNC_STATUS_GENERATED = 'AI_GENERATED';
 const ASYNC_STATUS_FAILED = 'AI_GENERATION_FAILED';
 const MAX_TRANSIENT_GEMINI_RETRIES = 3;
+const ASYNC_TRIGGER_HANDLER = 'processPendingAiSnapshots';
+const ASYNC_TRIGGER_PROPERTY = 'asyncSnapshotTriggerQueuedAt';
+const ASYNC_TRIGGER_STALE_MS = 2 * 60 * 1000;
+const ASYNC_GENERATING_STALE_MS = 5 * 60 * 1000;
 
 const ASYNC_STATUS_HEADERS = [
   'Submission ID',
@@ -198,7 +202,30 @@ function handleStatus(data) {
 
   const normalizedStatus = normalizeAsyncStatus(row.status) || ASYNC_STATUS_PROCESSING;
 
-  if (normalizedStatus === ASYNC_STATUS_PROCESSING || normalizedStatus === ASYNC_STATUS_GENERATING) {
+  if (normalizedStatus === ASYNC_STATUS_PROCESSING) {
+    enqueueAsyncSnapshotGeneration();
+    Logger.log('processing status ensured trigger for: ' + submissionId);
+    Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
+    return {
+      success: true,
+      submissionId: submissionId,
+      status: normalizedStatus
+    };
+  }
+
+  if (normalizedStatus === ASYNC_STATUS_GENERATING) {
+    if (isStaleAsyncStatus(row.updatedAt, ASYNC_GENERATING_STALE_MS)) {
+      upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_PROCESSING, row.intakeJson, '', 'Recovered stale GENERATING status; queued a new generation attempt.');
+      enqueueAsyncSnapshotGeneration();
+      Logger.log('stale GENERATING status reset to PROCESSING for: ' + submissionId);
+      Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
+      return {
+        success: true,
+        submissionId: submissionId,
+        status: ASYNC_STATUS_PROCESSING
+      };
+    }
+
     Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
     return {
       success: true,
@@ -246,26 +273,51 @@ function handleGenerate(data) {
  * 7. Trigger creation without duplicates
  ************************************************************/
 function enqueueAsyncSnapshotGeneration() {
-  const triggers = ScriptApp.getProjectTriggers();
-  const alreadyQueued = triggers.some(function(trigger) {
-    return trigger.getHandlerFunction() === 'processPendingAiSnapshots';
-  });
+  const now = Date.now();
+  const properties = PropertiesService.getScriptProperties();
+  const queuedAt = Number(properties.getProperty(ASYNC_TRIGGER_PROPERTY) || 0);
+  const triggerAlreadyQueued = hasAsyncSnapshotTrigger();
 
-  if (!alreadyQueued) {
-    ScriptApp.newTrigger('processPendingAiSnapshots')
-      .timeBased()
-      .after(1000)
-      .create();
+  if (triggerAlreadyQueued && queuedAt && now - queuedAt < ASYNC_TRIGGER_STALE_MS) {
+    Logger.log('trigger already queued recently: ' + ASYNC_TRIGGER_HANDLER);
+    return;
   }
+
+  if (triggerAlreadyQueued) {
+    Logger.log('removing stale trigger before requeue: ' + ASYNC_TRIGGER_HANDLER);
+    removeAsyncSnapshotTriggers();
+  }
+
+  ScriptApp.newTrigger(ASYNC_TRIGGER_HANDLER)
+    .timeBased()
+    .after(1000)
+    .create();
+  properties.setProperty(ASYNC_TRIGGER_PROPERTY, String(now));
+}
+
+function hasAsyncSnapshotTrigger() {
+  return ScriptApp.getProjectTriggers().some(function(trigger) {
+    const handler = trigger.getHandlerFunction();
+    return handler === ASYNC_TRIGGER_HANDLER || handler === 'processPendingAsyncSnapshots';
+  });
 }
 
 function removeAsyncSnapshotTriggers() {
   ScriptApp.getProjectTriggers().forEach(function(trigger) {
     const handler = trigger.getHandlerFunction();
-    if (handler === 'processPendingAiSnapshots' || handler === 'processPendingAsyncSnapshots') {
+    if (handler === ASYNC_TRIGGER_HANDLER || handler === 'processPendingAsyncSnapshots') {
       ScriptApp.deleteTrigger(trigger);
     }
   });
+}
+
+function clearAsyncSnapshotTriggerMarker() {
+  PropertiesService.getScriptProperties().deleteProperty(ASYNC_TRIGGER_PROPERTY);
+}
+
+function isStaleAsyncStatus(updatedAt, staleAfterMs) {
+  const updatedTime = updatedAt instanceof Date ? updatedAt.getTime() : new Date(updatedAt).getTime();
+  return !updatedTime || Date.now() - updatedTime > staleAfterMs;
 }
 
 /************************************************************
@@ -275,29 +327,56 @@ function removeAsyncSnapshotTriggers() {
  ************************************************************/
 function processPendingAiSnapshots() {
   Logger.log('generationStarted: processPendingAiSnapshots');
-  removeAsyncSnapshotTriggers();
-
-  const sheet = getAsyncSnapshotStatusSheet();
-  if (!sheet || sheet.getLastRow() < 2) {
-    Logger.log('generationFinished: no pending rows');
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(500)) {
+    Logger.log('generationSkipped: another processPendingAiSnapshots run is active');
+    enqueueAsyncSnapshotGeneration();
     return;
   }
 
-  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, ASYNC_STATUS_HEADERS.length).getValues();
-  for (let i = 0; i < rows.length; i += 1) {
-    const row = rows[i];
-    const submissionId = cleanValue(row[0]);
-    const status = cleanValue(row[3]);
+  try {
+    clearAsyncSnapshotTriggerMarker();
+    removeAsyncSnapshotTriggers();
 
-    if (submissionId && status === ASYNC_STATUS_PROCESSING) {
-      Logger.log('submissionId: ' + submissionId);
-      generateAsyncSnapshot(submissionId);
-      Logger.log('generationFinished: ' + submissionId);
+    const sheet = getAsyncSnapshotStatusSheet();
+    if (!sheet || sheet.getLastRow() < 2) {
+      Logger.log('generationFinished: no pending rows');
       return;
     }
-  }
 
-  Logger.log('generationFinished: no PROCESSING rows');
+    const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, ASYNC_STATUS_HEADERS.length).getValues();
+    const maxSnapshotsPerRun = 1;
+    let processedCount = 0;
+    let hasMorePending = false;
+
+    for (let i = 0; i < rows.length; i += 1) {
+      const row = rows[i];
+      const submissionId = cleanValue(row[0]);
+      const status = normalizeAsyncStatus(row[3]);
+
+      if (!submissionId || status !== ASYNC_STATUS_PROCESSING) continue;
+
+      if (processedCount >= maxSnapshotsPerRun) {
+        hasMorePending = true;
+        continue;
+      }
+
+      Logger.log('submissionId: ' + submissionId);
+      generateAsyncSnapshot(submissionId);
+      processedCount += 1;
+      Logger.log('generationFinished: ' + submissionId);
+    }
+
+    if (hasMorePending) {
+      enqueueAsyncSnapshotGeneration();
+      Logger.log('generationFinished: processed ' + processedCount + ', re-queued remaining PROCESSING rows');
+      return;
+    }
+
+    Logger.log('generationFinished: processed ' + processedCount + ' PROCESSING rows');
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 // Backward-compatible alias for older triggers created by earlier versions.
