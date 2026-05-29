@@ -23,6 +23,14 @@ const ASYNC_STATUS_GENERATING = 'GENERATING';
 const ASYNC_STATUS_GENERATED = 'AI_GENERATED';
 const ASYNC_STATUS_FAILED = 'AI_GENERATION_FAILED';
 const MAX_TRANSIENT_GEMINI_RETRIES = 3;
+const ASYNC_TRIGGER_HANDLER = 'processPendingAiSnapshots';
+const ASYNC_TRIGGER_PROPERTY = 'asyncSnapshotTriggerQueuedAt';
+const ASYNC_TRIGGER_STALE_MS = 2 * 60 * 1000;
+const ASYNC_GENERATING_STALE_MS = 5 * 60 * 1000;
+const ASYNC_WATCHDOG_HANDLER = 'recoverPendingAiSnapshots';
+const ASYNC_WATCHDOG_PROPERTY = 'asyncSnapshotWatchdogQueuedAt';
+const ASYNC_WATCHDOG_DELAY_MS = 60 * 1000;
+const ASYNC_WATCHDOG_STALE_MS = 3 * 60 * 1000;
 
 const ASYNC_STATUS_HEADERS = [
   'Submission ID',
@@ -154,6 +162,7 @@ function handleStart(data) {
   Logger.log('status row written: ' + submissionId);
 
   enqueueAsyncSnapshotGeneration();
+  enqueueAsyncSnapshotWatchdog();
   Logger.log('trigger scheduled: processPendingAiSnapshots');
   Logger.log('handleStartFinished: ' + (Date.now() - startedAt) + 'ms');
 
@@ -199,6 +208,9 @@ function handleStatus(data) {
   const normalizedStatus = normalizeAsyncStatus(row.status) || ASYNC_STATUS_PROCESSING;
 
   if (normalizedStatus === ASYNC_STATUS_PROCESSING || normalizedStatus === ASYNC_STATUS_GENERATING) {
+    // Keep status checks read-only and fast. Trigger and recovery work happens in
+    // handleStart(), processPendingAiSnapshots(), and recoverPendingAiSnapshots()
+    // so polling cannot starve time-based triggers or time out the Netlify proxy.
     Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
     return {
       success: true,
@@ -246,26 +258,92 @@ function handleGenerate(data) {
  * 7. Trigger creation without duplicates
  ************************************************************/
 function enqueueAsyncSnapshotGeneration() {
-  const triggers = ScriptApp.getProjectTriggers();
-  const alreadyQueued = triggers.some(function(trigger) {
-    return trigger.getHandlerFunction() === 'processPendingAiSnapshots';
-  });
+  const now = Date.now();
+  const properties = PropertiesService.getScriptProperties();
+  const queuedAt = Number(properties.getProperty(ASYNC_TRIGGER_PROPERTY) || 0);
+  const triggerAlreadyQueued = hasAsyncSnapshotTrigger();
 
-  if (!alreadyQueued) {
-    ScriptApp.newTrigger('processPendingAiSnapshots')
-      .timeBased()
-      .after(1000)
-      .create();
+  if (triggerAlreadyQueued && queuedAt && now - queuedAt < ASYNC_TRIGGER_STALE_MS) {
+    Logger.log('trigger already queued recently: ' + ASYNC_TRIGGER_HANDLER);
+    return;
   }
+
+  if (triggerAlreadyQueued) {
+    Logger.log('removing stale trigger before requeue: ' + ASYNC_TRIGGER_HANDLER);
+    removeAsyncSnapshotTriggers();
+  }
+
+  ScriptApp.newTrigger(ASYNC_TRIGGER_HANDLER)
+    .timeBased()
+    .after(1000)
+    .create();
+  properties.setProperty(ASYNC_TRIGGER_PROPERTY, String(now));
+}
+
+function enqueueAsyncSnapshotWatchdog() {
+  const now = Date.now();
+  const properties = PropertiesService.getScriptProperties();
+  const queuedAt = Number(properties.getProperty(ASYNC_WATCHDOG_PROPERTY) || 0);
+  const watchdogAlreadyQueued = hasAsyncSnapshotWatchdog();
+
+  if (watchdogAlreadyQueued && queuedAt && now - queuedAt < ASYNC_WATCHDOG_STALE_MS) {
+    Logger.log('watchdog already queued recently: ' + ASYNC_WATCHDOG_HANDLER);
+    return;
+  }
+
+  if (watchdogAlreadyQueued) {
+    Logger.log('removing stale watchdog before requeue: ' + ASYNC_WATCHDOG_HANDLER);
+    removeAsyncSnapshotWatchdogs();
+  }
+
+  ScriptApp.newTrigger(ASYNC_WATCHDOG_HANDLER)
+    .timeBased()
+    .after(ASYNC_WATCHDOG_DELAY_MS)
+    .create();
+  properties.setProperty(ASYNC_WATCHDOG_PROPERTY, String(now));
+}
+
+function hasAsyncSnapshotTrigger() {
+  return ScriptApp.getProjectTriggers().some(function(trigger) {
+    const handler = trigger.getHandlerFunction();
+    return handler === ASYNC_TRIGGER_HANDLER || handler === 'processPendingAsyncSnapshots';
+  });
 }
 
 function removeAsyncSnapshotTriggers() {
   ScriptApp.getProjectTriggers().forEach(function(trigger) {
     const handler = trigger.getHandlerFunction();
-    if (handler === 'processPendingAiSnapshots' || handler === 'processPendingAsyncSnapshots') {
+    if (handler === ASYNC_TRIGGER_HANDLER || handler === 'processPendingAsyncSnapshots') {
       ScriptApp.deleteTrigger(trigger);
     }
   });
+}
+
+function hasAsyncSnapshotWatchdog() {
+  return ScriptApp.getProjectTriggers().some(function(trigger) {
+    return trigger.getHandlerFunction() === ASYNC_WATCHDOG_HANDLER;
+  });
+}
+
+function removeAsyncSnapshotWatchdogs() {
+  ScriptApp.getProjectTriggers().forEach(function(trigger) {
+    if (trigger.getHandlerFunction() === ASYNC_WATCHDOG_HANDLER) {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+}
+
+function clearAsyncSnapshotTriggerMarker() {
+  PropertiesService.getScriptProperties().deleteProperty(ASYNC_TRIGGER_PROPERTY);
+}
+
+function clearAsyncSnapshotWatchdogMarker() {
+  PropertiesService.getScriptProperties().deleteProperty(ASYNC_WATCHDOG_PROPERTY);
+}
+
+function isStaleAsyncStatus(updatedAt, staleAfterMs) {
+  const updatedTime = updatedAt instanceof Date ? updatedAt.getTime() : new Date(updatedAt).getTime();
+  return !updatedTime || Date.now() - updatedTime > staleAfterMs;
 }
 
 /************************************************************
@@ -275,29 +353,99 @@ function removeAsyncSnapshotTriggers() {
  ************************************************************/
 function processPendingAiSnapshots() {
   Logger.log('generationStarted: processPendingAiSnapshots');
-  removeAsyncSnapshotTriggers();
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(500)) {
+    Logger.log('generationSkipped: another processPendingAiSnapshots run is active');
+    enqueueAsyncSnapshotGeneration();
+    return;
+  }
+
+  try {
+    clearAsyncSnapshotTriggerMarker();
+    removeAsyncSnapshotTriggers();
+
+    const sheet = getAsyncSnapshotStatusSheet();
+    if (!sheet || sheet.getLastRow() < 2) {
+      Logger.log('generationFinished: no pending rows');
+      return;
+    }
+
+    const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, ASYNC_STATUS_HEADERS.length).getValues();
+    const maxSnapshotsPerRun = 1;
+    let processedCount = 0;
+    let hasMorePending = false;
+
+    for (let i = 0; i < rows.length; i += 1) {
+      const row = rows[i];
+      const submissionId = cleanValue(row[0]);
+      const status = normalizeAsyncStatus(row[3]);
+
+      if (!submissionId || status !== ASYNC_STATUS_PROCESSING) continue;
+
+      if (processedCount >= maxSnapshotsPerRun) {
+        hasMorePending = true;
+        continue;
+      }
+
+      Logger.log('submissionId: ' + submissionId);
+      generateAsyncSnapshot(submissionId);
+      processedCount += 1;
+      Logger.log('generationFinished: ' + submissionId);
+    }
+
+    if (hasMorePending) {
+      enqueueAsyncSnapshotGeneration();
+      Logger.log('generationFinished: processed ' + processedCount + ', re-queued remaining PROCESSING rows');
+      return;
+    }
+
+    Logger.log('generationFinished: processed ' + processedCount + ' PROCESSING rows');
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function recoverPendingAiSnapshots() {
+  Logger.log('watchdogStarted: recoverPendingAiSnapshots');
+  clearAsyncSnapshotWatchdogMarker();
+  removeAsyncSnapshotWatchdogs();
 
   const sheet = getAsyncSnapshotStatusSheet();
   if (!sheet || sheet.getLastRow() < 2) {
-    Logger.log('generationFinished: no pending rows');
+    Logger.log('watchdogFinished: no status rows');
     return;
   }
 
   const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, ASYNC_STATUS_HEADERS.length).getValues();
+  let recoveredGeneratingCount = 0;
+  let hasPendingWork = false;
+
   for (let i = 0; i < rows.length; i += 1) {
     const row = rows[i];
     const submissionId = cleanValue(row[0]);
-    const status = cleanValue(row[3]);
+    const updatedAt = row[2];
+    const status = normalizeAsyncStatus(row[3]);
+    const intakeJson = cleanValue(row[4]);
 
-    if (submissionId && status === ASYNC_STATUS_PROCESSING) {
-      Logger.log('submissionId: ' + submissionId);
-      generateAsyncSnapshot(submissionId);
-      Logger.log('generationFinished: ' + submissionId);
-      return;
+    if (!submissionId) continue;
+
+    if (status === ASYNC_STATUS_PROCESSING) {
+      hasPendingWork = true;
+      continue;
+    }
+
+    if (status === ASYNC_STATUS_GENERATING && isStaleAsyncStatus(updatedAt, ASYNC_GENERATING_STALE_MS)) {
+      upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_PROCESSING, intakeJson, '', 'Recovered stale GENERATING status; queued a new generation attempt.');
+      recoveredGeneratingCount += 1;
+      hasPendingWork = true;
     }
   }
 
-  Logger.log('generationFinished: no PROCESSING rows');
+  if (hasPendingWork) {
+    enqueueAsyncSnapshotGeneration();
+  }
+
+  Logger.log('watchdogFinished: recovered ' + recoveredGeneratingCount + ', pendingWork=' + hasPendingWork);
 }
 
 // Backward-compatible alias for older triggers created by earlier versions.
@@ -526,7 +674,22 @@ function upsertAsyncSnapshotStatus(submissionId, status, intakeJson, snapshotJso
 
 
 /************************************************************
- * 10. doPost action dispatcher — MUST BE THE LAST doPost(e)
+ * 10. Simple install smoke test
+ *
+ * Non-developer check after pasting/deploying this patch:
+ * - In Apps Script, select testAsyncDispatcherInstall from the Run dropdown.
+ * - It should log a fast JSON response with status AI_GENERATION_FAILED and
+ *   message "Submission status was not found." for the fake install-test ID.
+ * - That proves the async status route is installed and is not calling Gemini.
+ ************************************************************/
+function testAsyncDispatcherInstall() {
+  const response = handleStatus({ submissionId: '__INSTALL_TEST__' });
+  Logger.log(JSON.stringify(response));
+  return response;
+}
+
+/************************************************************
+ * 11. doPost action dispatcher — MUST BE THE LAST doPost(e)
  *
  * CRITICAL INSTALL NOTE:
  * If Code.gs still contains an older doPost(e) after this function, Apps Script
