@@ -22,6 +22,7 @@ const ASYNC_STATUS_PROCESSING = 'PROCESSING';
 const ASYNC_STATUS_GENERATING = 'GENERATING';
 const ASYNC_STATUS_GENERATED = 'AI_GENERATED';
 const ASYNC_STATUS_FAILED = 'AI_GENERATION_FAILED';
+const MAX_TRANSIENT_GEMINI_RETRIES = 3;
 
 const ASYNC_STATUS_HEADERS = [
   'Submission ID',
@@ -355,12 +356,38 @@ function generateAsyncSnapshot(submissionId) {
     };
   } catch (error) {
     const existing = findAsyncSnapshotStatusRow(submissionId);
+    const errorMessage = error && error.message ? error.message : String(error);
+
+    if (existing && isTransientGeminiError(errorMessage)) {
+      const nextAttempt = getTransientRetryAttempt(existing.errorMessage) + 1;
+
+      if (nextAttempt <= MAX_TRANSIENT_GEMINI_RETRIES) {
+        const retryMessage = buildTransientRetryMessage(nextAttempt, errorMessage);
+        upsertAsyncSnapshotStatus(
+          submissionId,
+          ASYNC_STATUS_PROCESSING,
+          existing.intakeJson,
+          '',
+          retryMessage
+        );
+        enqueueAsyncSnapshotGeneration();
+        Logger.log('transient Gemini error; retry queued for ' + submissionId + ': attempt ' + nextAttempt);
+
+        return {
+          success: true,
+          submissionId: submissionId,
+          status: ASYNC_STATUS_PROCESSING,
+          message: retryMessage
+        };
+      }
+    }
+
     upsertAsyncSnapshotStatus(
       submissionId,
       ASYNC_STATUS_FAILED,
       existing ? existing.intakeJson : '',
       '',
-      error.message
+      errorMessage
     );
     Logger.log('status updated: ' + ASYNC_STATUS_FAILED + ' for ' + submissionId);
 
@@ -368,9 +395,30 @@ function generateAsyncSnapshot(submissionId) {
       success: false,
       submissionId: submissionId,
       status: ASYNC_STATUS_FAILED,
-      message: error.message
+      message: errorMessage
     };
   }
+}
+
+function isTransientGeminiError(errorMessage) {
+  const text = cleanValue(errorMessage).toLowerCase();
+  return (
+    text.indexOf('gemini api error 429') !== -1 ||
+    text.indexOf('gemini api error 503') !== -1 ||
+    text.indexOf('resource_exhausted') !== -1 ||
+    text.indexOf('unavailable') !== -1 ||
+    text.indexOf('high demand') !== -1 ||
+    text.indexOf('try again later') !== -1
+  );
+}
+
+function getTransientRetryAttempt(errorMessage) {
+  const match = cleanValue(errorMessage).match(/Transient Gemini retry (\d+)\//i);
+  return match && match[1] ? Number(match[1]) || 0 : 0;
+}
+
+function buildTransientRetryMessage(attempt, errorMessage) {
+  return 'Transient Gemini retry ' + attempt + '/' + MAX_TRANSIENT_GEMINI_RETRIES + ': ' + errorMessage;
 }
 
 function createInstantSnapshotForAsyncIntake(intake) {
