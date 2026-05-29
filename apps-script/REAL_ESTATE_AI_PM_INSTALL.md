@@ -1,12 +1,14 @@
-# Real Estate AI PM Apps Script install guide (non-developer steps)
+# Real Estate AI PM Apps Script install guide (copy the full script)
 
 You do **not** need to send or attach your long `Code.gs` file.
 
-The website can only use the async fixes in this repository after the Google Apps Script Web App is updated. The file to copy from this repo is:
+Use the full replacement script in this repository:
 
-- `apps-script/real-estate-ai-pm-async.gs`
+- `apps-script/real-estate-ai-pm-full-code.gs`
 
-## What to do in Google Apps Script
+This file is meant for non-developers: copy the whole file and replace your current Apps Script `Code.gs` with it.
+
+## Replace `Code.gs`
 
 1. Open the Google Apps Script project that powers the Real Estate AI PM form.
 2. Open `Code.gs`.
@@ -14,30 +16,40 @@ The website can only use the async fixes in this repository after the Google App
    - Click inside `Code.gs`.
    - Press `Ctrl+A` / `Cmd+A`.
    - Copy it into a temporary Google Doc or text file.
-4. If you already pasted an older async patch before:
-   - Search in `Code.gs` for `PROPERTYDEX / REAL ESTATE AI PM PILOT — ASYNC CODE.GS PATCH`.
-   - Delete from that comment down through the final async `doPost(e)` function at the bottom.
-   - This avoids duplicate `const ASYNC_...` declarations.
-5. Open this repository file: `apps-script/real-estate-ai-pm-async.gs`.
-6. Copy the **entire** file.
-7. Go back to Apps Script `Code.gs`.
-8. Scroll to the very bottom.
-9. Paste the entire async file at the very bottom.
-10. Save the Apps Script project.
+4. Open this repository file: `apps-script/real-estate-ai-pm-full-code.gs`.
+5. Copy the **entire** file.
+6. Go back to Apps Script `Code.gs`.
+7. Press `Ctrl+A` / `Cmd+A` to select all old code.
+8. Paste the full script so it replaces everything.
+9. Save the Apps Script project.
+
+Do **not** paste this full script under the old code. Replace the old code so there is only one `doPost(e)`.
+
+## Optional but recommended: add Gemini API key
+
+The full script can run without a Gemini key by returning a structured rules-based preliminary snapshot. For model-generated wording, add your Gemini key:
+
+1. In Apps Script, open **Project Settings**.
+2. Under **Script Properties**, add:
+   - Property: `GEMINI_API_KEY`
+   - Value: your Gemini API key
+3. Optional property:
+   - Property: `GEMINI_MODEL`
+   - Value: `gemini-1.5-flash` or the model you want to use
 
 ## Quick smoke test before deploying
 
-1. In Apps Script, use the function dropdown and select `testAsyncDispatcherInstall`.
+1. In Apps Script, use the function dropdown and select `testFullCodeInstall`.
 2. Click **Run**.
 3. If Google asks for authorization, approve it.
 4. Open **Executions** or **Logs**.
-5. A good result is a fast JSON response containing:
+5. A good result contains:
 
 ```json
-{"success":false,"submissionId":"__INSTALL_TEST__","status":"AI_GENERATION_FAILED","message":"Submission status was not found."}
+{"success":true,"diagnosticFallbackOk":true,"snapshotFallbackOk":true}
 ```
 
-That message is expected for the fake test ID. It means the async status handler is installed and it did **not** call Gemini.
+This smoke test does **not** call Gemini. It verifies the full script helpers, sheet setup, and fallback snapshot structure exist.
 
 ## Deploy the Web App again
 
@@ -57,5 +69,6 @@ If the browser keeps showing one of these patterns, the live Web App is probably
 - Status requests return `504`.
 - The response says the deployment may still be running the legacy synchronous `processSubmission()` flow.
 - The form stays on `PROCESSING` forever and the Apps Script executions do not show `processPendingAiSnapshots`.
+- The final failure says a helper like `createDiagnostic` is not defined.
 
-In that case, repeat the deploy steps above and make sure you selected **New version**.
+In that case, repeat the replace-and-deploy steps above and make sure you selected **New version**.
