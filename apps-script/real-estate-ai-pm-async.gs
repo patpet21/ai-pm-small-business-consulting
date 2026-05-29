@@ -198,7 +198,18 @@ function handleStatus(data) {
 
   const normalizedStatus = normalizeAsyncStatus(row.status) || ASYNC_STATUS_PROCESSING;
 
-  if (normalizedStatus === ASYNC_STATUS_PROCESSING || normalizedStatus === ASYNC_STATUS_GENERATING) {
+  if (normalizedStatus === ASYNC_STATUS_PROCESSING) {
+    enqueueAsyncSnapshotGeneration();
+    Logger.log('processing status re-queued trigger for: ' + submissionId);
+    Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
+    return {
+      success: true,
+      submissionId: submissionId,
+      status: normalizedStatus
+    };
+  }
+
+  if (normalizedStatus === ASYNC_STATUS_GENERATING) {
     Logger.log('handleStatusFinished: ' + (Date.now() - startedAt) + 'ms');
     return {
       success: true,
@@ -246,17 +257,14 @@ function handleGenerate(data) {
  * 7. Trigger creation without duplicates
  ************************************************************/
 function enqueueAsyncSnapshotGeneration() {
-  const triggers = ScriptApp.getProjectTriggers();
-  const alreadyQueued = triggers.some(function(trigger) {
-    return trigger.getHandlerFunction() === 'processPendingAiSnapshots';
-  });
-
-  if (!alreadyQueued) {
-    ScriptApp.newTrigger('processPendingAiSnapshots')
-      .timeBased()
-      .after(1000)
-      .create();
-  }
+  // Apps Script one-shot time triggers can occasionally linger after auth/runtime
+  // interruptions. Replacing pending generation triggers each time prevents a
+  // stale trigger from blocking new work indefinitely.
+  removeAsyncSnapshotTriggers();
+  ScriptApp.newTrigger('processPendingAiSnapshots')
+    .timeBased()
+    .after(1000)
+    .create();
 }
 
 function removeAsyncSnapshotTriggers() {
@@ -284,20 +292,35 @@ function processPendingAiSnapshots() {
   }
 
   const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, ASYNC_STATUS_HEADERS.length).getValues();
+  const maxSnapshotsPerRun = 1;
+  let processedCount = 0;
+  let hasMorePending = false;
+
   for (let i = 0; i < rows.length; i += 1) {
     const row = rows[i];
     const submissionId = cleanValue(row[0]);
-    const status = cleanValue(row[3]);
+    const status = normalizeAsyncStatus(row[3]);
 
-    if (submissionId && status === ASYNC_STATUS_PROCESSING) {
-      Logger.log('submissionId: ' + submissionId);
-      generateAsyncSnapshot(submissionId);
-      Logger.log('generationFinished: ' + submissionId);
-      return;
+    if (!submissionId || status !== ASYNC_STATUS_PROCESSING) continue;
+
+    if (processedCount >= maxSnapshotsPerRun) {
+      hasMorePending = true;
+      continue;
     }
+
+    Logger.log('submissionId: ' + submissionId);
+    generateAsyncSnapshot(submissionId);
+    processedCount += 1;
+    Logger.log('generationFinished: ' + submissionId);
   }
 
-  Logger.log('generationFinished: no PROCESSING rows');
+  if (hasMorePending) {
+    enqueueAsyncSnapshotGeneration();
+    Logger.log('generationFinished: processed ' + processedCount + ', re-queued remaining PROCESSING rows');
+    return;
+  }
+
+  Logger.log('generationFinished: processed ' + processedCount + ' PROCESSING rows');
 }
 
 // Backward-compatible alias for older triggers created by earlier versions.
