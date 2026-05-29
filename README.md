@@ -19,6 +19,11 @@ npm run dev
 
 Open the local URL printed by Vite. Do not open `index.html` directly from the file system or from the repository source view.
 
+
+## Real Estate AI PM Apps Script update
+
+If the Real Estate AI PM form stays on `PROCESSING` or status requests time out, update the Google Apps Script Web App using the non-developer guide at [`apps-script/REAL_ESTATE_AI_PM_INSTALL.md`](apps-script/REAL_ESTATE_AI_PM_INSTALL.md). You do not need to attach your long `Code.gs` file; the guide explains exactly what to copy, where to paste it, how to run the smoke test, and how to deploy a new Web App version.
+
 ## Netlify deployment
 
 This repository includes `netlify.toml`, so Netlify can detect the correct production build settings automatically:
