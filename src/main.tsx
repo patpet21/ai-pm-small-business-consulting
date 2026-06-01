@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom';
+import { Contact } from './pages/Contact';
 import { RealEstateAIPMPilot } from './pages/RealEstateAIPMPilot';
 import './styles.css';
 
@@ -142,6 +143,7 @@ const navItems = [
   { label: 'Resources', to: '/resources' },
   { label: 'Use Cases', to: '/use-cases' },
   { label: 'About', to: '/about' },
+  { label: 'Contact', to: '/contact' },
   { label: 'Real Estate Pilot', to: '/real-estate-ai-pm-pilot' },
 ];
 
@@ -494,6 +496,7 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/use-cases" element={<UseCases />} />
           <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/real-estate-ai-pm-pilot" element={<RealEstateAIPMPilot />} />
         </Routes>
       </main>

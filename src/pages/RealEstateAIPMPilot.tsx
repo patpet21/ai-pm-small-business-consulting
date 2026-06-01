@@ -168,7 +168,7 @@ export function RealEstateAIPMPilot() {
 
   const pollSnapshotStatus = async (submissionId: string): Promise<ApiResponse> => {
     const startedAt = Date.now();
-    const maxPollingMs = 90000;
+    const maxPollingMs = 180000;
 
     while (Date.now() - startedAt < maxPollingMs) {
       await new Promise((resolve) => window.setTimeout(resolve, 5000));
