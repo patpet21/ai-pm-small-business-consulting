@@ -438,6 +438,26 @@ function recoverPendingAiSnapshots() {
       recoveredGeneratingCount += 1;
       hasPendingWork = true;
     }
+
+    if (status === ASYNC_STATUS_GENERATING && isStaleAsyncStatus(updatedAt, ASYNC_GENERATING_STALE_MS)) {
+      upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_PROCESSING, intakeJson, '', 'Recovered stale GENERATING status; queued a new generation attempt.');
+      recoveredGeneratingCount += 1;
+      hasPendingWork = true;
+    }
+
+    if (status === ASYNC_STATUS_GENERATING && isStaleAsyncStatus(updatedAt, ASYNC_GENERATING_STALE_MS)) {
+      upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_PROCESSING, intakeJson, '', 'Recovered stale GENERATING status; queued a new generation attempt.');
+      recoveredGeneratingCount += 1;
+      hasPendingWork = true;
+    }
+  }
+
+  if (hasPendingWork) {
+    enqueueAsyncSnapshotGeneration();
+  }
+
+  if (hasPendingWork) {
+    enqueueAsyncSnapshotGeneration();
   }
 
   if (hasPendingWork) {
