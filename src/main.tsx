@@ -288,6 +288,21 @@ function Home() {
               <span>Tasks</span>
               <span>Decisions</span>
             </div>
+            <p className="trust-line">Not just automation. Better structure, better coordination, better execution.</p>
+            <div className="hero-proof-row" aria-label="Practical focus areas">
+              <span>Follow-up</span>
+              <span>Documents</span>
+              <span>Tasks</span>
+              <span>Decisions</span>
+            </div>
+            <p className="trust-line">Start with the workflow. Add AI only where it makes the work clearer, faster, or easier to manage.</p>
+            <div className="hero-proof-row" aria-label="Practical focus areas">
+              <span>Follow-up</span>
+              <span>Documents</span>
+              <span>Tasks</span>
+              <span>Decisions</span>
+            </div>
+            <p className="trust-line">Start with the workflow. Add AI only where it makes the work clearer, faster, or easier to manage.</p>
           </div>
 
           <aside className="hero-signal-panel execution-panel" aria-label="Project Control Layer framework visual">
