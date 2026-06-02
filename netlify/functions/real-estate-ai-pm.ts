@@ -231,12 +231,13 @@ async function handleStatus(event: Event): Promise<Result> {
 
   const appsScriptResult = await postToAppsScript(buildStatusPayload(submissionId), APPS_SCRIPT_STATUS_TIMEOUT_MS);
   if (appsScriptResult.timedOut) {
-    return jsonResponse(504, {
-      success: false,
+    console.warn('Apps Script status timed out; returning PROCESSING so the client can keep polling.', { submissionId });
+    return jsonResponse(200, {
+      success: true,
       submissionId,
-      status: 'AI_GENERATION_FAILED',
-      message: 'Apps Script status did not return quickly. The live Code.gs deployment is likely still running the legacy synchronous processSubmission() flow.',
-      errorSource: 'apps_script_status_timeout',
+      status: 'PROCESSING',
+      message: 'AI PM workflow is still processing. Status polling will retry shortly.',
+      warningSource: 'apps_script_status_timeout',
       details: appsScriptResult.body,
     });
   }
