@@ -19,6 +19,11 @@ npm run dev
 
 Open the local URL printed by Vite. Do not open `index.html` directly from the file system or from the repository source view.
 
+
+## Real Estate AI PM Apps Script update
+
+If the Real Estate AI PM form stays on `PROCESSING`, status requests time out, or Apps Script reports a missing helper like `createDiagnostic`, replace the Web App `Code.gs` with the full non-developer script at [`apps-script/real-estate-ai-pm-full-code.gs`](apps-script/real-estate-ai-pm-full-code.gs). The step-by-step guide is [`apps-script/REAL_ESTATE_AI_PM_INSTALL.md`](apps-script/REAL_ESTATE_AI_PM_INSTALL.md). You do not need to attach your long `Code.gs` file.
+
 ## Netlify deployment
 
 This repository includes `netlify.toml`, so Netlify can detect the correct production build settings automatically:
