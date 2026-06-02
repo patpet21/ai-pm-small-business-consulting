@@ -27,7 +27,7 @@ const issueCards = [
 
 const workflowSteps = [
   'Client message',
-  'AI-supported summary',
+  'AI support / documentation',
   'Human review',
   'Next action',
   'Owner assigned',
@@ -43,7 +43,7 @@ const helpCards = [
   },
   {
     title: 'Add Practical AI Support',
-    text: 'Use AI for summaries, drafts, checklists, reports, templates, and decision support without removing human review.',
+    text: 'Use AI to support planning, documentation, reporting, communication, and decision support without removing human review or accountability.',
     button: 'View Resources',
     to: '/resources',
   },
@@ -70,24 +70,37 @@ const freeResourceBullets = [
   'Common AI mistakes to avoid',
 ];
 
+const aiSupportedPmCards = [
+  'Scope clarity',
+  'Stakeholder communication',
+  'Task ownership',
+  'Timeline planning',
+  'Risk tracking',
+  'Decision support',
+  'Documentation',
+  'Reporting',
+  'SOP creation',
+  'Follow-up routines',
+];
+
 const serviceBlocks = [
   {
-    title: 'Workflow Clarity Review',
-    for: 'Owners and small teams that know work is slipping through gaps but are not sure where to start.',
-    problem: 'Follow-up, documents, estimates, reports, and internal handoffs are scattered across tools, people, or memory.',
-    gets: ['Workflow review', 'Bottleneck diagnosis', 'Priority improvement list', 'AI use-case suggestions', 'Simple implementation roadmap'],
+    title: 'Project & Workflow Clarity Review',
+    for: 'Businesses that need to clarify the problem, scope, stakeholders, priorities, and bottlenecks before adding tools.',
+    problem: 'Unclear scope, shifting priorities, disconnected communication, and weak ownership make everyday work hard to manage.',
+    gets: ['Problem and scope clarification', 'Stakeholder and priority mapping', 'Bottleneck diagnosis', 'Risk and decision review', 'Simple implementation roadmap'],
   },
   {
-    title: 'Practical AI System Setup',
-    for: 'Businesses ready to use AI outputs inside real daily work, not just as one-off drafts.',
-    problem: 'AI can create summaries and drafts, but the work still needs review, ownership, deadlines, and follow-up.',
-    gets: ['Tool and workflow recommendations', 'Task and communication structure', 'Tracker and template setup', 'Human review checkpoints', 'Simple adoption guidance'],
+    title: 'AI-Augmented Project System Setup',
+    for: 'Businesses ready to organize tasks, documents, communication, timelines, risks, and reporting into a usable system.',
+    problem: 'Work needs structure around ownership, deadlines, documentation, communication, risk tracking, and human review.',
+    gets: ['Project and workflow structure', 'Task ownership and timeline setup', 'Risk and decision tracking', 'Communication and reporting routines', 'Human review checkpoints'],
   },
   {
-    title: 'ChatGPT / Claude Business Playbook',
-    for: 'Small teams that want clear, safe, non-technical ways to use AI in daily operations.',
-    problem: 'People use AI inconsistently, with different prompts, unclear standards, and no shared process.',
-    gets: ['Prompt starter pack', 'Use-case guidance by workflow', 'Do-and-do-not-use rules', 'Examples for follow-up, documents, reporting, and decisions', 'Human review checklist'],
+    title: 'ChatGPT / Claude PM Playbook',
+    for: 'Teams that want practical AI templates for planning, meeting notes, stakeholder updates, risk logs, SOPs, reports, and decision support.',
+    problem: 'People use AI inconsistently, with different standards, unclear review steps, and no shared project or operations process.',
+    gets: ['Planning and meeting-note templates', 'Stakeholder update examples', 'Risk log and decision-support prompts', 'SOP and report templates', 'Human review checklist'],
   },
 ];
 
@@ -259,15 +272,21 @@ function Home() {
         <div className="premium-hero-grid">
           <div className="premium-hero-copy">
             <p className="hero-eyebrow-pill">Practical AI Systems</p>
-            <h1>Practical AI Systems for Small Businesses and Real Estate Professionals</h1>
+            <h1>AI-Augmented Project Management Systems for Small Businesses and Real Estate Professionals</h1>
             <p className="hero-lede">
-              We help owners, operators, and real estate professionals organize follow-up, documents, tasks, communication,
-              and workflow execution using practical systems, project management structure, and AI support where it adds value.
+              We help owners, operators, and real estate professionals structure unclear work into practical project systems: clear scope, priorities, owners, timelines, risks, communication, documents, and AI-supported workflows.
             </p>
             <div className="hero-actions premium-hero-actions">
               <CTAButton>Book a 15-Minute Review</CTAButton>
               <Link className="button secondary" to="/services">Explore What I Do</Link>
               <Link className="button pilot-link" to="/real-estate-ai-pm-pilot">Real Estate AI PM Pilot</Link>
+            </div>
+            <p className="trust-line">Not just automation. Project structure, decision support, and delivery discipline powered by practical AI.</p>
+            <div className="hero-proof-row" aria-label="Practical focus areas">
+              <span>Follow-up</span>
+              <span>Documents</span>
+              <span>Tasks</span>
+              <span>Decisions</span>
             </div>
             <p className="trust-line">Not just automation. Better structure, better coordination, better execution.</p>
             <div className="hero-proof-row" aria-label="Practical focus areas">
@@ -286,24 +305,24 @@ function Home() {
             <p className="trust-line">Start with the workflow. Add AI only where it makes the work clearer, faster, or easier to manage.</p>
           </div>
 
-          <aside className="hero-signal-panel execution-panel" aria-label="Structured execution framework visual">
+          <aside className="hero-signal-panel execution-panel" aria-label="Project Control Layer framework visual">
             <div className="signal-panel-header">
-              <p className="card-topline">Structured execution</p>
-              <strong>Bring structure, ownership, and visibility into daily work.</strong>
-              <span>Project-management thinking with practical AI support where it helps.</span>
+              <p className="card-topline">Project Control Layer</p>
+              <strong>From unclear work to structured project control.</strong>
+              <span>Scope, priorities, ownership, risks, timelines, communication, and human-reviewed AI outputs in one practical operating layer.</span>
             </div>
             <div className="execution-framework-grid">
-              <div className="execution-node"><span>01</span><strong>Input</strong><p>Requests, notes, documents, client messages</p></div>
-              <div className="execution-node"><span>02</span><strong>Workflow</strong><p>Clarified steps, handoffs, priorities</p></div>
-              <div className="execution-node"><span>03</span><strong>Ownership</strong><p>Assigned next action, deadline, accountable person</p></div>
-              <div className="execution-node"><span>04</span><strong>Review</strong><p>Human checks before client-facing output</p></div>
-              <div className="execution-node"><span>05</span><strong>Follow-up</strong><p>Tracked communication and recurring routines</p></div>
-              <div className="execution-node"><span>06</span><strong>Visibility</strong><p>Clear status for owners, teams, and clients</p></div>
+              <div className="execution-node"><span>01</span><strong>Intake / Problem</strong><p>Requests, constraints, context, and the real issue to solve</p></div>
+              <div className="execution-node"><span>02</span><strong>Scope / Priorities</strong><p>What matters, what is out of scope, and what comes first</p></div>
+              <div className="execution-node"><span>03</span><strong>Owners / Timeline</strong><p>Accountability, milestones, handoffs, and due dates</p></div>
+              <div className="execution-node"><span>04</span><strong>Risks / Decisions</strong><p>Open questions, tradeoffs, blockers, and decision points</p></div>
+              <div className="execution-node"><span>05</span><strong>AI Support / Documentation</strong><p>Drafts, summaries, reports, SOPs, and project records</p></div>
+              <div className="execution-node"><span>06</span><strong>Review / Delivery</strong><p>Human-reviewed outputs, follow-up, monitoring, and delivery</p></div>
             </div>
             <div className="execution-outcome-bar">
-              <span>Less fragmentation</span>
-              <span>Clearer coordination</span>
-              <span>Better execution</span>
+              <span>Scope clarity</span>
+              <span>Decision support</span>
+              <span>Delivery control</span>
             </div>
           </aside>
         </div>
@@ -316,9 +335,7 @@ function Home() {
             <h2>More than prompts. More than automation.</h2>
           </div>
           <p>
-            We help businesses clarify workflows, define ownership, improve coordination, strengthen follow-up,
-            structure recurring work, and introduce AI in a practical, controlled way. The goal is not to replace
-            management. The goal is to improve execution.
+            We help businesses clarify workflows, define ownership, improve coordination, strengthen follow-up, structure recurring work, identify risks, improve reporting, and introduce AI in a practical, controlled way. The goal is not to replace management. The goal is to strengthen project clarity, decisions, and delivery.
           </p>
         </div>
       </section>
@@ -446,8 +463,8 @@ function Services() {
     <>
       <PageIntro
         eyebrow="Services"
-        title="Practical systems for owners who want clarity, not complexity."
-        text="Start with the work your business already does. Then add AI, templates, trackers, and simple routines only where they help."
+        title="Practical project systems for owners who want clarity, coordination, and control."
+        text="Start with the work your business already does. Then clarify scope, priorities, ownership, timelines, communication, risks, and where AI can support delivery."
       />
       <section className="section-shell service-detail-grid service-card-grid">
         {serviceBlocks.map((service) => (
@@ -472,6 +489,19 @@ function Services() {
             <CTAButton>Book a Call</CTAButton>
           </article>
         ))}
+      </section>
+
+      <section className="section-shell ai-supported-pm-section">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">Practical support areas</div>
+            <h2>What AI-supported PM can help with</h2>
+          </div>
+          <p>Use AI as support inside a managed project or operations system: clarify, plan, communicate, document, monitor, and review.</p>
+        </div>
+        <div className="pm-support-grid">
+          {aiSupportedPmCards.map((item) => <article className="compact-card" key={item}>{item}</article>)}
+        </div>
       </section>
 
       <section className="section-shell business-examples-section">

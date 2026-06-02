@@ -2324,3 +2324,37 @@ h1 {
     width: min(100% - 28px, 1360px);
   }
 }
+
+.ai-supported-pm-section {
+  width: min(1360px, calc(100% - 56px));
+  padding: var(--section-space) 0 0;
+}
+
+.pm-support-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.pm-support-grid .compact-card {
+  min-height: 106px;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 252, 246, 0.84);
+}
+
+@media (max-width: 980px) {
+  .pm-support-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .ai-supported-pm-section {
+    width: min(100% - 28px, 1360px);
+  }
+
+  .pm-support-grid {
+    grid-template-columns: 1fr;
+  }
+}
