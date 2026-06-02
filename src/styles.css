@@ -1696,3 +1696,229 @@ h1 {
     width: 100%;
   }
 }
+
+.trust-line {
+  max-width: 720px;
+  margin-top: 18px;
+  color: var(--accent-dark);
+  font-weight: 850;
+  line-height: 1.55;
+}
+
+.authority-card {
+  display: grid;
+  gap: 16px;
+}
+
+.authority-card p,
+.help-card p,
+.pilot-highlight p,
+.resources-highlight p,
+.related-work-section p,
+.final-funnel-cta p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.funnel-section,
+.workflow-visual-section,
+.related-work-section,
+.business-examples-section {
+  padding: var(--section-space) 0;
+}
+
+.single-column-header {
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+.audience-grid,
+.issue-grid,
+.help-card-grid,
+.related-work-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.audience-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.issue-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin-top: 32px;
+}
+
+.compact-card {
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgba(251, 248, 241, 0.78);
+  box-shadow: 0 14px 36px rgba(32, 56, 47, 0.08);
+  color: var(--forest);
+  font-weight: 850;
+  line-height: 1.35;
+  padding: 20px;
+}
+
+.issue-card {
+  min-height: 120px;
+  background: rgba(255, 252, 246, 0.8);
+}
+
+.workflow-step-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.workflow-step-card {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  min-height: 138px;
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: rgba(251, 248, 241, 0.84);
+  padding: 20px;
+  box-shadow: 0 14px 36px rgba(32, 56, 47, 0.08);
+}
+
+.workflow-step-card:not(:last-child)::after {
+  content: '→';
+  position: absolute;
+  top: 50%;
+  right: -13px;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--forest);
+  color: #fffaf0;
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  font-weight: 900;
+}
+
+.workflow-step-card span {
+  color: var(--accent-dark);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.workflow-step-card strong {
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.help-card-grid,
+.related-work-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.related-work-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.help-card {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.help-card .button,
+.related-work-section .button {
+  width: fit-content;
+  margin-top: 8px;
+}
+
+.pilot-highlight,
+.resources-highlight {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.5fr);
+  gap: clamp(24px, 5vw, 52px);
+  align-items: center;
+  border: 1px solid rgba(32, 56, 47, 0.18);
+  border-radius: 36px;
+  background:
+    radial-gradient(circle at 85% 20%, rgba(166, 111, 63, 0.16), transparent 20rem),
+    rgba(251, 248, 241, 0.86);
+  box-shadow: var(--shadow);
+  margin-top: var(--section-space);
+  padding: clamp(28px, 6vw, 60px);
+}
+
+.pilot-highlight h3 {
+  margin-top: 14px;
+  color: var(--accent-dark);
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+}
+
+.pilot-highlight p,
+.resources-highlight p {
+  margin: 18px 0 26px;
+  max-width: 760px;
+}
+
+.pilot-example-list,
+.resources-highlight ul {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: rgba(255, 252, 246, 0.68);
+  padding: 24px 24px 24px 42px;
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.resource-bottom-cta {
+  padding-top: var(--section-space);
+}
+
+.light-outline {
+  border-color: rgba(255, 250, 240, 0.4) !important;
+  background: rgba(255, 250, 240, 0.12) !important;
+  color: #fffaf0 !important;
+}
+
+.soft-related-note {
+  border-top: 1px solid var(--line);
+  margin-top: 24px !important;
+  padding-top: 22px;
+}
+
+@media (max-width: 1100px) {
+  .issue-grid,
+  .workflow-step-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .workflow-step-card:nth-child(3)::after {
+    display: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .audience-grid,
+  .help-card-grid,
+  .related-work-grid,
+  .pilot-highlight,
+  .resources-highlight {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .audience-grid,
+  .issue-grid,
+  .workflow-step-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .workflow-step-card::after {
+    display: none !important;
+  }
+}

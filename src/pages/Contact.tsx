@@ -59,8 +59,8 @@ export function Contact() {
         <div className="contact-hero-grid">
           <div className="contact-hero-copy">
             <p className="eyebrow">Contact</p>
-            <h1>Let’s make AI useful for the workflow that is slowing you down.</h1>
-            <p className="hero-lede">Tell me what is happening in your business, where work gets stuck, and what kind of practical AI + project management support you want next.</p>
+            <h1>Let’s make your workflow clearer before adding more tools.</h1>
+            <p className="hero-lede">Tell me what is happening in your business, where work gets stuck, and what kind of practical AI and workflow support you want next.</p>
           </div>
           <div className="contact-summary-card">
             <p className="card-topline">Best fit</p>
