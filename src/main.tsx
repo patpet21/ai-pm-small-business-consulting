@@ -255,26 +255,59 @@ function SiteFooter() {
 function Home() {
   return (
     <>
-      <section className="hero section-shell home-funnel-hero">
-        <div className="hero-grid">
-          <div className="hero-copy">
-            <p className="eyebrow">Practical AI Systems</p>
+      <section className="hero section-shell home-funnel-hero premium-hero">
+        <div className="premium-hero-grid">
+          <div className="premium-hero-copy">
+            <p className="hero-eyebrow-pill">Practical AI Systems</p>
             <h1>Practical AI Systems for Small Businesses and Real Estate Professionals</h1>
             <p className="hero-lede">
               I help owners, operators, and real estate professionals turn scattered information, client follow-up,
               documents, tasks, and decisions into clearer systems supported by practical AI.
             </p>
-            <div className="hero-actions">
+            <div className="hero-actions premium-hero-actions">
               <CTAButton>Book a 15-Minute Review</CTAButton>
               <Link className="button secondary" to="/services">Explore What I Do</Link>
-              <Link className="button secondary" to="/real-estate-ai-pm-pilot">Real Estate AI PM Pilot</Link>
+              <Link className="button pilot-link" to="/real-estate-ai-pm-pilot">Real Estate AI PM Pilot</Link>
+            </div>
+            <p className="trust-line">Start with the workflow. Add AI only where it makes the work clearer, faster, or easier to manage.</p>
+            <div className="hero-proof-row" aria-label="Practical focus areas">
+              <span>Follow-up</span>
+              <span>Documents</span>
+              <span>Tasks</span>
+              <span>Decisions</span>
             </div>
             <p className="trust-line">Start with the workflow. Add AI only where it makes the work clearer, faster, or easier to manage.</p>
           </div>
-          <aside className="hero-card authority-card" aria-label="Practical AI Systems positioning">
-            <div className="card-topline">What this is</div>
-            <h3>Structure, clarity, and useful AI support for everyday business workflows.</h3>
-            <p>Practical support for follow-up, documents, tasks, client communication, decisions, and repeatable processes.</p>
+
+          <aside className="hero-signal-panel" aria-label="Problem to solution workflow visual">
+            <div className="signal-panel-header">
+              <p className="card-topline">Problem → system</p>
+              <strong>Turn daily inputs into clear next actions.</strong>
+            </div>
+            <div className="before-after-grid">
+              <div className="signal-column problem-column">
+                <span>Before</span>
+                <ul>
+                  <li>Client notes in different places</li>
+                  <li>No clear owner for the next step</li>
+                  <li>Follow-up depends on memory</li>
+                </ul>
+              </div>
+              <div className="signal-column solution-column">
+                <span>After</span>
+                <ul>
+                  <li>AI-supported summary</li>
+                  <li>Human-reviewed next action</li>
+                  <li>Owner, deadline, and follow-up tracked</li>
+                </ul>
+              </div>
+            </div>
+            <div className="mini-workflow-bar">
+              <span>Input</span>
+              <span>Review</span>
+              <span>Action</span>
+              <span>Follow-up</span>
+            </div>
           </aside>
         </div>
       </section>
