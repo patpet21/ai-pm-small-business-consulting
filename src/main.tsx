@@ -261,13 +261,20 @@ function Home() {
             <p className="hero-eyebrow-pill">Practical AI Systems</p>
             <h1>Practical AI Systems for Small Businesses and Real Estate Professionals</h1>
             <p className="hero-lede">
-              I help owners, operators, and real estate professionals turn scattered information, client follow-up,
-              documents, tasks, and decisions into clearer systems supported by practical AI.
+              We help owners, operators, and real estate professionals organize follow-up, documents, tasks, communication,
+              and workflow execution using practical systems, project management structure, and AI support where it adds value.
             </p>
             <div className="hero-actions premium-hero-actions">
               <CTAButton>Book a 15-Minute Review</CTAButton>
               <Link className="button secondary" to="/services">Explore What I Do</Link>
               <Link className="button pilot-link" to="/real-estate-ai-pm-pilot">Real Estate AI PM Pilot</Link>
+            </div>
+            <p className="trust-line">Not just automation. Better structure, better coordination, better execution.</p>
+            <div className="hero-proof-row" aria-label="Practical focus areas">
+              <span>Follow-up</span>
+              <span>Documents</span>
+              <span>Tasks</span>
+              <span>Decisions</span>
             </div>
             <p className="trust-line">Start with the workflow. Add AI only where it makes the work clearer, faster, or easier to manage.</p>
             <div className="hero-proof-row" aria-label="Practical focus areas">
@@ -279,36 +286,40 @@ function Home() {
             <p className="trust-line">Start with the workflow. Add AI only where it makes the work clearer, faster, or easier to manage.</p>
           </div>
 
-          <aside className="hero-signal-panel" aria-label="Problem to solution workflow visual">
+          <aside className="hero-signal-panel execution-panel" aria-label="Structured execution framework visual">
             <div className="signal-panel-header">
-              <p className="card-topline">Problem → system</p>
-              <strong>Turn daily inputs into clear next actions.</strong>
+              <p className="card-topline">Structured execution</p>
+              <strong>Bring structure, ownership, and visibility into daily work.</strong>
+              <span>Project-management thinking with practical AI support where it helps.</span>
             </div>
-            <div className="before-after-grid">
-              <div className="signal-column problem-column">
-                <span>Before</span>
-                <ul>
-                  <li>Client notes in different places</li>
-                  <li>No clear owner for the next step</li>
-                  <li>Follow-up depends on memory</li>
-                </ul>
-              </div>
-              <div className="signal-column solution-column">
-                <span>After</span>
-                <ul>
-                  <li>AI-supported summary</li>
-                  <li>Human-reviewed next action</li>
-                  <li>Owner, deadline, and follow-up tracked</li>
-                </ul>
-              </div>
+            <div className="execution-framework-grid">
+              <div className="execution-node"><span>01</span><strong>Input</strong><p>Requests, notes, documents, client messages</p></div>
+              <div className="execution-node"><span>02</span><strong>Workflow</strong><p>Clarified steps, handoffs, priorities</p></div>
+              <div className="execution-node"><span>03</span><strong>Ownership</strong><p>Assigned next action, deadline, accountable person</p></div>
+              <div className="execution-node"><span>04</span><strong>Review</strong><p>Human checks before client-facing output</p></div>
+              <div className="execution-node"><span>05</span><strong>Follow-up</strong><p>Tracked communication and recurring routines</p></div>
+              <div className="execution-node"><span>06</span><strong>Visibility</strong><p>Clear status for owners, teams, and clients</p></div>
             </div>
-            <div className="mini-workflow-bar">
-              <span>Input</span>
-              <span>Review</span>
-              <span>Action</span>
-              <span>Follow-up</span>
+            <div className="execution-outcome-bar">
+              <span>Less fragmentation</span>
+              <span>Clearer coordination</span>
+              <span>Better execution</span>
             </div>
           </aside>
+        </div>
+      </section>
+
+      <section className="section-shell beyond-automation-section">
+        <div className="beyond-automation-panel">
+          <div>
+            <p className="eyebrow">How this is different</p>
+            <h2>More than prompts. More than automation.</h2>
+          </div>
+          <p>
+            We help businesses clarify workflows, define ownership, improve coordination, strengthen follow-up,
+            structure recurring work, and introduce AI in a practical, controlled way. The goal is not to replace
+            management. The goal is to improve execution.
+          </p>
         </div>
       </section>
 
