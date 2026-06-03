@@ -7,13 +7,43 @@ import './styles.css';
 
 const calendlyLink = 'https://calendly.com/propertydext/15min';
 
-const audienceCards = [
-  'Small business owners',
-  'Real estate professionals',
-  'Property managers',
-  'Brokers and small real estate teams',
-  'Consultants and service businesses',
-  'Operators managing clients, documents, tasks, and follow-ups',
+const sectorCards = [
+  {
+    title: 'Real Estate Teams',
+    copy: 'Lead follow-up, client updates, property documents, vendors, transaction tasks.',
+    cta: 'Explore Real Estate Pilot',
+    to: '/real-estate-ai-pm-pilot',
+  },
+  {
+    title: 'Events & Nonprofits',
+    copy: 'Fundraising events, stakeholder communication, budgets, timelines, sponsors, volunteers, post-event reporting.',
+    cta: 'View Services',
+    to: '/services',
+  },
+  {
+    title: 'Contractors & Renovation Teams',
+    copy: 'Estimates, site notes, change requests, vendors, materials, timelines, client updates.',
+    cta: 'View Services',
+    to: '/services',
+  },
+  {
+    title: 'Consultants & Service Professionals',
+    copy: 'Discovery calls, proposals, recommendations, project plans, client deliverables, reports.',
+    cta: 'View Services',
+    to: '/services',
+  },
+  {
+    title: 'Small Business Owners',
+    copy: 'Internal operations, recurring tasks, documents, follow-ups, team coordination, weekly priorities.',
+    cta: 'Book a Review',
+    href: calendlyLink,
+  },
+  {
+    title: 'Founders & Operators',
+    copy: 'Ideas, business models, launch plans, roadmaps, risks, decisions, and execution systems.',
+    cta: 'Book a Call',
+    href: calendlyLink,
+  },
 ];
 
 const issueCards = [
@@ -272,23 +302,16 @@ function Home() {
         <div className="premium-hero-grid">
           <div className="premium-hero-copy">
             <p className="hero-eyebrow-pill">Practical AI Systems</p>
-            <h1>AI-Augmented Project Management Systems for Small Businesses and Real Estate Professionals</h1>
+            <h1>AI + Project Management Systems for Small Businesses and Project-Based Teams</h1>
             <p className="hero-lede">
-              We help owners, operators, and real estate professionals structure unclear work into practical project systems: clear scope, priorities, owners, timelines, risks, communication, documents, and AI-supported workflows.
+              I help owners, operators, and small teams turn ideas, client work, events, operations, and business workflows into structured projects with clear scope, tasks, timelines, risks, documents, communication, and AI-supported execution.
             </p>
             <div className="hero-actions premium-hero-actions">
               <CTAButton>Book a 15-Minute Review</CTAButton>
               <Link className="button secondary" to="/services">Explore What I Do</Link>
               <Link className="button pilot-link" to="/real-estate-ai-pm-pilot">Real Estate AI PM Pilot</Link>
             </div>
-            <p className="trust-line">Not just automation. Project structure, decision support, and delivery discipline powered by practical AI.</p>
-            <div className="hero-proof-row" aria-label="Practical focus areas">
-              <span>Follow-up</span>
-              <span>Documents</span>
-              <span>Tasks</span>
-              <span>Decisions</span>
-            </div>
-            <p className="trust-line">Not just automation. Better structure, better coordination, better execution.</p>
+            <p className="trust-line">Not just automation. Project structure, decision support, documentation, and practical delivery systems.</p>
             <div className="hero-proof-row" aria-label="Practical focus areas">
               <span>Follow-up</span>
               <span>Documents</span>
@@ -344,11 +367,21 @@ function Home() {
         <div className="section-header single-column-header">
           <div>
             <div className="section-kicker">Who this is for</div>
-            <h2>Built for people who need practical systems, not another complicated tool.</h2>
+            <h2>Who this is for</h2>
           </div>
         </div>
-        <div className="audience-grid">
-          {audienceCards.map((audience) => <article className="compact-card" key={audience}>{audience}</article>)}
+        <div className="audience-grid sector-grid">
+          {sectorCards.map((sector) => (
+            <article className="compact-card sector-card" key={sector.title}>
+              <h3>{sector.title}</h3>
+              <p>{sector.copy}</p>
+              {sector.to ? (
+                <Link className="text-link" to={sector.to}>{sector.cta}</Link>
+              ) : (
+                <a className="text-link" href={sector.href} target="_blank" rel="noreferrer">{sector.cta}</a>
+              )}
+            </article>
+          ))}
         </div>
       </section>
 
@@ -409,10 +442,9 @@ function Home() {
 
       <section className="section-shell pilot-highlight">
         <div className="pilot-highlight-copy">
-          <p className="eyebrow">Real Estate AI PM Pilot</p>
-          <h2>Real Estate AI PM Pilot</h2>
-          <h3>A practical test for real estate professionals who want to organize one disconnected workflow.</h3>
-          <p>This pilot is designed for realtors, brokers, property managers, and small real estate teams that want to turn one real workflow into a clearer AI-supported process.</p>
+          <p className="eyebrow">Featured Pilot</p>
+          <h2>Featured Pilot: Real Estate AI PM Pilot</h2>
+          <p>A focused pilot for real estate professionals who want to organize one workflow: leads, follow-up, documents, vendors, client updates, tasks, or weekly visibility.</p>
           <Link className="button primary" to="/real-estate-ai-pm-pilot">Apply for the Free Pilot</Link>
         </div>
         <ul className="pilot-example-list">

@@ -2358,3 +2358,48 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+.sector-grid {
+  gap: 18px;
+}
+
+.sector-card {
+  min-height: 238px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background:
+    linear-gradient(145deg, rgba(255, 252, 246, 0.94), rgba(245, 240, 229, 0.84));
+  border-color: rgba(32, 56, 47, 0.12);
+}
+
+.sector-card h3 {
+  color: var(--ink);
+  font-size: 1.08rem;
+  letter-spacing: -0.018em;
+}
+
+.sector-card p {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.96rem;
+  font-weight: 650;
+  line-height: 1.58;
+}
+
+.sector-card .text-link {
+  margin-top: auto;
+  padding-top: 20px;
+  color: var(--accent-dark);
+  font-size: 0.92rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.sector-card .text-link::after {
+  content: ' →';
+}
+
+.sector-card .text-link:hover {
+  color: var(--forest);
+}
