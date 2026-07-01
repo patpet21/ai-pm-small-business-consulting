@@ -903,6 +903,13 @@ function Resources() {
           <Link className="button primary light" to="/contact">Book an AI Use Review</Link>
         </div>
       </section>
+      <section className="cta section-shell resource-bottom-cta">
+        <div className="cta-panel">
+          <p className="eyebrow">Apply this to your work</p>
+          <h2>Want this adapted to your business?</h2>
+          <CTAButton light>Book a 15-Minute Review</CTAButton>
+        </div>
+      </section>
     </>
   );
 }
