@@ -285,9 +285,20 @@ function testFullCodeInstall() {
   setupAsyncSnapshotStatusSheet();
   const diagnostic = buildAsyncDiagnostic({ workflowType: 'Install test', currentProcess: 'Test process', mainPainPoints: 'Test pain point' });
   const fallback = buildRuleBasedInstantSnapshot({ workflowType: 'Install test', diagnostic: diagnostic }, 'Install test fallback.');
-  const response = handleStatus({ submissionId: '__INSTALL_TEST__' });
-  Logger.log(JSON.stringify({ version: FULL_CODE_VERSION, statusResponse: response, diagnosticFallbackOk: Boolean(diagnostic.workflowDetected), snapshotFallbackOk: Boolean(fallback.first48HourFix && fallback.aiPromptPack && fallback.aiPromptPack.length) }));
-  return { success: true, version: FULL_CODE_VERSION, diagnosticFallbackOk: Boolean(diagnostic.workflowDetected), snapshotFallbackOk: Boolean(fallback.first48HourFix && fallback.aiPromptPack && fallback.aiPromptPack.length) };
+  const statusResponse = handleStatus({ submissionId: '__INSTALL_TEST__' });
+  const diagnosticFallbackOk = Boolean(diagnostic.workflowDetected);
+  const snapshotFallbackOk = Boolean(fallback.first48HourFix && fallback.aiPromptPack && fallback.aiPromptPack.length);
+  const statusRouteOk = Boolean(statusResponse && statusResponse.status === 'AI_GENERATION_FAILED' && statusResponse.message === 'Submission status was not found.');
+  const result = {
+    success: diagnosticFallbackOk && snapshotFallbackOk && statusRouteOk,
+    version: FULL_CODE_VERSION,
+    diagnosticFallbackOk: diagnosticFallbackOk,
+    snapshotFallbackOk: snapshotFallbackOk,
+    statusRouteOk: statusRouteOk,
+    statusRouteNote: 'Expected fake install-test ID to return not found quickly without calling Gemini.'
+  };
+  Logger.log(JSON.stringify(result));
+  return result;
 }
 
 
@@ -988,15 +999,22 @@ function upsertAsyncSnapshotStatus(submissionId, status, intakeJson, snapshotJso
  *
  * Non-developer check after pasting/deploying this patch:
  * - In Apps Script, select testAsyncDispatcherInstall from the Run dropdown.
- * - It should log a fast JSON response with status AI_GENERATION_FAILED and
- *   message "Submission status was not found." for the fake install-test ID.
+ * - It should log success:true and statusRouteOk:true for the fake install-test ID.
  * - That proves the async status route is installed and is not calling Gemini.
  ************************************************************/
 function testAsyncDispatcherInstall() {
-  const response = handleStatus({ submissionId: '__INSTALL_TEST__' });
+  const statusResponse = handleStatus({ submissionId: '__INSTALL_TEST__' });
   const diagnostic = buildAsyncDiagnostic({ workflowType: 'Install test', currentProcess: 'Test process', mainPainPoints: 'Test pain point' });
-  Logger.log(JSON.stringify({ statusResponse: response, diagnosticFallbackOk: Boolean(diagnostic.workflowDetected) }));
-  return response;
+  const diagnosticFallbackOk = Boolean(diagnostic.workflowDetected);
+  const statusRouteOk = Boolean(statusResponse && statusResponse.status === 'AI_GENERATION_FAILED' && statusResponse.message === 'Submission status was not found.');
+  const result = {
+    success: diagnosticFallbackOk && statusRouteOk,
+    diagnosticFallbackOk: diagnosticFallbackOk,
+    statusRouteOk: statusRouteOk,
+    statusRouteNote: 'Expected fake install-test ID to return not found quickly without calling Gemini.'
+  };
+  Logger.log(JSON.stringify(result));
+  return result;
 }
 
 /************************************************************
