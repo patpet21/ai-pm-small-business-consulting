@@ -1,20 +1,309 @@
 /************************************************************
- * PROPERTYDEX / REAL ESTATE AI PM PILOT — ASYNC CODE.GS PATCH
+ * PROPERTYDEX / REAL ESTATE AI PM PILOT — FULL CODE.GS
  *
- * Paste this block at the VERY BOTTOM of Code.gs, or DELETE/REPLACE the old synchronous doPost(e).
- * Apps Script uses the last function doPost(e) definition in the file; if an old
- * doPost(e) appears after this block, action=start/status will still run the
- * legacy processSubmission() flow.
- * This patch assumes your existing Code.gs still provides:
- * - CONFIG
- * - getSpreadsheet()
- * - getConfigValue(key, fallbackValue)
- * - parseRequestData(e)
- * - cleanValue(value)
- * - createSubmissionId()
- * - ensureSheetWithHeaders(ss, sheetName, headers)
- * - createInstantSnapshotWithGemini(data)
- * - processSubmission(data) only if you intentionally add a separate legacy route
+ * NON-DEVELOPER INSTALL:
+ * 1) Open Apps Script > Code.gs.
+ * 2) Select all existing Code.gs text.
+ * 3) Replace it with this entire file.
+ * 4) Save.
+ * 5) Run testFullCodeInstall once.
+ * 6) Deploy > Manage deployments > Edit > New version > Deploy.
+ *
+ * Optional Script Properties:
+ * - GEMINI_API_KEY: Google Gemini API key. If missing, the script returns a
+ *   rules-based preliminary snapshot instead of failing.
+ * - GEMINI_MODEL: Gemini model name. Default: gemini-1.5-flash.
+ * - SPREADSHEET_ID: Spreadsheet ID for saved status/intake rows. If missing,
+ *   this script uses the bound spreadsheet or creates one automatically.
+ ************************************************************/
+
+const FULL_CODE_VERSION = '2026-05-29-full-v1';
+const FULL_CONFIG = {
+  spreadsheetIdProperty: 'SPREADSHEET_ID',
+  geminiApiKeyProperty: 'GEMINI_API_KEY',
+  geminiModelProperty: 'GEMINI_MODEL',
+  defaultGeminiModel: 'gemini-1.5-flash',
+  generatedSpreadsheetName: 'Real Estate AI PM Submissions'
+};
+
+function cleanValue(value) {
+  if (value === null || value === undefined) return '';
+  if (Array.isArray(value)) return value.map(cleanValue).filter(Boolean).join(', ');
+  return String(value).trim();
+}
+
+function parseRequestData(e) {
+  const raw = e && e.postData && e.postData.contents ? e.postData.contents : '';
+  if (raw) {
+    try {
+      return JSON.parse(raw);
+    } catch (error) {
+      return Object.assign({}, e && e.parameter ? e.parameter : {}, { rawBody: raw });
+    }
+  }
+  return Object.assign({}, e && e.parameter ? e.parameter : {});
+}
+
+function createSubmissionId() {
+  const now = new Date();
+  const pad = function(value) { return String(value).padStart(2, '0'); };
+  const datePart = now.getUTCFullYear() + pad(now.getUTCMonth() + 1) + pad(now.getUTCDate()) + '-' + pad(now.getUTCHours()) + pad(now.getUTCMinutes()) + pad(now.getUTCSeconds());
+  const randomPart = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  return 'RE-AI-' + datePart + '-' + randomPart;
+}
+
+function getConfigValue(key, fallbackValue) {
+  const properties = PropertiesService.getScriptProperties();
+  const directValue = cleanValue(properties.getProperty(key));
+  if (directValue) return directValue;
+
+  const upperValue = cleanValue(properties.getProperty(String(key).toUpperCase()));
+  if (upperValue) return upperValue;
+
+  if (typeof CONFIG !== 'undefined' && CONFIG && CONFIG[key]) return CONFIG[key];
+  return fallbackValue;
+}
+
+function getSpreadsheet() {
+  const properties = PropertiesService.getScriptProperties();
+  const spreadsheetId = cleanValue(properties.getProperty(FULL_CONFIG.spreadsheetIdProperty));
+  if (spreadsheetId) return SpreadsheetApp.openById(spreadsheetId);
+
+  const active = SpreadsheetApp.getActiveSpreadsheet();
+  if (active) {
+    properties.setProperty(FULL_CONFIG.spreadsheetIdProperty, active.getId());
+    return active;
+  }
+
+  const created = SpreadsheetApp.create(FULL_CONFIG.generatedSpreadsheetName);
+  properties.setProperty(FULL_CONFIG.spreadsheetIdProperty, created.getId());
+  return created;
+}
+
+function ensureSheetWithHeaders(ss, sheetName, headers) {
+  let sheet = ss.getSheetByName(sheetName);
+  if (!sheet) sheet = ss.insertSheet(sheetName);
+
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.setFrozenRows(1);
+    return sheet;
+  }
+
+  const existingHeaders = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), headers.length)).getValues()[0].map(cleanValue);
+  const needsHeaderRefresh = headers.some(function(header, index) { return existingHeaders[index] !== header; });
+  if (needsHeaderRefresh) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.setFrozenRows(1);
+  }
+
+  return sheet;
+}
+
+function getGeminiApiKey() {
+  return getConfigValue(FULL_CONFIG.geminiApiKeyProperty, '');
+}
+
+function getGeminiModel() {
+  return getConfigValue(FULL_CONFIG.geminiModelProperty, FULL_CONFIG.defaultGeminiModel);
+}
+
+function createInstantSnapshotWithGemini(data) {
+  const fallbackSnapshot = buildRuleBasedInstantSnapshot(data, 'Rules-based fallback was available if Gemini returned malformed output.');
+  const apiKey = getGeminiApiKey();
+
+  if (!apiKey) {
+    return buildRuleBasedInstantSnapshot(data, 'Gemini API key is not configured in Apps Script Script Properties, so this is a rules-based preliminary snapshot. Add GEMINI_API_KEY for model-generated wording.');
+  }
+
+  const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(getGeminiModel()) + ':generateContent?key=' + encodeURIComponent(apiKey);
+  const prompt = buildSnapshotPrompt(data);
+  const payload = {
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.35,
+      maxOutputTokens: 6000,
+      responseMimeType: 'application/json'
+    }
+  };
+
+  const response = UrlFetchApp.fetch(endpoint, {
+    method: 'post',
+    contentType: 'application/json',
+    muteHttpExceptions: true,
+    payload: JSON.stringify(payload)
+  });
+
+  const statusCode = response.getResponseCode();
+  const body = response.getContentText();
+  if (statusCode === 429 || statusCode === 503) {
+    throw new Error('Gemini API error ' + statusCode + ': ' + body);
+  }
+  if (statusCode < 200 || statusCode >= 300) {
+    throw new Error('Gemini API error ' + statusCode + ': ' + body);
+  }
+
+  const parsedBody = JSON.parse(body);
+  const text = cleanValue(parsedBody && parsedBody.candidates && parsedBody.candidates[0] && parsedBody.candidates[0].content && parsedBody.candidates[0].content.parts && parsedBody.candidates[0].content.parts[0] && parsedBody.candidates[0].content.parts[0].text);
+  const snapshot = parseJsonObjectFromText(text);
+  return normalizeSnapshot(Object.assign({}, fallbackSnapshot, snapshot));
+}
+
+function buildSnapshotPrompt(data) {
+  return [
+    'You are creating a preliminary AI PM Workflow Snapshot for a real estate professional.',
+    'Return ONLY valid JSON. No markdown. No code fence.',
+    cleanValue(data.reportPromptInstructions),
+    'Use direct client-facing language: you, your, your team. Do not say the client, the user, or the submitter.',
+    'Do not provide legal, tax, financial, investment, brokerage, licensing, or compliance advice.',
+    'If compliance-sensitive topics appear, say: Confirm compliance-sensitive requirements with your broker, legal counsel, or appropriate professional advisor.',
+    'Required JSON fields:',
+    JSON.stringify(buildRequiredSnapshotShape()),
+    'Intake data:',
+    JSON.stringify(data)
+  ].join('\n\n');
+}
+
+function buildRequiredSnapshotShape() {
+  return {
+    workflowReadinessScore: 50,
+    workflowMaturity: 'string',
+    workflowDetected: 'string',
+    executiveSummary: 'string',
+    problemStatement: 'string',
+    mainBottleneck: 'string',
+    recommendedPriority: 'string',
+    recommendedFirstStep: 'string',
+    suggestedSimpleSystem: 'string',
+    topWorkflowGaps: ['string', 'string', 'string'],
+    first48HourFix: { title: 'string', description: 'string', trackerName: 'string', columns: ['Lead/Client', 'Next action'], statuses: ['New', 'In progress', 'Done'] },
+    wbsTaskBreakdown: [{ taskName: 'string', ownerType: 'string', output: 'string', acceptanceCriteria: 'string' }],
+    aiPromptPack: [{ title: 'string', prompt: 'string' }],
+    scarfTrustCheck: [{ domain: 'Status', risk: 'string', recommendation: 'string' }],
+    aiUseTransparencySummary: { inputUsed: 'string', outputGenerated: 'string', humanValidation: 'string', sensitiveDataWarning: 'string' },
+    aiOpportunities: ['string', 'string', 'string'],
+    quickWin: 'string',
+    sevenDayRoadmap: ['string'],
+    humanReviewedReportPreview: ['string'],
+    riskNotes: ['string'],
+    nextStep: 'string',
+    ctaPrimary: 'Book a 15-minute review',
+    ctaSecondary: 'Request human-reviewed report',
+    disclaimer: 'string'
+  };
+}
+
+function parseJsonObjectFromText(text) {
+  const cleaned = cleanValue(text).replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch (error) {
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start !== -1 && end !== -1 && end > start) {
+      return JSON.parse(cleaned.slice(start, end + 1));
+    }
+    throw error;
+  }
+}
+
+function buildRuleBasedInstantSnapshot(data, fallbackNote) {
+  const diagnostic = data.diagnostic || buildAsyncDiagnostic(data);
+  const workflow = cleanValue(diagnostic.workflowDetected || data.workflowType) || 'Real estate workflow';
+  const pain = cleanValue(data.mainPainPoints || diagnostic.mainBottleneck) || 'The workflow needs a clearer next-action system.';
+  const process = cleanValue(data.currentProcess) || 'Your current process was not fully documented in the intake.';
+  const source = cleanValue(data.informationStartsFrom) || 'your usual lead or client source';
+  const tools = cleanValue(data.currentTools) || 'your current tools';
+
+  return normalizeSnapshot({
+    workflowReadinessScore: diagnostic.workflowReadinessScore || 45,
+    workflowMaturity: diagnostic.workflowMaturity || 'Needs basic documentation',
+    workflowDetected: workflow,
+    executiveSummary: 'Your biggest opportunity is to turn this ' + workflow + ' into a visible, repeatable workflow your team can follow without relying on memory.',
+    problemStatement: 'Right now, information starts from ' + source + ' and moves through ' + tools + ', but the next action, owner, and follow-up status are not clear enough at each step.',
+    mainBottleneck: pain,
+    recommendedPriority: diagnostic.recommendedPriority || 'Create one shared source of truth before adding more automation.',
+    recommendedFirstStep: diagnostic.recommendedFirstStep || 'Write the next five recurring steps in a tracker with owner, status, due date, and client-facing next action.',
+    suggestedSimpleSystem: 'Use one simple tracker plus a weekly review habit before connecting AI prompts or automations.',
+    topWorkflowGaps: diagnostic.topWorkflowGaps || ['No single source of truth', 'Unclear next action ownership', 'Follow-up language is not standardized'],
+    first48HourFix: {
+      title: 'Build your first shared workflow tracker',
+      description: 'Create a lightweight tracker for this workflow and use it for the next two business days before adding more tools.',
+      trackerName: workflow + ' Action Tracker',
+      columns: ['Client/Lead', 'Workflow stage', 'Last touch', 'Next action', 'Owner', 'Due date', 'Status', 'Notes'],
+      statuses: ['New', 'Needs review', 'Waiting on client', 'In progress', 'Done']
+    },
+    wbsTaskBreakdown: [
+      { taskName: 'Capture the request or lead', ownerType: 'Admin or assigned agent', output: 'A complete tracker row', acceptanceCriteria: 'Every new item has source, owner, and next action.' },
+      { taskName: 'Draft the next client-facing message', ownerType: 'Agent or coordinator', output: 'Clear follow-up message', acceptanceCriteria: 'Message states what happens next and when.' },
+      { taskName: 'Review open items weekly', ownerType: 'Team lead or solo owner', output: 'Updated priorities', acceptanceCriteria: 'No active item is missing a status or owner.' }
+    ],
+    aiPromptPack: [
+      { title: 'Turn notes into next actions', prompt: 'You are helping organize my ' + workflow + '. Based on these notes, create a table with client/lead, current stage, missing information, next action, owner, due date, and a suggested follow-up message. Notes: [paste notes]' },
+      { title: 'Draft a client follow-up', prompt: 'Draft a concise, professional real estate follow-up message for this situation. Use clear next steps, no legal or financial advice, and include what I need from the recipient. Situation: [paste situation]' },
+      { title: 'Weekly workflow review', prompt: 'Review this workflow tracker and identify the top 3 stuck items, the likely bottleneck, and the next action I should take in the next 48 hours. Tracker rows: [paste rows]' }
+    ],
+    scarfTrustCheck: [
+      { domain: 'Status', risk: 'Team members may feel exposed if the tracker is used to blame missed follow-ups.', recommendation: 'Frame the tracker as visibility for support, not surveillance.' },
+      { domain: 'Certainty', risk: 'People may ignore the system if statuses are unclear.', recommendation: 'Use a small fixed status list and review it weekly.' },
+      { domain: 'Autonomy', risk: 'AI suggestions may feel forced.', recommendation: 'Let the owner edit every AI-generated message before sending.' }
+    ],
+    aiUseTransparencySummary: {
+      inputUsed: 'Your intake answers about role, market, workflow, tools, pain points, and desired output.',
+      outputGenerated: 'A preliminary workflow diagnosis, tracker structure, prompt pack, and 7-day roadmap.',
+      humanValidation: 'Review all recommendations before using them with clients or your team.',
+      sensitiveDataWarning: 'Do not paste private client, financial, legal, or compliance-sensitive information into public AI tools.'
+    },
+    aiOpportunities: ['Convert messy notes into tracker rows', 'Draft consistent follow-up messages', 'Summarize open workflow items for a weekly review'],
+    quickWin: 'Create the tracker today and move three active items into it before changing any software.',
+    sevenDayRoadmap: ['Day 1: Create the tracker columns.', 'Day 2: Add active workflow items.', 'Day 3: Draft reusable follow-up prompts.', 'Day 4: Review stuck items.', 'Day 5: Standardize one client message.', 'Day 6: Assign ownership for every open item.', 'Day 7: Review what improved and what still needs human judgment.'],
+    humanReviewedReportPreview: ['A deeper workflow map', 'Tool-specific implementation guidance', 'A more complete AI prompt library', 'A practical adoption plan for your team'],
+    riskNotes: [fallbackNote, 'Confirm compliance-sensitive requirements with your broker, legal counsel, or appropriate professional advisor.', 'Keep human review in place for client-facing and compliance-sensitive work.'],
+    nextStep: 'Book a short review and bring one real example from this workflow so the system can be refined around your actual work.',
+    ctaPrimary: 'Book a 15-minute review',
+    ctaSecondary: 'Request human-reviewed report',
+    disclaimer: 'This preliminary snapshot is automatically generated and has not been reviewed by a human. It is not legal, tax, financial, investment, brokerage, or compliance advice.'
+  });
+}
+
+function normalizeSnapshot(snapshot) {
+  const normalized = snapshot || {};
+  normalized.topWorkflowGaps = Array.isArray(normalized.topWorkflowGaps) ? normalized.topWorkflowGaps : [];
+  normalized.wbsTaskBreakdown = Array.isArray(normalized.wbsTaskBreakdown) ? normalized.wbsTaskBreakdown : [];
+  normalized.aiPromptPack = Array.isArray(normalized.aiPromptPack) ? normalized.aiPromptPack : [];
+  normalized.scarfTrustCheck = Array.isArray(normalized.scarfTrustCheck) ? normalized.scarfTrustCheck : [];
+  normalized.aiOpportunities = Array.isArray(normalized.aiOpportunities) ? normalized.aiOpportunities : [];
+  normalized.sevenDayRoadmap = Array.isArray(normalized.sevenDayRoadmap) ? normalized.sevenDayRoadmap : [];
+  normalized.humanReviewedReportPreview = Array.isArray(normalized.humanReviewedReportPreview) ? normalized.humanReviewedReportPreview : [];
+  normalized.riskNotes = Array.isArray(normalized.riskNotes) ? normalized.riskNotes : [];
+  normalized.first48HourFix = normalized.first48HourFix || { title: 'First 48-hour fix', columns: ['Client/Lead', 'Next action', 'Owner', 'Status'], statuses: ['New', 'In progress', 'Done'] };
+  normalized.aiUseTransparencySummary = normalized.aiUseTransparencySummary || {};
+  return normalized;
+}
+
+function testFullCodeInstall() {
+  setupAsyncSnapshotStatusSheet();
+  const diagnostic = buildAsyncDiagnostic({ workflowType: 'Install test', currentProcess: 'Test process', mainPainPoints: 'Test pain point' });
+  const fallback = buildRuleBasedInstantSnapshot({ workflowType: 'Install test', diagnostic: diagnostic }, 'Install test fallback.');
+  const statusResponse = handleStatus({ submissionId: '__INSTALL_TEST__' });
+  const diagnosticFallbackOk = Boolean(diagnostic.workflowDetected);
+  const snapshotFallbackOk = Boolean(fallback.first48HourFix && fallback.aiPromptPack && fallback.aiPromptPack.length);
+  const statusRouteOk = Boolean(statusResponse && statusResponse.status === 'AI_GENERATION_FAILED' && statusResponse.message === 'Submission status was not found.');
+  const result = {
+    success: diagnosticFallbackOk && snapshotFallbackOk && statusRouteOk,
+    version: FULL_CODE_VERSION,
+    diagnosticFallbackOk: diagnosticFallbackOk,
+    snapshotFallbackOk: snapshotFallbackOk,
+    statusRouteOk: statusRouteOk,
+    statusRouteNote: 'Expected fake install-test ID to return not found quickly without calling Gemini.'
+  };
+  Logger.log(JSON.stringify(result));
+  return result;
+}
+
+
+/************************************************************
+ * ASYNC BACKGROUND PROCESSING SECTION
  ************************************************************/
 
 const ASYNC_STATUS_PROCESSING = 'PROCESSING';
