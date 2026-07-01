@@ -438,6 +438,16 @@ function recoverPendingAiSnapshots() {
       recoveredGeneratingCount += 1;
       hasPendingWork = true;
     }
+
+    if (status === ASYNC_STATUS_GENERATING && isStaleAsyncStatus(updatedAt, ASYNC_GENERATING_STALE_MS)) {
+      upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_PROCESSING, intakeJson, '', 'Recovered stale GENERATING status; queued a new generation attempt.');
+      recoveredGeneratingCount += 1;
+      hasPendingWork = true;
+    }
+  }
+
+  if (hasPendingWork) {
+    enqueueAsyncSnapshotGeneration();
   }
 
   if (hasPendingWork) {
@@ -710,6 +720,22 @@ function upsertAsyncSnapshotStatus(submissionId, status, intakeJson, snapshotJso
  *
  * Non-developer check after pasting/deploying this patch:
  * - In Apps Script, select testAsyncDispatcherInstall from the Run dropdown.
+ * - It should log success:true and statusRouteOk:true for the fake install-test ID.
+ * - That proves the async status route is installed and is not calling Gemini.
+ ************************************************************/
+function testAsyncDispatcherInstall() {
+  const statusResponse = handleStatus({ submissionId: '__INSTALL_TEST__' });
+  const diagnostic = buildAsyncDiagnostic({ workflowType: 'Install test', currentProcess: 'Test process', mainPainPoints: 'Test pain point' });
+  const diagnosticFallbackOk = Boolean(diagnostic.workflowDetected);
+  const statusRouteOk = Boolean(statusResponse && statusResponse.status === 'AI_GENERATION_FAILED' && statusResponse.message === 'Submission status was not found.');
+  const result = {
+    success: diagnosticFallbackOk && statusRouteOk,
+    diagnosticFallbackOk: diagnosticFallbackOk,
+    statusRouteOk: statusRouteOk,
+    statusRouteNote: 'Expected fake install-test ID to return not found quickly without calling Gemini.'
+  };
+  Logger.log(JSON.stringify(result));
+  return result;
  * - It should log a fast JSON response with status AI_GENERATION_FAILED and
  *   message "Submission status was not found." for the fake install-test ID.
  * - That proves the async status route is installed and is not calling Gemini.
