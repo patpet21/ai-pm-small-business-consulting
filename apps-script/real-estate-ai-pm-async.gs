@@ -438,6 +438,16 @@ function recoverPendingAiSnapshots() {
       recoveredGeneratingCount += 1;
       hasPendingWork = true;
     }
+
+    if (status === ASYNC_STATUS_GENERATING && isStaleAsyncStatus(updatedAt, ASYNC_GENERATING_STALE_MS)) {
+      upsertAsyncSnapshotStatus(submissionId, ASYNC_STATUS_PROCESSING, intakeJson, '', 'Recovered stale GENERATING status; queued a new generation attempt.');
+      recoveredGeneratingCount += 1;
+      hasPendingWork = true;
+    }
+  }
+
+  if (hasPendingWork) {
+    enqueueAsyncSnapshotGeneration();
   }
 
   if (hasPendingWork) {
@@ -726,6 +736,15 @@ function testAsyncDispatcherInstall() {
   };
   Logger.log(JSON.stringify(result));
   return result;
+ * - It should log a fast JSON response with status AI_GENERATION_FAILED and
+ *   message "Submission status was not found." for the fake install-test ID.
+ * - That proves the async status route is installed and is not calling Gemini.
+ ************************************************************/
+function testAsyncDispatcherInstall() {
+  const response = handleStatus({ submissionId: '__INSTALL_TEST__' });
+  const diagnostic = buildAsyncDiagnostic({ workflowType: 'Install test', currentProcess: 'Test process', mainPainPoints: 'Test pain point' });
+  Logger.log(JSON.stringify({ statusResponse: response, diagnosticFallbackOk: Boolean(diagnostic.workflowDetected) }));
+  return response;
 }
 
 /************************************************************
