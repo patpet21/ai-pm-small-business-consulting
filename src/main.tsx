@@ -104,6 +104,85 @@ const homeAudienceCards = [
 ];
 
 const pilotFocusAreas = [
+const sectorCards = [
+  {
+    title: 'Real Estate Teams',
+    copy: 'Lead follow-up, client updates, property documents, vendors, transaction tasks.',
+    cta: 'Explore Real Estate Pilot',
+    to: '/real-estate-ai-pm-pilot',
+  },
+  {
+    title: 'Events & Nonprofits',
+    copy: 'Fundraising events, stakeholder communication, budgets, timelines, sponsors, volunteers, post-event reporting.',
+    cta: 'View Services',
+    to: '/services',
+  },
+  {
+    title: 'Contractors & Renovation Teams',
+    copy: 'Estimates, site notes, change requests, vendors, materials, timelines, client updates.',
+    cta: 'View Services',
+    to: '/services',
+  },
+  {
+    title: 'Consultants & Service Professionals',
+    copy: 'Discovery calls, proposals, recommendations, project plans, client deliverables, reports.',
+    cta: 'View Services',
+    to: '/services',
+  },
+  {
+    title: 'Small Business Owners',
+    copy: 'Internal operations, recurring tasks, documents, follow-ups, team coordination, weekly priorities.',
+    cta: 'Book a Review',
+    href: calendlyLink,
+  },
+  {
+    title: 'Founders & Operators',
+    copy: 'Ideas, business models, launch plans, roadmaps, risks, decisions, and execution systems.',
+    cta: 'Book a Call',
+    href: calendlyLink,
+  },
+];
+
+const issueCards = [
+  'Follow-ups are hard to track',
+  'Documents are spread across tools',
+  'Notes do not become next steps',
+  'Tasks are not clearly owned',
+  'Client updates take too long',
+  'AI is used inconsistently',
+];
+
+const workflowSteps = [
+  'Client message',
+  'AI support / documentation',
+  'Human review',
+  'Next action',
+  'Owner assigned',
+  'Follow-up tracked',
+];
+
+const helpCards = [
+  {
+    title: 'Organize the Workflow',
+    text: 'Clarify how information enters the business, who owns the next step, where documents live, and how follow-up is tracked.',
+    button: 'View Services',
+    to: '/services',
+  },
+  {
+    title: 'Add Practical AI Support',
+    text: 'Use AI to support planning, documentation, reporting, communication, and decision support without removing human review or accountability.',
+    button: 'View Resources',
+    to: '/resources',
+  },
+  {
+    title: 'Build Simple Operating Systems',
+    text: 'Create repeatable routines for client communication, internal updates, tasks, documents, and weekly visibility.',
+    button: 'Book a Call',
+    href: calendlyLink,
+  },
+];
+
+const pilotExamples = [
   'Buyer or seller follow-up',
   'Property notes and client updates',
   'Vendor coordination',
@@ -337,6 +416,31 @@ function Home() {
               <span>Next actions</span>
             </div>
             <p className="home-positioning-line">AI + Project Management systems for business, projects, and real estate workflows.</p>
+            <p className="hero-eyebrow-pill">Practical AI Systems</p>
+            <h1>AI + Project Management Systems for Small Businesses and Project-Based Teams</h1>
+            <p className="hero-lede">
+              I help owners, operators, and small teams turn ideas, client work, events, operations, and business workflows into structured projects with clear scope, tasks, timelines, risks, documents, communication, and AI-supported execution.
+            </p>
+            <div className="hero-actions premium-hero-actions">
+              <CTAButton>Book a 15-Minute Review</CTAButton>
+              <Link className="button secondary" to="/services">Explore What I Do</Link>
+              <Link className="button pilot-link" to="/real-estate-ai-pm-pilot">Real Estate AI PM Pilot</Link>
+            </div>
+            <p className="trust-line">Not just automation. Project structure, decision support, documentation, and practical delivery systems.</p>
+            <div className="hero-proof-row" aria-label="Practical focus areas">
+              <span>Follow-up</span>
+              <span>Documents</span>
+              <span>Tasks</span>
+              <span>Decisions</span>
+            </div>
+            <p className="trust-line">Start with the workflow. Add AI only where it makes the work clearer, faster, or easier to manage.</p>
+            <div className="hero-proof-row" aria-label="Practical focus areas">
+              <span>Follow-up</span>
+              <span>Documents</span>
+              <span>Tasks</span>
+              <span>Decisions</span>
+            </div>
+            <p className="trust-line">Start with the workflow. Add AI only where it makes the work clearer, faster, or easier to manage.</p>
           </div>
 
           <aside className="hero-signal-panel execution-panel" aria-label="Project Control Layer framework visual">
@@ -358,6 +462,21 @@ function Home() {
               <span>Maps</span>
               <span>Prompts</span>
               <span>Logs</span>
+              <strong>From unclear work to structured project control.</strong>
+              <span>Scope, priorities, ownership, risks, timelines, communication, and human-reviewed AI outputs in one practical operating layer.</span>
+            </div>
+            <div className="execution-framework-grid">
+              <div className="execution-node"><span>01</span><strong>Intake / Problem</strong><p>Requests, constraints, context, and the real issue to solve</p></div>
+              <div className="execution-node"><span>02</span><strong>Scope / Priorities</strong><p>What matters, what is out of scope, and what comes first</p></div>
+              <div className="execution-node"><span>03</span><strong>Owners / Timeline</strong><p>Accountability, milestones, handoffs, and due dates</p></div>
+              <div className="execution-node"><span>04</span><strong>Risks / Decisions</strong><p>Open questions, tradeoffs, blockers, and decision points</p></div>
+              <div className="execution-node"><span>05</span><strong>AI Support / Documentation</strong><p>Drafts, summaries, reports, SOPs, and project records</p></div>
+              <div className="execution-node"><span>06</span><strong>Review / Delivery</strong><p>Human-reviewed outputs, follow-up, monitoring, and delivery</p></div>
+            </div>
+            <div className="execution-outcome-bar">
+              <span>Scope clarity</span>
+              <span>Decision support</span>
+              <span>Delivery control</span>
             </div>
           </aside>
         </div>
@@ -380,6 +499,35 @@ function Home() {
                 {point.deliverables.map((item) => <li key={item}>{item}</li>)}
               </ul>
               <Link className="button secondary" to={point.to}>{point.cta}</Link>
+      <section className="section-shell beyond-automation-section">
+        <div className="beyond-automation-panel">
+          <div>
+            <p className="eyebrow">How this is different</p>
+            <h2>More than prompts. More than automation.</h2>
+          </div>
+          <p>
+            We help businesses clarify workflows, define ownership, improve coordination, strengthen follow-up, structure recurring work, identify risks, improve reporting, and introduce AI in a practical, controlled way. The goal is not to replace management. The goal is to strengthen project clarity, decisions, and delivery.
+          </p>
+        </div>
+      </section>
+
+      <section className="section-shell funnel-section">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">Who this is for</div>
+            <h2>Who this is for</h2>
+          </div>
+        </div>
+        <div className="audience-grid sector-grid">
+          {sectorCards.map((sector) => (
+            <article className="compact-card sector-card" key={sector.title}>
+              <h3>{sector.title}</h3>
+              <p>{sector.copy}</p>
+              {sector.to ? (
+                <Link className="text-link" to={sector.to}>{sector.cta}</Link>
+              ) : (
+                <a className="text-link" href={sector.href} target="_blank" rel="noreferrer">{sector.cta}</a>
+              )}
             </article>
           ))}
         </div>
@@ -394,11 +542,19 @@ function Home() {
           <div className="copy-stack">
             <p>
               Many teams already use AI for emails, summaries, reports, client updates, research, documents, and planning. But without structure, AI outputs stay disconnected from real execution.
+            <h2>AI is useful only when the workflow is clear.</h2>
+          </div>
+          <div className="copy-stack">
+            <p>
+              Many businesses are already using tools like ChatGPT or Claude, but the results often stay separate from
+              the real work. A summary does not help if no one owns the next step. A draft does not help if there is no
+              review process. A checklist does not help if it is not connected to a deadline, a client update, or a team routine.
             </p>
           </div>
         </div>
         <div className="issue-grid">
           {problemBullets.map((issue) => <article className="compact-card issue-card" key={issue}>{issue}</article>)}
+          {issueCards.map((issue) => <article className="compact-card issue-card" key={issue}>{issue}</article>)}
         </div>
       </section>
 
@@ -439,6 +595,16 @@ function Home() {
                 {card.includes.map((item) => <li key={item}>{item}</li>)}
               </ul>
               <Link className="button secondary" to={card.to}>{card.cta}</Link>
+            <div className="section-kicker">Simple process</div>
+            <h2>From scattered information to clear next actions.</h2>
+          </div>
+          <p>The goal is not to automate everything. The goal is to create a simple path from information to decision, task, and follow-up.</p>
+        </div>
+        <div className="workflow-step-grid">
+          {workflowSteps.map((step, index) => (
+            <article className="workflow-step-card" key={step}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <strong>{step}</strong>
             </article>
           ))}
         </div>
@@ -456,6 +622,19 @@ function Home() {
             <article className="compact-card sector-card" key={audience.title}>
               <h3>{audience.title}</h3>
               <p>{audience.copy}</p>
+      <section className="solution section-shell">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">How I can help</div>
+            <h2>Practical support for the work your business already does.</h2>
+          </div>
+        </div>
+        <div className="help-card-grid">
+          {helpCards.map((card) => (
+            <article className="detail-card help-card" key={card.title}>
+              <h3>{card.title}</h3>
+              <p>{card.text}</p>
+              {card.to ? <Link className="button secondary" to={card.to}>{card.button}</Link> : <a className="button secondary" href={card.href} target="_blank" rel="noreferrer">{card.button}</a>}
             </article>
           ))}
         </div>
@@ -487,6 +666,43 @@ function Home() {
             <h3>PropertyDEX</h3>
             <p>AI PM Lab focuses on practical AI + Project Management systems. PropertyDEX is the broader real estate innovation research track.</p>
             <a className="button secondary" href="https://propertydex.xyz" target="_blank" rel="noreferrer">Explore PropertyDEX</a>
+          <p>A focused pilot for real estate professionals who want to organize one workflow: leads, follow-up, documents, vendors, client updates, tasks, or weekly visibility.</p>
+          <Link className="button primary" to="/real-estate-ai-pm-pilot">Apply for the Free Pilot</Link>
+        </div>
+        <ul className="pilot-example-list">
+          {pilotExamples.map((example) => <li key={example}>{example}</li>)}
+        </ul>
+      </section>
+
+      <section className="section-shell resources-highlight">
+        <div>
+          <p className="eyebrow">Free resources</p>
+          <h2>Free Workflow Resources</h2>
+          <p>Start with practical examples, checklist questions, prompt templates, and simple workflow structures before changing your tools.</p>
+          <Link className="button secondary" to="/resources">View Free Resources</Link>
+        </div>
+        <ul>
+          {freeResourceBullets.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+      </section>
+
+      <section className="section-shell related-work-section">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">Related work</div>
+            <h2>Explore Related Work</h2>
+          </div>
+        </div>
+        <div className="related-work-grid">
+          <article className="detail-card">
+            <h3>PropertyDEX</h3>
+            <p>Research and development around real estate innovation, digital property infrastructure, and future ownership models.</p>
+            <a className="button secondary" href="https://propertydex.xyz" target="_blank" rel="noreferrer">Visit PropertyDEX</a>
+          </article>
+          <article className="detail-card">
+            <h3>PropertyDEX Framework</h3>
+            <p>A decision-support framework for analyzing real estate project readiness, documentation, structure, and execution complexity.</p>
+            <a className="button secondary" href="https://framework.propertydex.xyz" target="_blank" rel="noreferrer">Explore Framework</a>
           </article>
         </div>
       </section>
