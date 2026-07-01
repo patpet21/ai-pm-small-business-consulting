@@ -507,15 +507,116 @@ function Home() {
 }
 
 function Services() {
+  const servicesPageServices = [
+    {
+      title: 'AI Use Review',
+      for: 'Teams already using ChatGPT, Claude, Copilot, Gemini, Canva AI, Notion AI, or other AI tools without a clear process for prompts, outputs, review, risk, and documentation.',
+      problem: 'AI is being used, but no one has a clear picture of who uses it, for what tasks, what data goes in, what outputs are used, who reviews them, and where the process is documented.',
+      gets: ['AI Use Map', 'Risk Checklist', 'Prompt Library Starter', 'AI Use Log', 'Human Review Workflow', '30-Day Action Plan'],
+      cta: 'Start AI Use Review',
+      to: '/contact',
+    },
+    {
+      title: 'Workflow Clarity Review',
+      for: 'Businesses that need to clarify a workflow, project, client process, internal routine, or recurring bottleneck before adding tools or automation.',
+      problem: 'Unclear scope, shifting priorities, scattered documents, disconnected communication, and weak ownership make everyday work hard to manage.',
+      gets: ['Problem and scope clarification', 'Stakeholder and priority mapping', 'Bottleneck diagnosis', 'Risk and decision review', 'Workflow improvement roadmap'],
+      cta: 'Book a Workflow Review',
+      to: '/contact',
+    },
+    {
+      title: 'Workflow System Setup',
+      for: 'Teams ready to organize tasks, documents, communication, timelines, risks, reporting, and AI-supported work into a simple operating system.',
+      problem: 'Work needs structure around ownership, deadlines, documentation, communication, risk tracking, human review, and recurring updates.',
+      gets: ['Workflow map', 'Task ownership structure', 'Timeline and milestone setup', 'Risk and decision tracking', 'Communication and reporting routines', 'Human review checkpoints', 'Simple operating templates'],
+      cta: 'Build a Workflow System',
+      to: '/contact',
+    },
+    {
+      title: 'Real Estate AI PM Pilot',
+      for: 'Real estate professionals, brokers, operators, property managers, and small developers who want to improve one workflow before adding more tools or automation.',
+      problem: 'Follow-ups, documents, property notes, vendors, client updates, transaction tasks, and reporting are often fragmented across email, texts, folders, spreadsheets, and memory.',
+      gets: ['Workflow Diagnostic', 'Follow-Up Review', 'Document and Task Visibility', 'Bottleneck Analysis', 'AI + PM Improvement Plan', 'Prompt Pack', '7-Day Roadmap'],
+      cta: 'Explore Real Estate Pilot',
+      to: '/real-estate-ai-pm-pilot',
+    },
+  ];
+
+  const servicesSupportItems = [
+    'AI use mapping',
+    'Scope clarity',
+    'Stakeholder communication',
+    'Task ownership',
+    'Timeline planning',
+    'Risk tracking',
+    'Decision support',
+    'Documentation',
+    'Reporting',
+    'SOP creation',
+    'Follow-up routines',
+    'Human review',
+  ];
+
+  const servicesBusinessExamples = [
+    {
+      title: 'Real estate professionals',
+      challenge: 'Client communication, property details, transaction tasks, vendor coordination, and deal updates are fragmented across tools and conversations.',
+      aiHelp: 'AI can summarize conversations, draft updates, organize deal tasks, and prepare client-ready communication for human review.',
+      system: 'A transaction coordination workflow that converts notes into follow-ups, documents, reminders, and decision points.',
+      output: 'Follow-up tracker, deal update template, prompt library, document checklist, weekly visibility report.',
+    },
+    {
+      title: 'Contractors and renovation teams',
+      challenge: 'Job details, site notes, estimate changes, materials, vendors, and client follow-up often live in texts, calls, photos, and memory.',
+      aiHelp: 'AI can turn notes and photos into summaries, estimate explanations, task lists, and follow-up drafts.',
+      system: 'A simple intake-to-estimate workflow with standard prompts, review steps, and assigned next actions.',
+      output: 'Intake template, estimate explanation prompt, change request log, client update template, task tracker.',
+    },
+    {
+      title: 'Local service businesses',
+      challenge: 'New inquiries, scheduling, service notes, reviews, and repeat communication are handled inconsistently.',
+      aiHelp: 'AI can standardize responses, summarize service history, draft updates, and create internal handoff notes.',
+      system: 'A client request workflow from intake to service completion with templates for each recurring touchpoint.',
+      output: 'Inquiry tracker, response templates, service note structure, review response prompts, follow-up routine.',
+    },
+    {
+      title: 'Consultants and service professionals',
+      challenge: 'Discovery notes, client recommendations, proposals, and status reports take too long to convert into clear outputs.',
+      aiHelp: 'AI can structure insights, draft deliverables, prepare meeting summaries, and keep action items visible.',
+      system: 'A consulting delivery workflow that turns meetings into decisions, tasks, summaries, and polished client materials.',
+      output: 'Discovery summary template, proposal prompt, client report outline, action item tracker, decision log.',
+    },
+    {
+      title: 'Small internal teams',
+      challenge: 'Work is spread across email, chat, spreadsheets, project tools, and informal conversations.',
+      aiHelp: 'AI can consolidate updates, clarify requests, draft internal documentation, and surface decisions that need attention.',
+      system: 'A lightweight operating rhythm for requests, updates, decisions, and weekly visibility.',
+      output: 'Weekly update template, request tracker, decision log, AI use log, review checklist.',
+    },
+  ];
+
   return (
     <>
       <PageIntro
         eyebrow="Services"
-        title="Practical project systems for owners who want clarity, coordination, and control."
-        text="Start with the work your business already does. Then clarify scope, priorities, ownership, timelines, communication, risks, and where AI can support delivery."
+        title="Practical AI + Project Management systems for teams that need clarity, coordination, and control."
+        text="Start with the work your business already does. Then clarify how AI is used, where workflows break, who owns the next step, what needs review, and what simple system should be created next."
       />
+      <section className="section-shell services-hero-actions">
+        <div className="hero-actions">
+          <Link className="button primary" to="/contact">Start with an AI Use Review</Link>
+          <Link className="button secondary" to="/contact">Book a Call</Link>
+        </div>
+      </section>
+
       <section className="section-shell service-detail-grid service-card-grid">
-        {serviceBlocks.map((service) => (
+        <div className="section-header single-column-header services-section-title">
+          <div>
+            <div className="section-kicker">Services</div>
+            <h2>Ways I can help</h2>
+          </div>
+        </div>
+        {servicesPageServices.map((service) => (
           <article className="detail-card service-card" key={service.title}>
             <h2>{service.title}</h2>
             <div className="detail-stack">
@@ -534,7 +635,7 @@ function Services() {
                 </ul>
               </div>
             </div>
-            <CTAButton>Book a Call</CTAButton>
+            <Link className="button secondary" to={service.to}>{service.cta}</Link>
           </article>
         ))}
       </section>
@@ -545,10 +646,10 @@ function Services() {
             <div className="section-kicker">Practical support areas</div>
             <h2>What AI-supported PM can help with</h2>
           </div>
-          <p>Use AI as support inside a managed project or operations system: clarify, plan, communicate, document, monitor, and review.</p>
+          <p>Use AI as support inside a managed workflow: clarify, plan, communicate, document, monitor, and review.</p>
         </div>
-        <div className="pm-support-grid">
-          {aiSupportedPmCards.map((item) => <article className="compact-card" key={item}>{item}</article>)}
+        <div className="pm-support-grid services-support-grid">
+          {servicesSupportItems.map((item) => <article className="compact-card" key={item}>{item}</article>)}
         </div>
       </section>
 
@@ -556,29 +657,45 @@ function Services() {
         <div className="section-header single-column-header">
           <div>
             <div className="section-kicker">Examples</div>
-            <h2>Examples by Business Type</h2>
+            <h2>Examples by business type</h2>
           </div>
         </div>
-        <div className="use-case-detail-grid business-example-grid">
-          {useCaseDetails.map((useCase) => (
+        <div className="use-case-detail-grid business-example-grid services-example-grid">
+          {servicesBusinessExamples.map((useCase) => (
             <article className="detail-card" key={useCase.title}>
               <h3>{useCase.title}</h3>
-              <div className="detail-stack three-column-text">
+              <div className="detail-stack three-column-text services-example-stack">
                 <div>
                   <strong>Common workflow challenge</strong>
-                  <p>{useCase.problem}</p>
+                  <p>{useCase.challenge}</p>
                 </div>
                 <div>
                   <strong>How AI can help</strong>
-                  <p>{useCase.help}</p>
+                  <p>{useCase.aiHelp}</p>
                 </div>
                 <div>
                   <strong>Simple system example</strong>
                   <p>{useCase.system}</p>
                 </div>
+                <div>
+                  <strong>Operational output</strong>
+                  <p>{useCase.output}</p>
+                </div>
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="cta section-shell services-final-cta">
+        <div className="cta-panel final-funnel-cta">
+          <p className="eyebrow">Start simple</p>
+          <h2>Start with one workflow.</h2>
+          <p>You do not need to automate everything. Start with one bottleneck, one workflow, and one practical next step.</p>
+          <div className="hero-actions">
+            <Link className="button primary light" to="/contact">Start with an AI Use Review</Link>
+            <Link className="button secondary light-outline" to="/contact">Book a Call</Link>
+          </div>
         </div>
       </section>
     </>
