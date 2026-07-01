@@ -46,6 +46,10 @@ The full script can run without a Gemini key by returning a structured rules-bas
 5. A good result contains:
 
 ```json
+{"success":true,"diagnosticFallbackOk":true,"snapshotFallbackOk":true,"statusRouteOk":true}
+```
+
+The fake `__INSTALL_TEST__` submission is expected to be "not found" internally; `statusRouteOk:true` means that status route responded quickly without calling Gemini. This smoke test does **not** call Gemini. It verifies the full script helpers, sheet setup, status route, and fallback snapshot structure exist.
 {"success":true,"diagnosticFallbackOk":true,"snapshotFallbackOk":true}
 ```
 

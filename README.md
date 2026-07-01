@@ -24,6 +24,11 @@ Open the local URL printed by Vite. Do not open `index.html` directly from the f
 
 If the Real Estate AI PM form stays on `PROCESSING`, status requests time out, or Apps Script reports a missing helper like `createDiagnostic`, replace the Web App `Code.gs` with the full non-developer script at [`apps-script/real-estate-ai-pm-full-code.gs`](apps-script/real-estate-ai-pm-full-code.gs). The step-by-step guide is [`apps-script/REAL_ESTATE_AI_PM_INSTALL.md`](apps-script/REAL_ESTATE_AI_PM_INSTALL.md). You do not need to attach your long `Code.gs` file.
 
+
+### Netlify PR checks
+
+If a Netlify deploy preview reports a TypeScript line number that no longer exists in `src/main.tsx`, do not keep trying to update the stale PR. Close or ignore the failed PR, open a fresh PR from the latest branch commit, and rerun the deploy preview. The current build command is `npm run build`, and it should complete before merging.
+
 ## Netlify deployment
 
 This repository includes `netlify.toml`, so Netlify can detect the correct production build settings automatically:
