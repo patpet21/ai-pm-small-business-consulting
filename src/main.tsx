@@ -703,22 +703,205 @@ function Services() {
 }
 
 function Resources() {
+  const checklistItems = [
+    'Where does the information enter?',
+    'Who owns the next step?',
+    'What output is needed?',
+    'What can AI draft, summarize, classify, or structure?',
+    'What must be reviewed by a human?',
+    'Where is the final decision documented?',
+    'What follow-up is required?',
+    'What should never be entered into AI?',
+  ];
+
+  const aiUseMapFields = ['Team / role', 'AI tool used', 'Task or workflow', 'Input type', 'Output type', 'Risk level', 'Reviewer', 'Next action'];
+  const aiUseMapExamples = [
+    'Admin — Email draft — Client notes — Follow-up email — Manager review',
+    'Broker — Property summary — Listing notes — Client update — Broker review',
+    'Owner — Weekly report — Team updates — Priority list — Owner review',
+  ];
+
+  const promptTemplates = [
+    {
+      title: 'Client follow-up',
+      prompt: 'Turn these notes into a clear client follow-up email with next steps, open questions, and a professional tone.',
+    },
+    {
+      title: 'Owner or manager update',
+      prompt: 'Summarize this project update for an owner who needs risks, decisions, deadlines, and next actions.',
+    },
+    {
+      title: 'Task checklist',
+      prompt: 'Create a checklist from this request so a team member can complete the work without another meeting.',
+    },
+    {
+      title: 'Estimate or proposal explanation',
+      prompt: 'Rewrite this estimate explanation so it is clear, direct, professional, and easy for a client to approve or question.',
+    },
+    {
+      title: 'Human review',
+      prompt: 'Review this AI-generated draft for missing context, unclear assumptions, sensitive data, and anything that should be checked before sending.',
+    },
+  ];
+
+  const aiUseLogFields = ['Date', 'Tool', 'User / role', 'Workflow', 'Input type', 'Output created', 'Human reviewer', 'Final decision', 'Notes'];
+
+  const commonMistakes = [
+    'Automating a workflow no one has clearly defined.',
+    'Letting every team member invent their own prompts and standards.',
+    'Using AI for client-facing work without review.',
+    'Uploading sensitive or confidential information without rules.',
+    'Treating AI output as a decision instead of a draft.',
+    'Buying another app when the real issue is ownership, handoffs, and follow-up.',
+    'Creating summaries that do not become tasks, decisions, or next actions.',
+  ];
+
+  const workflowExamples = [
+    {
+      title: 'Client follow-up workflow',
+      flow: 'Call notes → AI summary → human review → client email → assigned task → follow-up date',
+    },
+    {
+      title: 'Real estate update workflow',
+      flow: 'Property notes → client-ready summary → document checklist → next action → weekly deal update',
+    },
+    {
+      title: 'Contractor or renovation workflow',
+      flow: 'Site visit notes → estimate draft → internal review → client proposal → change request log',
+    },
+    {
+      title: 'Small business workflow',
+      flow: 'Client request → clarified scope → task checklist → owner assigned → status update',
+    },
+    {
+      title: 'Internal team workflow',
+      flow: 'Weekly updates → AI summary → risks and decisions → owner review → priority list',
+    },
+  ];
+
+  const reviewReasons = [
+    'Your team already uses AI but without a shared method.',
+    'You do not know what data people enter into AI tools.',
+    'You need standard prompts and review steps.',
+    'Client communication takes too long.',
+    'Follow-ups or documents are scattered.',
+    'AI outputs are not connected to tasks or decisions.',
+    'You want a simple 30-day action plan.',
+  ];
+
   return (
     <>
       <PageIntro
-        eyebrow="Resources"
-        title="Free Workflow Resources"
-        text="Useful starting points for applying AI to real business workflows before buying another tool."
+        eyebrow="Free AI Workflow Resources"
+        title="Practical starting points for using AI inside real business workflows."
+        text="Before buying another tool or asking AI for more outputs, start by mapping the workflow, clarifying the next step, and deciding where human review is required."
       />
-      <section className="section-shell resource-grid">
-        {resourceSections.map((section) => (
-          <article className="resource-card" key={section.title}>
-            <h2>{section.title}</h2>
-            <ul>
-              {section.points.map((point) => <li key={point}>{point}</li>)}
-            </ul>
-          </article>
-        ))}
+      <section className="section-shell resources-hero-actions">
+        <div className="hero-actions">
+          <a className="button primary" href="#ai-workflow-checklist">Start with the checklist</a>
+          <Link className="button secondary" to="/contact">Book an AI Use Review</Link>
+        </div>
+      </section>
+
+      <section className="section-shell resource-grid resources-starter-grid" id="ai-workflow-checklist">
+        <article className="resource-card resources-wide-card">
+          <p className="eyebrow">1. AI Workflow Checklist</p>
+          <h2>Pick one workflow before picking another tool.</h2>
+          <ul>
+            {checklistItems.map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        </article>
+
+        <article className="resource-card resources-wide-card">
+          <p className="eyebrow">2. AI Use Map Starter</p>
+          <h2>Before controlling AI, map where it is already being used.</h2>
+          <p>An AI Use Map helps a team see who uses AI, for what task, with what input, what output is created, who reviews it, and what happens next.</p>
+          <div className="resource-pill-grid">
+            {aiUseMapFields.map((field) => <span key={field}>{field}</span>)}
+          </div>
+          <div className="resource-example-list">
+            {aiUseMapExamples.map((example) => <p key={example}>{example}</p>)}
+          </div>
+        </article>
+      </section>
+
+      <section className="section-shell resources-section-block">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">3. Prompt Templates</div>
+            <h2>Use prompts that connect AI output to a real workflow.</h2>
+          </div>
+        </div>
+        <div className="resource-grid prompt-template-grid">
+          {promptTemplates.map((template) => (
+            <article className="resource-card" key={template.title}>
+              <h2>{template.title}</h2>
+              <p>{template.prompt}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section-shell resource-grid resources-starter-grid">
+        <article className="resource-card resources-wide-card">
+          <p className="eyebrow">4. AI Use Log Starter</p>
+          <h2>If AI supports business work, the use should leave a simple trace.</h2>
+          <p>The goal is not bureaucracy. The goal is visibility: knowing how AI was used, what was reviewed, and what became part of the business process.</p>
+          <div className="resource-pill-grid log-field-grid">
+            {aiUseLogFields.map((field) => <span key={field}>{field}</span>)}
+          </div>
+        </article>
+
+        <article className="resource-card resources-wide-card">
+          <p className="eyebrow">5. Common AI Mistakes</p>
+          <h2>Common AI Mistakes</h2>
+          <ul>
+            {commonMistakes.map((mistake) => <li key={mistake}>{mistake}</li>)}
+          </ul>
+        </article>
+      </section>
+
+      <section className="section-shell resources-section-block">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">6. Simple Workflow Examples</div>
+            <h2>Simple Workflow Examples</h2>
+          </div>
+        </div>
+        <div className="resource-grid workflow-example-grid">
+          {workflowExamples.map((example) => (
+            <article className="resource-card" key={example.title}>
+              <h2>{example.title}</h2>
+              <p>{example.flow}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section-shell resources-review-section">
+        <div className="resources-review-panel">
+          <div>
+            <p className="eyebrow">When to book a review</p>
+            <h2>When to book an AI Use Review</h2>
+            <p>These resources help you start. A review is useful when you want the workflow adapted to your actual business, team, documents, tools, risks, and follow-up process.</p>
+            <div className="hero-actions">
+              <Link className="button primary" to="/contact">Book an AI Use Review</Link>
+              <Link className="button secondary" to="/services">Explore Services</Link>
+            </div>
+          </div>
+          <ul>
+            {reviewReasons.map((reason) => <li key={reason}>{reason}</li>)}
+          </ul>
+        </div>
+      </section>
+
+      <section className="cta section-shell resource-bottom-cta">
+        <div className="cta-panel">
+          <p className="eyebrow">Start simple</p>
+          <h2>Start with one workflow.</h2>
+          <p>Pick one workflow, map how information moves, decide where AI can help, and define who reviews the output before it becomes part of the work.</p>
+          <Link className="button primary light" to="/contact">Book an AI Use Review</Link>
+        </div>
       </section>
       <section className="cta section-shell resource-bottom-cta">
         <div className="cta-panel">
