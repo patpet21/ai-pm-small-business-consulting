@@ -2619,3 +2619,109 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+/* High-contrast CTA panels and mobile navigation */
+.cta-panel,
+.final-funnel-cta {
+  background:
+    radial-gradient(circle at 85% 15%, rgba(255, 250, 240, 0.16), transparent 19rem),
+    linear-gradient(135deg, #20382f, #13251f) !important;
+  color: #fffaf0 !important;
+}
+
+.cta-panel .eyebrow,
+.cta-panel h2,
+.cta-panel p,
+.final-funnel-cta .eyebrow,
+.final-funnel-cta h2,
+.final-funnel-cta p {
+  color: #fffaf0 !important;
+}
+
+.cta-panel .button.light,
+.final-funnel-cta .button.light {
+  background: #fffaf0 !important;
+  color: #13251f !important;
+}
+
+.cta-panel .light-outline,
+.final-funnel-cta .light-outline {
+  border-color: rgba(255, 250, 240, 0.68) !important;
+  background: rgba(255, 250, 240, 0.12) !important;
+  color: #fffaf0 !important;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 252, 246, 0.86);
+  color: var(--forest);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 850;
+  padding: 10px 14px;
+}
+
+.mobile-menu-bars {
+  display: grid;
+  gap: 4px;
+}
+
+.mobile-menu-bars span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--forest);
+}
+
+@media (max-width: 980px) {
+  .site-header.section-shell {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-flex;
+  }
+
+  .site-header .nav-links,
+  .site-header .nav-cta {
+    display: none;
+  }
+
+  .site-header.menu-open .nav-links,
+  .site-header.menu-open .nav-cta {
+    display: flex;
+  }
+
+  .site-header.menu-open .nav-links {
+    grid-column: 1 / -1;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: rgba(255, 252, 246, 0.94);
+    box-shadow: var(--shadow);
+    margin-top: 6px;
+    padding: 14px;
+    width: 100%;
+  }
+
+  .site-header.menu-open .nav-link {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .site-header.menu-open .nav-cta {
+    grid-column: 1 / -1;
+    justify-content: center;
+    width: 100%;
+  }
+}

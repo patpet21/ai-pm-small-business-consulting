@@ -243,15 +243,31 @@ function CTAButton({ children, light = false }: { children: React.ReactNode; lig
 }
 
 function SiteHeader() {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
   return (
-    <header className="site-header section-shell">
-      <Link className="brand" to="/" aria-label="Practical AI Systems home">
+    <header className={`site-header section-shell${isMenuOpen ? ' menu-open' : ''}`}>
+      <Link className="brand" to="/" aria-label="Practical AI Systems home" onClick={() => setIsMenuOpen(false)}>
         <img className="brand-logo" src="https://i.ibb.co/5g7gFLQz/Logo-PRDX.jpg" alt="Practical AI Systems logo" />
         Practical AI Systems
       </Link>
-      <nav className="nav-links" aria-label="Main navigation">
+      <button
+        className="mobile-menu-toggle"
+        type="button"
+        aria-expanded={isMenuOpen}
+        aria-controls="primary-navigation"
+        onClick={() => setIsMenuOpen((open) => !open)}
+      >
+        <span className="mobile-menu-bars" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </span>
+        Menu
+      </button>
+      <nav className="nav-links" id="primary-navigation" aria-label="Main navigation">
         {navItems.map((item) => (
-          <NavLink className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} key={item.to} to={item.to}>
+          <NavLink className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')} key={item.to} to={item.to} onClick={() => setIsMenuOpen(false)}>
             {item.label}
           </NavLink>
         ))}
