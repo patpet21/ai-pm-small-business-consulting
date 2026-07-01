@@ -903,13 +903,6 @@ function Resources() {
           <Link className="button primary light" to="/contact">Book an AI Use Review</Link>
         </div>
       </section>
-      <section className="cta section-shell resource-bottom-cta">
-        <div className="cta-panel">
-          <p className="eyebrow">Apply this to your work</p>
-          <h2>Want this adapted to your business?</h2>
-          <CTAButton light>Book a 15-Minute Review</CTAButton>
-        </div>
-      </section>
     </>
   );
 }
@@ -949,43 +942,116 @@ function UseCases() {
 }
 
 function About() {
+  const focusAreas = [
+    {
+      title: 'AI Use Review',
+      text: 'Mapping how AI is used, where risks exist, and what controls should be created.',
+    },
+    {
+      title: 'Workflow Clarity',
+      text: 'Turning scattered work into clear scope, owners, tasks, timelines, and follow-up.',
+    },
+    {
+      title: 'Human-Reviewed AI Support',
+      text: 'Using AI for drafts, summaries, prompts, reports, and documentation without removing human judgment.',
+    },
+    {
+      title: 'Real Estate AI PM Pilot',
+      text: 'Supporting real estate teams with follow-up, documents, vendors, client updates, and task visibility.',
+    },
+    {
+      title: 'Tokenization Research',
+      text: 'Ongoing research into real estate innovation, digital property infrastructure, and future ownership models.',
+    },
+  ];
+
+  const backgroundItems = [
+    'Civil engineering background',
+    'Project Management graduate studies in the United States',
+    'Business operations experience',
+    'Hospitality and service management experience',
+    'Real estate and tokenization research',
+    'Practical AI workflow systems',
+    'Human-reviewed implementation',
+  ];
+
   return (
     <>
       <PageIntro
-        eyebrow="About"
-        title="Practical systems for business owners who need clarity, not buzzwords."
-        text="Practical AI Systems is led by Peter, a practical AI systems consultant focused on turning complex ideas, scattered information, and recurring business work into simple systems people can actually use."
+        eyebrow="About AI PM Lab"
+        title="Practical AI + Project Management systems for teams that need clarity, structure, and control."
+        text="AI PM Lab is led by Pietro Forestieri, a project management graduate student, engineering-trained operator, and practical AI systems builder focused on helping teams turn scattered work, AI use, documents, follow-ups, and decisions into simple systems people can actually use."
       />
       <section className="section-shell about-profile">
-        <img src="https://i.ibb.co/nx5qk7T/Progetto-senza-titolo-3.png" alt="Peter, founder of Practical AI Systems" />
+        <img src="https://i.ibb.co/nx5qk7T/Progetto-senza-titolo-3.png" alt="Pietro Forestieri, founder of AI PM Lab" />
         <div className="about-card">
-          <div className="section-kicker">Founder profile</div>
-          <h2>Peter</h2>
-          <p className="profile-title">Founder / Practical AI Systems Consultant</p>
+          <div className="section-kicker">About Pietro</div>
+          <h2>Pietro Forestieri</h2>
+          <p className="profile-title">Founder / AI + Project Management Systems Consultant</p>
           <p>
-            Peter is an engineer by background and a builder by instinct. With experience across civil engineering,
-            construction, real estate coordination, digital ventures, and business operations, he focuses on turning
-            complex ideas into practical systems.
+            Pietro combines a civil engineering background, business operations experience, hospitality and service management exposure, real estate interest, and ongoing graduate study in Project Management in the United States.
           </p>
           <p>
-            Through Practical AI Systems, Peter helps small businesses use tools like ChatGPT and Claude in a structured,
-            useful way: not as random tools, but as part of real business operations.
+            His work focuses on practical implementation: mapping workflows, clarifying ownership, organizing documents, creating prompt libraries, setting up AI use logs, and building human-reviewed systems that support real business execution.
           </p>
-          <p className="soft-related-note">
-            Peter has also explored emerging digital business models and real estate innovation since 2017, including
-            blockchain-based real estate concepts and decision-support tools.
+        </div>
+      </section>
+
+      <section className="section-shell about-focus-section">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">What I focus on</div>
+            <h2>What I focus on</h2>
+          </div>
+        </div>
+        <div className="help-card-grid about-focus-grid">
+          {focusAreas.map((area) => (
+            <article className="detail-card help-card" key={area.title}>
+              <h3>{area.title}</h3>
+              <p>{area.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section-shell about-support-note">
+        <div className="about-card">
+          <div className="section-kicker">Practical support</div>
+          <h2>Practical support, not empty AI hype.</h2>
+          <p>
+            AI PM Lab does not replace legal, HR, IT, compliance, or certified training providers. The focus is practical implementation: helping teams document how AI is used, improve workflows, create review steps, and prepare clearer materials that can be shared with internal or external advisors when needed.
           </p>
+        </div>
+      </section>
+
+      <section className="section-shell about-profile about-learning-section">
+        <div className="about-card">
+          <div className="section-kicker">Continuous learning</div>
+          <h2>Continuous learning</h2>
+          <p>
+            Pietro continues to study project management, responsible AI use, generative AI workflows, business analysis, and practical implementation through graduate coursework, PMI-related learning, professional certificates, and hands-on system building.
+          </p>
+        </div>
+        <div className="about-card">
+          <div className="section-kicker">Background</div>
+          <h2>Background</h2>
           <ul className="credential-list">
-            <li>Civil engineering background</li>
-            <li>Construction and real estate experience</li>
-            <li>Business operations experience</li>
-            <li>Practical AI systems</li>
-            <li>Workflow clarity</li>
-            <li>Human-reviewed implementation</li>
+            {backgroundItems.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </div>
       </section>
-      <FinalCTA />
+
+      <section className="cta section-shell about-final-cta">
+        <div className="cta-panel final-funnel-cta">
+          <p className="eyebrow">Start simple</p>
+          <h2>Want to make your workflow clearer?</h2>
+          <p>Start with one workflow, one bottleneck, and one practical next step.</p>
+          <div className="hero-actions">
+            <Link className="button primary light" to="/contact">Book an AI Use Review</Link>
+            <Link className="button secondary light-outline" to="/contact">Contact Pietro</Link>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

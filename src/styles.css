@@ -2583,3 +2583,39 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+.cta-panel p,
+.final-funnel-cta p {
+  color: rgba(255, 250, 240, 0.9);
+}
+
+.about-focus-section,
+.about-support-note,
+.about-learning-section,
+.about-final-cta {
+  padding-top: var(--section-space);
+}
+
+.about-focus-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.about-support-note .about-card {
+  max-width: 980px;
+}
+
+.about-learning-section {
+  align-items: stretch;
+}
+
+@media (max-width: 1180px) {
+  .about-focus-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .about-focus-grid {
+    grid-template-columns: 1fr;
+  }
+}
