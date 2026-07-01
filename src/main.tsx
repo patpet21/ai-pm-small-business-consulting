@@ -1,66 +1,155 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom';
+import { Contact } from './pages/Contact';
 import { RealEstateAIPMPilot } from './pages/RealEstateAIPMPilot';
 import './styles.css';
 
 const calendlyLink = 'https://calendly.com/propertydext/15min';
 
-const workflowAreas = [
-  'Client follow-up',
-  'Documents',
-  'Estimates',
-  'Reports',
-  'Task management',
-  'Communication',
-  'Decision-making',
-  'Internal operations',
+const startingPoints = [
+  {
+    title: 'AI Use Review',
+    copy: 'For teams already using ChatGPT, Claude, Copilot, Gemini, or other AI tools and needing a clearer way to manage prompts, risks, outputs, reviews, and documentation.',
+    deliverables: ['AI Use Map', 'Risk Checklist', 'Prompt Library Starter', 'Human Review Workflow', 'AI Use Log', '30-Day Action Plan'],
+    cta: 'Start AI Use Review',
+    to: '/contact',
+  },
+  {
+    title: 'Real Estate AI PM Pilot',
+    copy: 'For real estate teams, brokers, operators, property managers, and small developers who want to improve follow-up, documents, task visibility, client updates, vendors, and reporting.',
+    deliverables: ['Workflow Diagnostic', 'Follow-Up Review', 'Document and Task Visibility', 'Bottleneck Analysis', 'AI + PM Improvement Plan', '7-Day Roadmap'],
+    cta: 'Explore Real Estate Pilot',
+    to: '/real-estate-ai-pm-pilot',
+  },
 ];
 
-const deliverables = [
-  'Workflow audit',
-  'AI use-case map',
-  'Prompt and template starter pack',
-  'Recommended tools and setup',
-  'Simple implementation roadmap',
+const problemBullets = [
+  'No clear owner for the next step',
+  'No review process before using AI output',
+  'No documentation of how AI was used',
+  'No standard prompts or repeatable process',
+  'No link between AI output, task ownership, and follow-up',
+  'No simple way to track risks, decisions, or client updates',
+];
+
+const projectControlSteps = [
+  {
+    title: 'Intake',
+    text: 'Request, context, constraint, and the real problem to solve.',
+  },
+  {
+    title: 'Scope',
+    text: 'What matters, what is out of scope, and what comes first.',
+  },
+  {
+    title: 'Ownership',
+    text: 'Who owns what, when it is due, and where handoffs happen.',
+  },
+  {
+    title: 'Risks & Decisions',
+    text: 'Open questions, blockers, tradeoffs, and decision points.',
+  },
+  {
+    title: 'AI Support',
+    text: 'Drafts, summaries, prompts, reports, SOPs, and project records.',
+  },
+  {
+    title: 'Human Review & Delivery',
+    text: 'Final check, approval, client update, follow-up, and monitoring.',
+  },
+];
+
+const homeHelpCards = [
+  {
+    title: 'AI Use Review',
+    copy: 'A practical review of how your team uses AI, where risks exist, and what controls should be created next.',
+    includes: ['AI Use Map', 'Risk Checklist', 'AI Use Log starter', 'Prompt Library starter', 'Human Review Workflow', '30-Day Action Plan'],
+    cta: 'Start AI Use Review',
+    to: '/contact',
+  },
+  {
+    title: 'Workflow System Setup',
+    copy: 'Turn one business process into a clear operating system for follow-up, documents, client updates, weekly priorities, task ownership, or reporting.',
+    includes: ['Workflow Map', 'Task and Ownership Structure', 'Document Organization', 'Follow-Up Routine', 'Reporting Template', 'Review Process'],
+    cta: 'Build a Workflow System',
+    to: '/contact',
+  },
+  {
+    title: 'Real Estate AI PM Pilot',
+    copy: 'A focused pilot for real estate teams that need better follow-up, document control, vendor coordination, client updates, weekly visibility, and deal status reporting.',
+    includes: ['Workflow Diagnostic', 'Bottleneck Review', 'AI + PM Recommendations', 'Prompt Pack', 'Task Visibility Plan', '7-Day Roadmap'],
+    cta: 'Explore Real Estate Pilot',
+    to: '/real-estate-ai-pm-pilot',
+  },
+];
+
+const homeAudienceCards = [
+  {
+    title: 'Real Estate Teams',
+    copy: 'Lead follow-up, client updates, property documents, vendors, transaction tasks, and weekly deal visibility.',
+  },
+  {
+    title: 'Small Business Owners',
+    copy: 'Internal operations, recurring tasks, documents, follow-ups, team coordination, and weekly priorities.',
+  },
+  {
+    title: 'Project-Based Teams',
+    copy: 'Client work, events, launches, operations, reports, timelines, decisions, and handoffs.',
+  },
+  {
+    title: 'Consultants & Service Professionals',
+    copy: 'Discovery calls, proposals, recommendations, project plans, client deliverables, and reports.',
+  },
+];
+
+const pilotFocusAreas = [
+  'Buyer or seller follow-up',
+  'Property notes and client updates',
+  'Vendor coordination',
+  'Document organization',
+  'Weekly task visibility',
+  'Deal and status reporting',
+];
+
+const freeResourceBullets = [
+  'AI workflow checklist',
+  'Prompt templates',
+  'Simple workflow examples',
+  'Common AI mistakes to avoid',
+];
+
+const aiSupportedPmCards = [
+  'Scope clarity',
+  'Stakeholder communication',
+  'Task ownership',
+  'Timeline planning',
+  'Risk tracking',
+  'Decision support',
+  'Documentation',
+  'Reporting',
+  'SOP creation',
+  'Follow-up routines',
 ];
 
 const serviceBlocks = [
   {
-    title: 'AI Workflow Audit',
-    for: 'Owners and small teams that know work is slipping but are not sure where AI should fit.',
-    problem:
-      'Follow-up, documents, estimates, reports, and internal handoffs are scattered across too many tools or too many people.',
-    gets: [
-      'A practical workflow review',
-      'Clear AI use-case priorities',
-      'A short list of process fixes before software changes',
-      'A simple implementation roadmap',
-    ],
+    title: 'Project & Workflow Clarity Review',
+    for: 'Businesses that need to clarify the problem, scope, stakeholders, priorities, and bottlenecks before adding tools.',
+    problem: 'Unclear scope, shifting priorities, disconnected communication, and weak ownership make everyday work hard to manage.',
+    gets: ['Problem and scope clarification', 'Stakeholder and priority mapping', 'Bottleneck diagnosis', 'Risk and decision review', 'Simple implementation roadmap'],
   },
   {
-    title: 'AI + PM System Setup',
-    for: 'Businesses ready to connect AI outputs to tasks, ownership, communication, and recurring operating routines.',
-    problem:
-      'AI creates drafts and summaries, but the work still does not become an assigned next step or a repeatable process.',
-    gets: [
-      'Recommended tool structure',
-      'Task and communication workflows',
-      'Reusable templates for everyday work',
-      'Team guidance for practical adoption',
-    ],
+    title: 'AI-Augmented Project System Setup',
+    for: 'Businesses ready to organize tasks, documents, communication, timelines, risks, and reporting into a usable system.',
+    problem: 'Work needs structure around ownership, deadlines, documentation, communication, risk tracking, and human review.',
+    gets: ['Project and workflow structure', 'Task ownership and timeline setup', 'Risk and decision tracking', 'Communication and reporting routines', 'Human review checkpoints'],
   },
   {
-    title: 'Claude / ChatGPT Business Playbook',
-    for: 'Small teams that want clear, safe, non-technical ways to use Claude or ChatGPT in day-to-day operations.',
-    problem:
-      'People are using AI randomly, with inconsistent prompts, unclear standards, and no shared way to apply the results.',
-    gets: [
-      'Prompt and template starter pack',
-      'Use-case guidance by workflow',
-      'Do-and-do-not-use rules for your team',
-      'Examples for follow-up, documents, reporting, and decisions',
-    ],
+    title: 'ChatGPT / Claude PM Playbook',
+    for: 'Teams that want practical AI templates for planning, meeting notes, stakeholder updates, risk logs, SOPs, reports, and decision support.',
+    problem: 'People use AI inconsistently, with different standards, unclear review steps, and no shared project or operations process.',
+    gets: ['Planning and meeting-note templates', 'Stakeholder update examples', 'Risk log and decision-support prompts', 'SOP and report templates', 'Human review checklist'],
   },
 ];
 
@@ -75,11 +164,11 @@ const resourceSections = [
     ],
   },
   {
-    title: 'Prompt Templates for Small Business',
+    title: 'Prompt Templates',
     points: [
       '“Turn these call notes into a client follow-up email with next steps and open questions.”',
       '“Summarize this project update for an owner who needs risks, decisions, and deadlines.”',
-      '“Create a checklist from this messy request so a team member can complete it without another meeting.”',
+      '“Create a checklist from this request so a team member can complete it without another meeting.”',
       '“Rewrite this estimate explanation so it is clear, direct, and professional.”',
     ],
   },
@@ -105,16 +194,16 @@ const resourceSections = [
 
 const useCaseDetails = [
   {
+    title: 'Real estate professionals',
+    problem: 'Client communication, property details, transaction tasks, and vendor coordination are often fragmented across tools and conversations.',
+    help: 'AI can summarize conversations, draft updates, organize deal tasks, and prepare client-ready communication for review.',
+    system: 'A transaction coordination workflow that converts notes into follow-ups, documents, reminders, and decision points.',
+  },
+  {
     title: 'Contractors',
     problem: 'Job details, site notes, estimate changes, and client follow-up often live in texts, calls, and memory.',
     help: 'AI can turn notes and photos into summaries, estimate explanations, task lists, and follow-up drafts.',
     system: 'A simple intake-to-estimate workflow with standard prompts, review steps, and assigned next actions.',
-  },
-  {
-    title: 'Real estate professionals',
-    problem: 'Client communication, property details, transaction tasks, and vendor coordination can become fragmented.',
-    help: 'AI can summarize conversations, draft updates, organize deal tasks, and prepare client-ready communication.',
-    system: 'A transaction coordination workflow that converts notes into follow-ups, documents, reminders, and decision points.',
   },
   {
     title: 'Local service businesses',
@@ -140,9 +229,9 @@ const navItems = [
   { label: 'Home', to: '/' },
   { label: 'Services', to: '/services' },
   { label: 'Resources', to: '/resources' },
-  { label: 'Use Cases', to: '/use-cases' },
-  { label: 'About', to: '/about' },
   { label: 'Real Estate Pilot', to: '/real-estate-ai-pm-pilot' },
+  { label: 'About', to: '/about' },
+  { label: 'Contact', to: '/contact' },
 ];
 
 function CTAButton({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
@@ -187,10 +276,14 @@ function PageIntro({ eyebrow, title, text }: { eyebrow: string; title: string; t
 function FinalCTA() {
   return (
     <section className="cta section-shell" id="contact">
-      <div className="cta-panel">
-        <p className="eyebrow">Ready to make AI practical?</p>
-        <h2>Start with the workflow you already know is slowing the business down.</h2>
-        <CTAButton light>Book a 15-minute review</CTAButton>
+      <div className="cta-panel final-funnel-cta">
+        <p className="eyebrow">Start simple</p>
+        <h2>Want to make your workflow clearer?</h2>
+        <p>Start with one workflow, one bottleneck, and one practical next step.</p>
+        <div className="hero-actions">
+          <CTAButton light>Book a 15-Minute Review</CTAButton>
+          <Link className="button secondary light-outline" to="/contact">Contact Peter</Link>
+        </div>
       </div>
     </section>
   );
@@ -203,7 +296,7 @@ function SiteFooter() {
         <div>
           <img className="site-footer-logo" src="https://i.ibb.co/5g7gFLQz/Logo-PRDX.jpg" alt="Practical AI Systems logo" />
           <p className="site-footer-brand">Practical AI Systems</p>
-          <p>AI + Project Management systems for real operations.</p>
+          <p>AI-supported workflow systems for real operations.</p>
         </div>
         <div>
           <p className="site-footer-title">Contact</p>
@@ -224,139 +317,307 @@ function SiteFooter() {
 function Home() {
   return (
     <>
-      <section className="hero section-shell">
-        <div className="hero-grid">
-          <div className="hero-copy">
-            <p className="eyebrow">AI + Project Management Consulting</p>
-            <h1>
-              Most small businesses do not have an AI problem. <span>They have a workflow problem.</span>
-            </h1>
+      <section className="hero section-shell home-funnel-hero premium-hero">
+        <div className="premium-hero-grid">
+          <div className="premium-hero-copy">
+            <p className="hero-eyebrow-pill">AI PM Lab</p>
+            <h1>Turn AI use into operational control.</h1>
             <p className="hero-lede">
-              Practical AI Systems helps owners turn AI curiosity into cleaner operations. We connect tools like
-              ChatGPT and Claude to real workflows: client follow-up, documents, estimates, reports, task management,
-              communication, decision-making, and internal operations.
+              AI PM Lab helps small businesses, project-based teams, and real estate professionals organize how AI is used, where workflows break, who owns the next step, and what system should be created next.
             </p>
-            <div className="hero-actions">
-              <CTAButton>Book a 15-minute review</CTAButton>
-              <Link className="button secondary" to="/services">
-                Explore services
-              </Link>
+            <p className="trust-line">Start with one workflow. Map the problem. Add AI only where it improves clarity, speed, documentation, or control.</p>
+            <div className="hero-actions premium-hero-actions">
+              <Link className="button primary" to="/contact">Start with an AI Use Review</Link>
+              <Link className="button secondary" to="/real-estate-ai-pm-pilot">Explore Real Estate AI PM Pilot</Link>
             </div>
+            <div className="hero-proof-row" aria-label="AI PM Lab positioning">
+              <span>AI use maps</span>
+              <span>Prompt controls</span>
+              <span>Review workflows</span>
+              <span>Next actions</span>
+            </div>
+            <p className="home-positioning-line">AI + Project Management systems for business, projects, and real estate workflows.</p>
           </div>
-          <aside className="hero-card" aria-label="Workflow areas">
-            <div className="card-topline">Where AI becomes useful</div>
-            <ul>
-              {workflowAreas.map((area) => (
-                <li key={area}>{area}</li>
+
+          <aside className="hero-signal-panel execution-panel" aria-label="Project Control Layer framework visual">
+            <div className="signal-panel-header">
+              <p className="card-topline">Project Control Layer</p>
+              <strong>From AI outputs and broken workflows to clear operational control.</strong>
+              <span>Map the workflow, define ownership, document AI use, review outputs, and connect decisions to follow-up.</span>
+            </div>
+            <div className="execution-framework-grid">
+              {projectControlSteps.map((step, index) => (
+                <div className="execution-node" key={step.title}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <strong>{step.title}</strong>
+                  <p>{step.text}</p>
+                </div>
               ))}
-            </ul>
+            </div>
+            <div className="execution-outcome-bar">
+              <span>Maps</span>
+              <span>Prompts</span>
+              <span>Logs</span>
+            </div>
           </aside>
         </div>
       </section>
 
-      <section className="problem section-shell">
-        <div className="section-kicker">The problem</div>
-        <div className="split">
-          <h2>Buying another AI tool will not fix a messy handoff.</h2>
-          <div className="copy-stack">
-            <p>
-              Small businesses rarely need a complicated AI strategy on day one. They need clearer ways to capture
-              information, decide what matters, assign work, follow up, and keep clients moving.
-            </p>
-            <p>
-              Random prompts and one-off experiments can be interesting, but they do not create operating leverage. The
-              value appears when AI is tied to repeatable workflows your team can trust.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="solution section-shell">
-        <div className="section-kicker">The solution</div>
-        <div className="solution-panel">
+      <section className="section-shell funnel-section home-starting-points">
+        <div className="section-header single-column-header">
           <div>
-            <h2>Build practical AI systems around the workflow first.</h2>
-            <p>
-              We help you decide where AI belongs, what should stay human, and how each tool should support the way your
-              business actually operates. The outcome is not more noise. It is fewer dropped balls, clearer standards,
-              and better decisions.
-            </p>
+            <div className="section-kicker">Two starting points</div>
+            <h2>Choose your starting point.</h2>
           </div>
-          <div className="metrics-grid" aria-label="Consulting principles">
-            <div>
-              <strong>Clear</strong>
-              <span>Simple processes before complex tools.</span>
-            </div>
-            <div>
-              <strong>Useful</strong>
-              <span>Systems designed for work your team already does.</span>
-            </div>
-            <div>
-              <strong>Durable</strong>
-              <span>Templates, prompts, and routines that keep working.</span>
-            </div>
-          </div>
+          <p>Start with the path that matches your current problem.</p>
         </div>
-      </section>
-
-      <section className="deliverables section-shell">
-        <div className="section-header">
-          <div>
-            <div className="section-kicker">What you get</div>
-            <h2>Concrete deliverables your business can use immediately.</h2>
-          </div>
-          <p>
-            Every engagement is built around practical outputs, not vague advice. You leave with a clearer operating
-            picture and a focused plan for using AI where it will actually help.
-          </p>
-        </div>
-        <div className="deliverable-grid">
-          {deliverables.map((deliverable) => (
-            <article className="deliverable-card" key={deliverable}>
-              <h3>{deliverable}</h3>
+        <div className="starting-point-grid">
+          {startingPoints.map((point) => (
+            <article className="detail-card starting-point-card" key={point.title}>
+              <h3>{point.title}</h3>
+              <p>{point.copy}</p>
+              <ul>
+                {point.deliverables.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+              <Link className="button secondary" to={point.to}>{point.cta}</Link>
             </article>
           ))}
         </div>
       </section>
 
-
-      <section className="section-shell detail-card pilot-home-cta">
-        <p className="eyebrow">New: Real Estate AI PM Pilot</p>
-        <h2>New: Real Estate AI PM Pilot</h2>
-        <p>
-          Most real estate professionals are not losing time because they lack another AI tool. They lose time because
-          leads, follow-ups, tasks, documents, vendors, and decisions are not connected.
-        </p>
-        <p>
-          This free pilot helps realtors, brokers, property managers, and small real estate teams turn one messy
-          workflow into a simple AI-assisted project management system.
-        </p>
-        <div className="hero-actions">
-          <Link className="button primary" to="/real-estate-ai-pm-pilot">
-            Apply for the Free Pilot
-          </Link>
-          <Link className="button secondary" to="/real-estate-ai-pm-pilot">
-            See How It Works
-          </Link>
+      <section className="problem section-shell">
+        <div className="split">
+          <div>
+            <div className="section-kicker">The problem</div>
+            <h2>AI does not fix messy workflows. It exposes them.</h2>
+          </div>
+          <div className="copy-stack">
+            <p>
+              Many teams already use AI for emails, summaries, reports, client updates, research, documents, and planning. But without structure, AI outputs stay disconnected from real execution.
+            </p>
+          </div>
+        </div>
+        <div className="issue-grid">
+          {problemBullets.map((issue) => <article className="compact-card issue-card" key={issue}>{issue}</article>)}
         </div>
       </section>
 
-      <FinalCTA />
+      <section className="section-shell workflow-visual-section">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">Project Control Layer</div>
+            <h2>The Project Control Layer</h2>
+          </div>
+          <p>From scattered information to clear scope, owners, risks, decisions, documentation, and follow-up.</p>
+        </div>
+        <div className="workflow-step-grid project-control-grid">
+          {projectControlSteps.map((step, index) => (
+            <article className="workflow-step-card project-control-card" key={step.title}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <strong>{step.title}</strong>
+              <p>{step.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="solution section-shell">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">How I can help</div>
+            <h2>How I can help.</h2>
+          </div>
+          <p>Practical support for the work your team already does.</p>
+        </div>
+        <div className="help-card-grid home-help-grid">
+          {homeHelpCards.map((card) => (
+            <article className="detail-card help-card" key={card.title}>
+              <h3>{card.title}</h3>
+              <p>{card.copy}</p>
+              <strong>Includes</strong>
+              <ul>
+                {card.includes.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+              <Link className="button secondary" to={card.to}>{card.cta}</Link>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section-shell funnel-section home-audience-section">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">Who this is for</div>
+            <h2>Who this is for.</h2>
+          </div>
+        </div>
+        <div className="audience-grid sector-grid home-audience-grid">
+          {homeAudienceCards.map((audience) => (
+            <article className="compact-card sector-card" key={audience.title}>
+              <h3>{audience.title}</h3>
+              <p>{audience.copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section-shell pilot-highlight">
+        <div className="pilot-highlight-copy">
+          <p className="eyebrow">Featured Pilot</p>
+          <h2>Featured Pilot: Real Estate AI PM Pilot</h2>
+          <p>A focused pilot for real estate professionals who want to organize one workflow before adding more tools or automation.</p>
+          <p className="pilot-note">Limited pilot spots available.</p>
+          <Link className="button primary" to="/real-estate-ai-pm-pilot">Explore Real Estate Pilot</Link>
+        </div>
+        <ul className="pilot-example-list">
+          {pilotFocusAreas.map((example) => <li key={example}>{example}</li>)}
+        </ul>
+      </section>
+
+      <section className="section-shell related-work-section home-related-work">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">Related work</div>
+            <h2>Related Research: PropertyDEX</h2>
+          </div>
+          <p>PropertyDEX explores real estate innovation, digital property infrastructure, tokenization research, and future ownership models.</p>
+        </div>
+        <div className="related-work-grid single-related-card">
+          <article className="detail-card">
+            <h3>PropertyDEX</h3>
+            <p>AI PM Lab focuses on practical AI + Project Management systems. PropertyDEX is the broader real estate innovation research track.</p>
+            <a className="button secondary" href="https://propertydex.xyz" target="_blank" rel="noreferrer">Explore PropertyDEX</a>
+          </article>
+        </div>
+      </section>
+
+      <section className="cta section-shell home-final-cta">
+        <div className="cta-panel final-funnel-cta">
+          <p className="eyebrow">Start simple</p>
+          <h2>Start with one workflow.</h2>
+          <p>You do not need to automate everything. Start with one bottleneck, one workflow, and one practical next step.</p>
+          <div className="hero-actions">
+            <Link className="button primary light" to="/contact">Start with an AI Use Review</Link>
+            <Link className="button secondary light-outline" to="/real-estate-ai-pm-pilot">Explore Real Estate Pilot</Link>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
 
 function Services() {
+  const servicesPageServices = [
+    {
+      title: 'AI Use Review',
+      for: 'Teams already using ChatGPT, Claude, Copilot, Gemini, Canva AI, Notion AI, or other AI tools without a clear process for prompts, outputs, review, risk, and documentation.',
+      problem: 'AI is being used, but no one has a clear picture of who uses it, for what tasks, what data goes in, what outputs are used, who reviews them, and where the process is documented.',
+      gets: ['AI Use Map', 'Risk Checklist', 'Prompt Library Starter', 'AI Use Log', 'Human Review Workflow', '30-Day Action Plan'],
+      cta: 'Start AI Use Review',
+      to: '/contact',
+    },
+    {
+      title: 'Workflow Clarity Review',
+      for: 'Businesses that need to clarify a workflow, project, client process, internal routine, or recurring bottleneck before adding tools or automation.',
+      problem: 'Unclear scope, shifting priorities, scattered documents, disconnected communication, and weak ownership make everyday work hard to manage.',
+      gets: ['Problem and scope clarification', 'Stakeholder and priority mapping', 'Bottleneck diagnosis', 'Risk and decision review', 'Workflow improvement roadmap'],
+      cta: 'Book a Workflow Review',
+      to: '/contact',
+    },
+    {
+      title: 'Workflow System Setup',
+      for: 'Teams ready to organize tasks, documents, communication, timelines, risks, reporting, and AI-supported work into a simple operating system.',
+      problem: 'Work needs structure around ownership, deadlines, documentation, communication, risk tracking, human review, and recurring updates.',
+      gets: ['Workflow map', 'Task ownership structure', 'Timeline and milestone setup', 'Risk and decision tracking', 'Communication and reporting routines', 'Human review checkpoints', 'Simple operating templates'],
+      cta: 'Build a Workflow System',
+      to: '/contact',
+    },
+    {
+      title: 'Real Estate AI PM Pilot',
+      for: 'Real estate professionals, brokers, operators, property managers, and small developers who want to improve one workflow before adding more tools or automation.',
+      problem: 'Follow-ups, documents, property notes, vendors, client updates, transaction tasks, and reporting are often fragmented across email, texts, folders, spreadsheets, and memory.',
+      gets: ['Workflow Diagnostic', 'Follow-Up Review', 'Document and Task Visibility', 'Bottleneck Analysis', 'AI + PM Improvement Plan', 'Prompt Pack', '7-Day Roadmap'],
+      cta: 'Explore Real Estate Pilot',
+      to: '/real-estate-ai-pm-pilot',
+    },
+  ];
+
+  const servicesSupportItems = [
+    'AI use mapping',
+    'Scope clarity',
+    'Stakeholder communication',
+    'Task ownership',
+    'Timeline planning',
+    'Risk tracking',
+    'Decision support',
+    'Documentation',
+    'Reporting',
+    'SOP creation',
+    'Follow-up routines',
+    'Human review',
+  ];
+
+  const servicesBusinessExamples = [
+    {
+      title: 'Real estate professionals',
+      challenge: 'Client communication, property details, transaction tasks, vendor coordination, and deal updates are fragmented across tools and conversations.',
+      aiHelp: 'AI can summarize conversations, draft updates, organize deal tasks, and prepare client-ready communication for human review.',
+      system: 'A transaction coordination workflow that converts notes into follow-ups, documents, reminders, and decision points.',
+      output: 'Follow-up tracker, deal update template, prompt library, document checklist, weekly visibility report.',
+    },
+    {
+      title: 'Contractors and renovation teams',
+      challenge: 'Job details, site notes, estimate changes, materials, vendors, and client follow-up often live in texts, calls, photos, and memory.',
+      aiHelp: 'AI can turn notes and photos into summaries, estimate explanations, task lists, and follow-up drafts.',
+      system: 'A simple intake-to-estimate workflow with standard prompts, review steps, and assigned next actions.',
+      output: 'Intake template, estimate explanation prompt, change request log, client update template, task tracker.',
+    },
+    {
+      title: 'Local service businesses',
+      challenge: 'New inquiries, scheduling, service notes, reviews, and repeat communication are handled inconsistently.',
+      aiHelp: 'AI can standardize responses, summarize service history, draft updates, and create internal handoff notes.',
+      system: 'A client request workflow from intake to service completion with templates for each recurring touchpoint.',
+      output: 'Inquiry tracker, response templates, service note structure, review response prompts, follow-up routine.',
+    },
+    {
+      title: 'Consultants and service professionals',
+      challenge: 'Discovery notes, client recommendations, proposals, and status reports take too long to convert into clear outputs.',
+      aiHelp: 'AI can structure insights, draft deliverables, prepare meeting summaries, and keep action items visible.',
+      system: 'A consulting delivery workflow that turns meetings into decisions, tasks, summaries, and polished client materials.',
+      output: 'Discovery summary template, proposal prompt, client report outline, action item tracker, decision log.',
+    },
+    {
+      title: 'Small internal teams',
+      challenge: 'Work is spread across email, chat, spreadsheets, project tools, and informal conversations.',
+      aiHelp: 'AI can consolidate updates, clarify requests, draft internal documentation, and surface decisions that need attention.',
+      system: 'A lightweight operating rhythm for requests, updates, decisions, and weekly visibility.',
+      output: 'Weekly update template, request tracker, decision log, AI use log, review checklist.',
+    },
+  ];
+
   return (
     <>
       <PageIntro
         eyebrow="Services"
-        title="Practical AI systems for owners who want results, not hype."
-        text="Start with the workflow, then connect AI and project management tools only where they make operations clearer."
+        title="Practical AI + Project Management systems for teams that need clarity, coordination, and control."
+        text="Start with the work your business already does. Then clarify how AI is used, where workflows break, who owns the next step, what needs review, and what simple system should be created next."
       />
-      <section className="section-shell service-detail-grid">
-        {serviceBlocks.map((service) => (
-          <article className="detail-card" key={service.title}>
+      <section className="section-shell services-hero-actions">
+        <div className="hero-actions">
+          <Link className="button primary" to="/contact">Start with an AI Use Review</Link>
+          <Link className="button secondary" to="/contact">Book a Call</Link>
+        </div>
+      </section>
+
+      <section className="section-shell service-detail-grid service-card-grid">
+        <div className="section-header single-column-header services-section-title">
+          <div>
+            <div className="section-kicker">Services</div>
+            <h2>Ways I can help</h2>
+          </div>
+        </div>
+        {servicesPageServices.map((service) => (
+          <article className="detail-card service-card" key={service.title}>
             <h2>{service.title}</h2>
             <div className="detail-stack">
               <div>
@@ -370,15 +631,72 @@ function Services() {
               <div>
                 <strong>What you get</strong>
                 <ul>
-                  {service.gets.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
+                  {service.gets.map((item) => <li key={item}>{item}</li>)}
                 </ul>
               </div>
             </div>
-            <CTAButton>Book a call</CTAButton>
+            <Link className="button secondary" to={service.to}>{service.cta}</Link>
           </article>
         ))}
+      </section>
+
+      <section className="section-shell ai-supported-pm-section">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">Practical support areas</div>
+            <h2>What AI-supported PM can help with</h2>
+          </div>
+          <p>Use AI as support inside a managed workflow: clarify, plan, communicate, document, monitor, and review.</p>
+        </div>
+        <div className="pm-support-grid services-support-grid">
+          {servicesSupportItems.map((item) => <article className="compact-card" key={item}>{item}</article>)}
+        </div>
+      </section>
+
+      <section className="section-shell business-examples-section">
+        <div className="section-header single-column-header">
+          <div>
+            <div className="section-kicker">Examples</div>
+            <h2>Examples by business type</h2>
+          </div>
+        </div>
+        <div className="use-case-detail-grid business-example-grid services-example-grid">
+          {servicesBusinessExamples.map((useCase) => (
+            <article className="detail-card" key={useCase.title}>
+              <h3>{useCase.title}</h3>
+              <div className="detail-stack three-column-text services-example-stack">
+                <div>
+                  <strong>Common workflow challenge</strong>
+                  <p>{useCase.challenge}</p>
+                </div>
+                <div>
+                  <strong>How AI can help</strong>
+                  <p>{useCase.aiHelp}</p>
+                </div>
+                <div>
+                  <strong>Simple system example</strong>
+                  <p>{useCase.system}</p>
+                </div>
+                <div>
+                  <strong>Operational output</strong>
+                  <p>{useCase.output}</p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="cta section-shell services-final-cta">
+        <div className="cta-panel final-funnel-cta">
+          <p className="eyebrow">Start simple</p>
+          <h2>Start with one workflow.</h2>
+          <p>You do not need to automate everything. Start with one bottleneck, one workflow, and one practical next step.</p>
+          <div className="hero-actions">
+            <Link className="button primary light" to="/contact">Start with an AI Use Review</Link>
+            <Link className="button secondary light-outline" to="/contact">Book a Call</Link>
+          </div>
+        </div>
       </section>
     </>
   );
@@ -389,20 +707,25 @@ function Resources() {
     <>
       <PageIntro
         eyebrow="Resources"
-        title="Useful starting points for applying AI to real small business workflows."
-        text="These examples are designed to help you think clearly before buying another tool or asking your team to change everything at once."
+        title="Free Workflow Resources"
+        text="Useful starting points for applying AI to real business workflows before buying another tool."
       />
       <section className="section-shell resource-grid">
         {resourceSections.map((section) => (
           <article className="resource-card" key={section.title}>
             <h2>{section.title}</h2>
             <ul>
-              {section.points.map((point) => (
-                <li key={point}>{point}</li>
-              ))}
+              {section.points.map((point) => <li key={point}>{point}</li>)}
             </ul>
           </article>
         ))}
+      </section>
+      <section className="cta section-shell resource-bottom-cta">
+        <div className="cta-panel">
+          <p className="eyebrow">Apply this to your work</p>
+          <h2>Want this adapted to your business?</h2>
+          <CTAButton light>Book a 15-Minute Review</CTAButton>
+        </div>
       </section>
     </>
   );
@@ -448,33 +771,34 @@ function About() {
       <PageIntro
         eyebrow="About"
         title="Practical systems for business owners who need clarity, not buzzwords."
-        text="Practical AI Systems is led by Peter, an AI + Project Management Systems Consultant focused on turning complex ideas into usable operations."
+        text="Practical AI Systems is led by Peter, a practical AI systems consultant focused on turning complex ideas, scattered information, and recurring business work into simple systems people can actually use."
       />
       <section className="section-shell about-profile">
         <img src="https://i.ibb.co/nx5qk7T/Progetto-senza-titolo-3.png" alt="Peter, founder of Practical AI Systems" />
         <div className="about-card">
           <div className="section-kicker">Founder profile</div>
           <h2>Peter</h2>
-          <p className="profile-title">Founder / AI + Project Management Systems Consultant</p>
+          <p className="profile-title">Founder / Practical AI Systems Consultant</p>
           <p>
             Peter is an engineer by background and a builder by instinct. With experience across civil engineering,
-            construction, real estate coordination, blockchain, digital ventures, and business operations, he focuses on
-            turning complex ideas into practical systems.
+            construction, real estate coordination, digital ventures, and business operations, he focuses on turning
+            complex ideas into practical systems.
           </p>
           <p>
-            He started exploring crypto and blockchain in 2017, later applying that curiosity to real estate
-            tokenization, decision-support tools, and practical AI workflows.
+            Through Practical AI Systems, Peter helps small businesses use tools like ChatGPT and Claude in a structured,
+            useful way: not as random tools, but as part of real business operations.
           </p>
-          <p>
-            Today, through Practical AI Systems, Peter helps small businesses use AI tools like ChatGPT and Claude in a
-            structured, useful way: not as random tools, but as part of real business operations.
+          <p className="soft-related-note">
+            Peter has also explored emerging digital business models and real estate innovation since 2017, including
+            blockchain-based real estate concepts and decision-support tools.
           </p>
           <ul className="credential-list">
             <li>Civil engineering background</li>
             <li>Construction and real estate experience</li>
-            <li>Blockchain and digital business experience</li>
-            <li>Project coordination mindset</li>
-            <li>Focus on practical AI systems, not hype</li>
+            <li>Business operations experience</li>
+            <li>Practical AI systems</li>
+            <li>Workflow clarity</li>
+            <li>Human-reviewed implementation</li>
           </ul>
         </div>
       </section>
@@ -494,6 +818,7 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/use-cases" element={<UseCases />} />
           <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/real-estate-ai-pm-pilot" element={<RealEstateAIPMPilot />} />
         </Routes>
       </main>
@@ -502,7 +827,13 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error('Root element #root was not found.');
+}
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
