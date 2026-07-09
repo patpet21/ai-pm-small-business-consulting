@@ -2551,32 +2551,65 @@ h1 {
   padding-top: var(--section-space);
 }
 
-.resources-download-section {
+.resource-card-section {
   padding-bottom: 18px;
 }
 
-.resources-download-card {
+.resource-card-grid {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
-.resources-download-card h2 {
-  margin-bottom: 0;
+.standard-resource-card {
+  display: flex;
+  min-height: 330px;
+  aspect-ratio: 1 / 0.92;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 22px;
+  padding: clamp(24px, 3vw, 34px);
 }
 
-.resources-download-card p:not(.eyebrow) {
-  max-width: 820px;
+.standard-resource-card-demo {
+  border-color: rgba(124, 92, 255, 0.28);
+  background:
+    radial-gradient(circle at 92% 8%, rgba(124, 92, 255, 0.22), transparent 34%),
+    linear-gradient(155deg, rgba(248, 250, 255, 0.97), rgba(232, 240, 255, 0.9));
+}
+
+.standard-resource-card h2 {
+  margin: 12px 0 14px;
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  line-height: 0.98;
+}
+
+.standard-resource-card p:not(.eyebrow) {
   color: var(--muted);
-  font-size: 1.05rem;
-  line-height: 1.72;
+  font-size: 1rem;
+  line-height: 1.62;
 }
 
-.resources-download-card .button {
+.standard-resource-card .button {
   width: fit-content;
 }
 
+@media (max-width: 1100px) {
+  .resource-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 640px) {
-  .resources-download-card .button {
+  .resource-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .standard-resource-card {
+    aspect-ratio: auto;
+  }
+
+  .standard-resource-card .button {
     width: 100%;
   }
 }
