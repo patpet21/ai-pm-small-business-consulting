@@ -805,6 +805,25 @@ function Resources() {
     'You want a simple 30-day action plan.',
   ];
 
+  const featuredResourceCards = [
+    {
+      eyebrow: 'DOWNLOAD DEMO',
+      title: 'Stakeholder Analysis AI + PM Demo',
+      description: 'Scarica il pacchetto demo con documento Word, dashboard Excel e PowerPoint executive per una stakeholder analysis real estate creata con workflow AI + Project Management.',
+      cta: 'Scarica il pacchetto',
+      href: '/downloads/Stakeholder%20Register.rar',
+      variant: 'demo',
+    },
+    ...Array.from({ length: 11 }, (_, index) => ({
+      eyebrow: 'RESOURCE CARD',
+      title: 'Coming Soon',
+      description: 'Nuova risorsa AI + Project Management in preparazione.',
+      cta: '',
+      href: '',
+      variant: index % 2 === 0 ? 'ice' : 'lavender',
+    })),
+  ];
+
   return (
     <>
       <PageIntro
@@ -816,6 +835,25 @@ function Resources() {
         <div className="hero-actions">
           <a className="button primary" href="#ai-workflow-checklist">Start with the checklist</a>
           <Link className="button secondary" to="/contact">Book an AI Use Review</Link>
+        </div>
+      </section>
+
+      <section className="section-shell resource-card-section">
+        <div className="resource-card-grid">
+          {featuredResourceCards.map((card) => (
+            <article className={`resource-card standard-resource-card standard-resource-card-${card.variant}`} key={card.title}>
+              <div>
+                <p className="eyebrow">{card.eyebrow}</p>
+                <h2>{card.title}</h2>
+                <p>{card.description}</p>
+              </div>
+              {card.href ? (
+                <a className="button primary resource-download-button" href={card.href} download>{card.cta}</a>
+              ) : (
+                <span className="resource-card-placeholder" aria-hidden="true">Coming soon</span>
+              )}
+            </article>
+          ))}
         </div>
       </section>
 
