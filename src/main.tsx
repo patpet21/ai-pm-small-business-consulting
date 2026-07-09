@@ -819,6 +819,15 @@ function Resources() {
         </div>
       </section>
 
+      <section className="section-shell resources-download-section">
+        <article className="resource-card resources-download-card">
+          <p className="eyebrow">Download demo</p>
+          <h2>Stakeholder Analysis AI + PM Demo</h2>
+          <p>Scarica il pacchetto demo con documento Word, dashboard Excel e PowerPoint executive per una stakeholder analysis real estate creata con workflow AI + Project Management.</p>
+          <a className="button primary" href="/downloads/Stakeholder%20Register.rar" download>Scarica il pacchetto</a>
+        </article>
+      </section>
+
       <section className="section-shell resource-grid resources-starter-grid" id="ai-workflow-checklist">
         <article className="resource-card resources-wide-card">
           <p className="eyebrow">1. AI Workflow Checklist</p>
