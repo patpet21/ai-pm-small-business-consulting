@@ -814,6 +814,14 @@ function Resources() {
       href: '/downloads/Stakeholder%20Register.rar',
       variant: 'demo',
     },
+    ...Array.from({ length: 11 }, (_, index) => ({
+      eyebrow: 'RESOURCE CARD',
+      title: 'Coming Soon',
+      description: 'Nuova risorsa AI + Project Management in preparazione.',
+      cta: '',
+      href: '',
+      variant: index % 2 === 0 ? 'ice' : 'lavender',
+    })),
   ];
 
   return (
@@ -839,7 +847,11 @@ function Resources() {
                 <h2>{card.title}</h2>
                 <p>{card.description}</p>
               </div>
-              <a className="button primary" href={card.href} download>{card.cta}</a>
+              {card.href ? (
+                <a className="button primary resource-download-button" href={card.href} download>{card.cta}</a>
+              ) : (
+                <span className="resource-card-placeholder" aria-hidden="true">Coming soon</span>
+              )}
             </article>
           ))}
         </div>
