@@ -1190,120 +1190,274 @@ function UseCases() {
   );
 }
 
+const aboutShapedApproach = [
+  {
+    title: 'Engineering mindset',
+    copy: 'My engineering background taught me to look at systems, constraints, dependencies, risks, and the relationship between individual parts and the larger outcome.',
+  },
+  {
+    title: 'Operational experience',
+    copy: 'My work in business operations, administration, hospitality, and service environments showed me how much real work depends on emails, documents, payments, deadlines, vendors, handoffs, and repeated follow-up.',
+  },
+  {
+    title: 'Project management structure',
+    copy: 'Through the Master of Science in Project Management I am currently pursuing at Harrisburg University, I have strengthened the way I approach scope, ownership, stakeholders, risk, communication, decisions, and completion criteria.',
+  },
+  {
+    title: 'Applied AI',
+    copy: 'I use AI as a support layer for drafting, analysis, organization, documentation, and decision preparation. I do not treat it as a replacement for professional judgment or accountability.',
+  },
+];
+
+const aboutMethodSteps = [
+  {
+    step: '01',
+    title: 'Understand the real work',
+    copy: 'I begin with one recurring activity, the people involved, the current process, and the points where time, information, or responsibility are being lost.',
+  },
+  {
+    step: '02',
+    title: 'Connect the wider project',
+    copy: 'I map the documents, decisions, risks, dependencies, handoffs, and next actions surrounding the activity.',
+  },
+  {
+    step: '03',
+    title: 'Add practical AI support',
+    copy: 'I introduce prompts, templates, trackers, document structures, summaries, or analysis steps only where they improve the workflow.',
+  },
+  {
+    step: '04',
+    title: 'Test, review, and document',
+    copy: 'I test the process on real work, define the human-review points, and prepare a system that can be reused, measured, and improved.',
+  },
+];
+
+const aboutSelectedWork = [
+  {
+    label: 'PRACTICAL RESOURCES',
+    title: 'AI PM LAB Resource Library',
+    copy: [
+      'I have created a growing library of practical AI frameworks, professional prompt kits, communication tools, decision guides, and human-review checklists.',
+      'Each resource is designed to improve real professional work without relying on hype, secret prompts, or unnecessary complexity.',
+    ],
+    examples: ['Before You Prompt: The Clarity Checklist — available now', 'From Vague Request to Professional Prompt — available now', 'The Difficult Conversation Prompt Kit — coming soon'],
+    cta: 'Explore the Resource Library',
+    to: '/resources',
+  },
+  {
+    label: 'INTERACTIVE WORKFLOW DIAGNOSTIC',
+    title: 'AI PM Workflow Copilot',
+    copy: [
+      'I created an interactive workflow diagnostic that uses structured intake questions to generate a preliminary workflow snapshot, identify bottlenecks, suggest a first practical improvement, and prepare the next human-reviewed conversation.',
+      'The current version was first developed through the Real Estate AI PM Pilot and applies the AI PM LAB method to follow-up, documentation, coordination, task ownership, and operational visibility.',
+    ],
+    note: 'The preliminary result is AI-generated and does not replace a human-reviewed consulting engagement.',
+    cta: 'Explore the Workflow Copilot',
+    to: '/real-estate-ai-pm-pilot',
+  },
+  {
+    label: 'RELATED PROPTECH RESEARCH',
+    title: 'PropertyDEX Framework',
+    copy: [
+      'I developed the PropertyDEX Framework as an AI-assisted educational and simulation project exploring real estate tokenization, stakeholder roles, project workflows, governance requirements, and the controls that may be needed around emerging digital ownership models.',
+      'The framework demonstrates how I combine research, project structure, AI-assisted development, governance thinking, and real estate process analysis in one applied project.',
+    ],
+    note: 'PropertyDEX is an exploratory and educational framework. It is not an investment platform, token offering, legal model, financial recommendation, or guarantee of future implementation.',
+    cta: 'Explore the PropertyDEX Framework',
+    href: 'https://framework.propertydex.xyz',
+  },
+];
+
+const aboutBackgroundItems = [
+  'Degree in Civil and Environmental Engineering',
+  'Business operations and administrative coordination',
+  'Hospitality and service-based operations',
+  'Vendor, payment, document, and deadline coordination',
+  'Currently pursuing a Master of Science in Project Management at Harrisburg University in the United States',
+];
+
+const aboutCurrentPracticeItems = [
+  'AI-supported project and operational workflows',
+  'Professional communication systems',
+  'Prompt and human-review processes',
+  'Workflow diagnostics and structured intake',
+  'Real estate operations and PropTech research',
+  'Practical framework and resource development',
+];
+
+const aboutWorkingPrinciples = [
+  {
+    title: 'Practical before impressive',
+    copy: 'I start with one real activity and one specific problem. I do not add technology before understanding the work.',
+  },
+  {
+    title: 'Connect the wider project',
+    copy: 'I do not treat a recurring activity as an isolated task. I identify the people, information, decisions, dependencies, and next actions around it before designing the system.',
+  },
+  {
+    title: 'Human control by design',
+    copy: 'I use AI to draft, organize, compare, summarize, and prepare. People remain responsible for decisions, commitments, approvals, and consequences.',
+  },
+  {
+    title: 'Clear information boundaries',
+    copy: 'I use the minimum information required and define what the AI may use, produce, and recommend.',
+  },
+  {
+    title: 'Responsible escalation',
+    copy: 'I recognize when the work requires qualified legal, HR, compliance, cybersecurity, financial, tax, brokerage, engineering, or safety professionals.',
+  },
+];
+
 function About() {
-  const focusAreas = [
-    {
-      title: 'AI Use Review',
-      text: 'Mapping how AI is used, where risks exist, and what controls should be created.',
-    },
-    {
-      title: 'Workflow Clarity',
-      text: 'Turning scattered work into clear scope, owners, tasks, timelines, and follow-up.',
-    },
-    {
-      title: 'Human-Reviewed AI Support',
-      text: 'Using AI for drafts, summaries, prompts, reports, and documentation without removing human judgment.',
-    },
-    {
-      title: 'Real Estate AI PM Pilot',
-      text: 'Supporting real estate teams with follow-up, documents, vendors, client updates, and task visibility.',
-    },
-    {
-      title: 'Tokenization Research',
-      text: 'Ongoing research into real estate innovation, digital property infrastructure, and future ownership models.',
-    },
-  ];
-
-  const backgroundItems = [
-    'Civil engineering background',
-    'Project Management graduate studies in the United States',
-    'Business operations experience',
-    'Hospitality and service management experience',
-    'Real estate and tokenization research',
-    'Practical AI workflow systems',
-    'Human-reviewed implementation',
-  ];
-
   return (
-    <>
-      <PageIntro
-        eyebrow="About AI PM Lab"
-        title="Practical AI + Project Management systems for teams that need clarity, structure, and control."
-        text="AI PM Lab is led by Pietro Forestieri, a project management graduate student, engineering-trained operator, and practical AI systems builder focused on helping teams turn scattered work, AI use, documents, follow-ups, and decisions into simple systems people can actually use."
-      />
-      <section className="section-shell about-profile">
-        <img src="https://i.ibb.co/nx5qk7T/Progetto-senza-titolo-3.png" alt="Pietro Forestieri, founder of AI PM Lab" />
-        <div className="about-card">
-          <div className="section-kicker">About Pietro</div>
-          <h2>Pietro Forestieri</h2>
-          <p className="profile-title">Founder / AI + Project Management Systems Consultant</p>
-          <p>
-            Pietro combines a civil engineering background, business operations experience, hospitality and service management exposure, real estate interest, and ongoing graduate study in Project Management in the United States.
-          </p>
-          <p>
-            His work focuses on practical implementation: mapping workflows, clarifying ownership, organizing documents, creating prompt libraries, setting up AI use logs, and building human-reviewed systems that support real business execution.
-          </p>
+    <article className="about-page">
+      <section className="section-shell about-hero">
+        <div className="about-hero-copy">
+          <p className="eyebrow">ABOUT AI PM LAB</p>
+          <h1>I build practical AI + project workflows around the way real work gets done.</h1>
+          <div className="about-hero-text">
+            <p>I created AI PM LAB to help small businesses, professionals, and project teams move beyond isolated AI outputs and unclear processes.</p>
+            <p>My work starts with one recurring activity, connects it to the people, documents, decisions, responsibilities, risks, and follow-up around it, and turns it into a clearer, repeatable, human-controlled project workflow.</p>
+            <p>I combine an engineering background and hands-on business operations experience, and I am currently pursuing a Master of Science in Project Management at Harrisburg University in the United States.</p>
+            <p className="about-institutional-line">AI PM LAB is a Trigosat Consulting initiative.</p>
+          </div>
+          <div className="hero-actions about-hero-actions">
+            <a className="button primary" href={calendlyLink} target="_blank" rel="noreferrer">Book a Free Workflow Clarity Call</a>
+            <Link className="button secondary" to="/resources">Explore Free Resources</Link>
+          </div>
+        </div>
+        <figure className="about-photo-card">
+          <img src="https://i.ibb.co/nx5qk7T/Progetto-senza-titolo-3.png" alt="Peter Forestieri, founder of AI PM LAB" />
+          <figcaption>
+            <strong>Peter Forestieri</strong>
+            <span>Founder of AI PM LAB</span>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section className="section-shell about-story">
+        <div className="about-section-heading">
+          <p className="eyebrow">WHY I CREATED AI PM LAB</p>
+          <h2>The problem is rarely access to AI.<span>The problem is the workflow around it.</span></h2>
+        </div>
+        <div className="about-narrative-card">
+          <p>I saw the same pattern repeatedly: people were using AI to draft emails, summarize documents, organize notes, and generate ideas, while the work around those outputs remained unclear.</p>
+          <p>The input was inconsistent. No one had clearly defined who should review the result, what decision it supported, where it should be documented, or what should happen next.</p>
+          <p>I created AI PM LAB to connect AI use with clearer project processes, practical controls, and accountable human decisions. One recurring activity becomes the starting point for understanding and improving the wider system around it.</p>
+          <p className="about-distinct-line">I do not start with the tool. I start with the work—and then connect the project around it.</p>
         </div>
       </section>
 
-      <section className="section-shell about-focus-section">
-        <div className="section-header single-column-header">
-          <div>
-            <div className="section-kicker">What I focus on</div>
-            <h2>What I focus on</h2>
-          </div>
+      <section className="section-shell about-shaped-approach">
+        <div className="about-section-heading">
+          <p className="eyebrow">WHAT SHAPED MY APPROACH</p>
+          <h2>Different experiences.<span>One practical way of thinking.</span></h2>
         </div>
-        <div className="help-card-grid about-focus-grid">
-          {focusAreas.map((area) => (
-            <article className="detail-card help-card" key={area.title}>
-              <h3>{area.title}</h3>
-              <p>{area.text}</p>
+        <div className="about-connected-grid">
+          {aboutShapedApproach.map((item, index) => (
+            <article className="about-connected-card" key={item.title}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="section-shell about-support-note">
-        <div className="about-card">
-          <div className="section-kicker">Practical support</div>
-          <h2>Practical support, not empty AI hype.</h2>
-          <p>
-            AI PM Lab does not replace legal, HR, IT, compliance, or certified training providers. The focus is practical implementation: helping teams document how AI is used, improve workflows, create review steps, and prepare clearer materials that can be shared with internal or external advisors when needed.
-          </p>
+      <section className="section-shell about-method">
+        <div className="about-section-heading">
+          <p className="eyebrow">HOW I WORK</p>
+          <h2>Start with the work.<span>Connect the project.</span>Add AI where it helps.</h2>
+        </div>
+        <div className="about-method-list">
+          {aboutMethodSteps.map((step) => (
+            <article className="about-method-step" key={step.step}>
+              <span>{step.step}</span>
+              <div>
+                <h3>{step.title}</h3>
+                <p>{step.copy}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section className="section-shell about-profile about-learning-section">
-        <div className="about-card">
-          <div className="section-kicker">Continuous learning</div>
-          <h2>Continuous learning</h2>
-          <p>
-            Pietro continues to study project management, responsible AI use, generative AI workflows, business analysis, and practical implementation through graduate coursework, PMI-related learning, professional certificates, and hands-on system building.
-          </p>
+      <section className="section-shell about-selected-work">
+        <div className="about-section-heading">
+          <p className="eyebrow">SELECTED WORK</p>
+          <h2>Built to be tested, used, and improved.</h2>
         </div>
-        <div className="about-card">
-          <div className="section-kicker">Background</div>
-          <h2>Background</h2>
-          <ul className="credential-list">
-            {backgroundItems.map((item) => <li key={item}>{item}</li>)}
-          </ul>
+        <div className="about-selected-grid">
+          {aboutSelectedWork.map((work) => (
+            <article className="about-selected-card" key={work.title}>
+              <p className="card-topline">{work.label}</p>
+              <h3>{work.title}</h3>
+              {work.copy.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+              {work.examples ? (
+                <ul>
+                  {work.examples.map((example) => <li key={example}>{example}</li>)}
+                </ul>
+              ) : null}
+              {work.note ? <p className="about-work-note">{work.note}</p> : null}
+              {work.href ? (
+                <a className="text-link" href={work.href} target="_blank" rel="noreferrer">{work.cta}</a>
+              ) : (
+                <Link className="button secondary" to={work.to ?? '/'}>{work.cta}</Link>
+              )}
+            </article>
+          ))}
         </div>
       </section>
 
-      <section className="cta section-shell about-final-cta">
-        <div className="cta-panel final-funnel-cta">
-          <p className="eyebrow">Start simple</p>
-          <h2>Want to make your workflow clearer?</h2>
-          <p>Start with one workflow, one bottleneck, and one practical next step.</p>
-          <div className="hero-actions">
-            <Link className="button primary light" to="/contact">Book an AI Use Review</Link>
-            <Link className="button secondary light-outline" to="/contact">Contact Pietro</Link>
+      <section className="section-shell about-foundation">
+        <div className="about-section-heading">
+          <p className="eyebrow">PROFESSIONAL FOUNDATION</p>
+          <h2>The experience behind the method.</h2>
+        </div>
+        <div className="about-foundation-grid">
+          <div className="about-foundation-column">
+            <h3>Background</h3>
+            <ul>{aboutBackgroundItems.map((item) => <li key={item}>{item}</li>)}</ul>
+          </div>
+          <div className="about-foundation-column">
+            <h3>Current practice</h3>
+            <ul>{aboutCurrentPracticeItems.map((item) => <li key={item}>{item}</li>)}</ul>
           </div>
         </div>
       </section>
-    </>
+
+      <section className="section-shell about-principles">
+        <div className="about-section-heading">
+          <p className="eyebrow">WORKING PRINCIPLES</p>
+          <h2>Practical support with clear limits.</h2>
+        </div>
+        <div className="about-principles-grid">
+          {aboutWorkingPrinciples.map((principle) => (
+            <article className="about-principle-card" key={principle.title}>
+              <h3>{principle.title}</h3>
+              <p>{principle.copy}</p>
+            </article>
+          ))}
+        </div>
+        <p className="about-principles-note">AI PM LAB does not replace regulated, licensed, or specialist professional advice.</p>
+      </section>
+
+      <section className="section-shell about-page-cta">
+        <div className="about-cta-panel">
+          <p className="eyebrow">START SIMPLE</p>
+          <h2>Bring one recurring activity.<span>We will look at the project around it.</span></h2>
+          <p>During the free Workflow Clarity Call, we identify where the work becomes unclear, what depends on it, and whether a practical 1:1 engagement can turn it into a clearer, repeatable, human-controlled project workflow.</p>
+          <div className="hero-actions">
+            <a className="button primary light" href={calendlyLink} target="_blank" rel="noreferrer">Book a Free Workflow Clarity Call</a>
+            <Link className="button secondary light-outline" to="/resources">Explore Free Resources</Link>
+          </div>
+          <p className="about-cta-note">No obligation. Start with one real activity and one practical next step.</p>
+        </div>
+      </section>
+    </article>
   );
 }
+
 
 function App() {
   return (

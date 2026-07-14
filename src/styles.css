@@ -3726,3 +3726,316 @@ button:focus-visible {
     height: 96px;
   }
 }
+
+/* About page redesign */
+.about-page {
+  color: var(--brand-ink);
+}
+
+.about-page .about-hero,
+.about-page .about-story,
+.about-page .about-shaped-approach,
+.about-page .about-method,
+.about-page .about-selected-work,
+.about-page .about-foundation,
+.about-page .about-principles,
+.about-page .about-page-cta {
+  padding: clamp(56px, 8vw, 96px) 0;
+}
+
+.about-page .about-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.48fr);
+  gap: clamp(28px, 5vw, 62px);
+  align-items: center;
+}
+
+.about-page .about-hero-copy h1 {
+  max-width: 860px;
+  color: var(--brand-navy);
+  font-size: clamp(2.7rem, 5.5vw, 5.25rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.about-page .about-hero-text,
+.about-page .about-narrative-card,
+.about-page .about-section-heading p:not(.eyebrow) {
+  color: var(--brand-muted);
+  line-height: 1.66;
+}
+
+.about-page .about-hero-text {
+  display: grid;
+  gap: 14px;
+  max-width: 760px;
+  margin-top: 24px;
+  font-size: clamp(1.02rem, 1.5vw, 1.16rem);
+}
+
+.about-page .about-institutional-line {
+  color: var(--brand-navy);
+  font-weight: 850;
+}
+
+.about-page .about-hero-actions {
+  margin-top: 28px;
+}
+
+.about-page .about-photo-card {
+  margin: 0;
+  border: 1px solid rgba(171, 146, 101, 0.3);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 22px 54px rgba(2, 26, 49, 0.12);
+  padding: 16px;
+}
+
+.about-page .about-photo-card img {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  border-radius: 22px;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.about-page .about-photo-card figcaption {
+  display: grid;
+  gap: 4px;
+  padding: 14px 4px 2px;
+  color: var(--brand-muted);
+}
+
+.about-page .about-photo-card figcaption strong {
+  color: var(--brand-navy);
+  font-size: 1.05rem;
+}
+
+.about-page .about-section-heading {
+  max-width: 820px;
+}
+
+.about-page .about-section-heading h2 {
+  margin-top: 14px;
+  color: var(--brand-navy);
+  font-size: clamp(2rem, 3.8vw, 3.65rem);
+  line-height: 1.03;
+  letter-spacing: -0.052em;
+}
+
+.about-page .about-section-heading h2 span,
+.about-page .about-cta-panel h2 span {
+  display: block;
+}
+
+.about-page .about-narrative-card {
+  display: grid;
+  gap: 16px;
+  max-width: 940px;
+  margin-top: 28px;
+  border-left: 4px solid var(--brand-gold);
+  border-radius: 0 24px 24px 0;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 14px 36px rgba(2, 26, 49, 0.06);
+  padding: clamp(22px, 4vw, 34px);
+}
+
+.about-page .about-distinct-line {
+  color: var(--brand-navy);
+  font-weight: 850;
+}
+
+.about-page .about-connected-grid,
+.about-page .about-method-list,
+.about-page .about-selected-grid,
+.about-page .about-foundation-grid,
+.about-page .about-principles-grid {
+  display: grid;
+  gap: 18px;
+  margin-top: 30px;
+}
+
+.about-page .about-connected-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.about-page .about-connected-card,
+.about-page .about-method-step,
+.about-page .about-selected-card,
+.about-page .about-foundation-column,
+.about-page .about-principle-card {
+  border: 1px solid var(--brand-line);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 14px 34px rgba(2, 26, 49, 0.065);
+  padding: 22px;
+}
+
+.about-page .about-connected-card span,
+.about-page .about-method-step > span {
+  display: inline-flex;
+  margin-bottom: 18px;
+  color: var(--brand-gold);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.about-page .about-connected-card h3,
+.about-page .about-method-step h3,
+.about-page .about-selected-card h3,
+.about-page .about-foundation-column h3,
+.about-page .about-principle-card h3 {
+  color: var(--brand-navy);
+}
+
+.about-page .about-connected-card p,
+.about-page .about-method-step p,
+.about-page .about-selected-card p,
+.about-page .about-foundation-column li,
+.about-page .about-principle-card p,
+.about-page .about-work-note,
+.about-page .about-principles-note {
+  color: var(--brand-muted);
+  line-height: 1.58;
+}
+
+.about-page .about-method-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.about-page .about-method-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+}
+
+.about-page .about-selected-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.about-page .about-selected-card {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.about-page .about-selected-card ul,
+.about-page .about-foundation-column ul {
+  display: grid;
+  gap: 10px;
+  padding-left: 20px;
+}
+
+.about-page .about-selected-card .button,
+.about-page .about-selected-card .text-link {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.about-page .about-work-note {
+  border-top: 1px solid var(--brand-line);
+  padding-top: 12px;
+  font-size: 0.95rem;
+}
+
+.about-page .about-foundation-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.about-page .about-principles-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.about-page .about-principles-note {
+  max-width: 780px;
+  margin-top: 18px;
+  border-left: 3px solid var(--brand-gold);
+  padding-left: 14px;
+  font-weight: 750;
+}
+
+.about-page .about-page-cta {
+  padding-bottom: var(--section-space);
+}
+
+.about-page .about-cta-panel {
+  border: 1px solid rgba(171, 146, 101, 0.28);
+  border-radius: 30px;
+  background: var(--brand-navy);
+  color: var(--brand-white);
+  box-shadow: 0 26px 70px rgba(2, 26, 49, 0.2);
+  padding: clamp(30px, 6vw, 64px);
+}
+
+.about-page .about-cta-panel .eyebrow {
+  color: var(--brand-gold);
+}
+
+.about-page .about-cta-panel h2 {
+  margin-top: 14px;
+  color: var(--brand-white);
+  font-size: clamp(2.1rem, 4vw, 4rem);
+  line-height: 1.04;
+  letter-spacing: -0.052em;
+}
+
+.about-page .about-cta-panel p:not(.eyebrow) {
+  max-width: 820px;
+  margin-top: 18px;
+  color: rgba(247, 245, 239, 0.82);
+  line-height: 1.65;
+}
+
+.about-page .about-cta-note {
+  font-weight: 750;
+}
+
+@media (max-width: 1100px) {
+  .about-page .about-connected-grid,
+  .about-page .about-selected-grid,
+  .about-page .about-principles-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .about-page .about-hero,
+  .about-page .about-foundation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-page .about-photo-card {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 640px) {
+  .about-page .about-hero,
+  .about-page .about-story,
+  .about-page .about-shaped-approach,
+  .about-page .about-method,
+  .about-page .about-selected-work,
+  .about-page .about-foundation,
+  .about-page .about-principles,
+  .about-page .about-page-cta {
+    padding: clamp(46px, 12vw, 64px) 0;
+  }
+
+  .about-page .about-hero-copy h1 {
+    font-size: clamp(2.35rem, 14vw, 3.4rem);
+  }
+
+  .about-page .about-connected-grid,
+  .about-page .about-method-list,
+  .about-page .about-selected-grid,
+  .about-page .about-principles-grid,
+  .about-page .about-method-step {
+    grid-template-columns: 1fr;
+  }
+
+  .about-page .hero-actions .button {
+    width: 100%;
+  }
+}
