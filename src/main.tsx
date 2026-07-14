@@ -718,244 +718,303 @@ function Services() {
   );
 }
 
+type ResourceCategory = 'AI & Prompting' | 'Professional Communication' | 'Decisions & Business' | 'Productivity & Organization';
+type ResourceStatus = 'Available now' | 'Coming soon';
+
+type ResourceItem = {
+  id: string;
+  category: ResourceCategory;
+  type: string;
+  title: string;
+  description: string;
+  status: ResourceStatus;
+  href?: string;
+};
+
+const resourceCategories: Array<'All Resources' | ResourceCategory> = [
+  'All Resources',
+  'AI & Prompting',
+  'Professional Communication',
+  'Decisions & Business',
+  'Productivity & Organization',
+];
+
+const resourceCatalog: ResourceItem[] = [
+  {
+    id: 'before-you-prompt-clarity-checklist',
+    category: 'AI & Prompting',
+    type: 'Checklist',
+    title: 'Before You Prompt: The Clarity Checklist',
+    description: 'Define the objective, audience, context, inputs, constraints, and format before writing a prompt.',
+    status: 'Available now',
+    href: '/downloads/before-you-prompt-clarity-checklist.pdf',
+  },
+  {
+    id: 'one-prompt-framework',
+    category: 'AI & Prompting',
+    type: 'Framework',
+    title: 'The One Prompt Framework You Actually Need',
+    description: 'A reusable professional structure for almost any AI-assisted task.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'vague-request-to-professional-prompt',
+    category: 'AI & Prompting',
+    type: 'Practical Guide',
+    title: 'From Vague Request to Professional Prompt',
+    description: 'Before-and-after examples that turn unclear requests into usable instructions.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'professional-prompts-everyday-work',
+    category: 'AI & Prompting',
+    type: 'Prompt Kit',
+    title: '20 Professional Prompts for Everyday Work',
+    description: 'Practical prompts for emails, documents, meetings, analysis, decisions, follow-ups, and planning.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'instructions-improve-ai-answer',
+    category: 'AI & Prompting',
+    type: 'Cheat Sheet',
+    title: '25 Instructions That Improve Almost Any AI Answer',
+    description: 'Use critique, comparison, checklists, red teaming, summaries, and decision matrices.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'which-ai-tool-for-each-task',
+    category: 'AI & Prompting',
+    type: 'Tool Guide',
+    title: 'Which AI Tool Should You Use for Each Task?',
+    description: 'Choose the right tool for writing, research, documents, data, images, code, and automation.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'ai-email-toolkit',
+    category: 'Professional Communication',
+    type: 'Email Toolkit',
+    title: 'The AI Email Toolkit',
+    description: 'Templates for professional requests, reminders, follow-ups, refusals, and sensitive messages.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'write-like-a-human-with-ai',
+    category: 'Professional Communication',
+    type: 'Writing Guide',
+    title: 'Write Like a Human with AI',
+    description: 'Remove robotic language, generic phrases, unnecessary formality, and artificial tone.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'difficult-conversation-prompt-kit',
+    category: 'Professional Communication',
+    type: 'Prompt Kit',
+    title: 'The Difficult Conversation Prompt Kit',
+    description: 'Prepare feedback, address delays, clarify responsibilities, and manage conflict.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'client-follow-up-prompt-pack',
+    category: 'Professional Communication',
+    type: 'Prompt Pack',
+    title: 'Client Follow-Up Prompt Pack',
+    description: 'Follow up after calls, proposals, events, presentations, and unanswered messages.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'turn-notes-into-documents',
+    category: 'Professional Communication',
+    type: 'Document Builder',
+    title: 'Turn Notes into Clear Professional Documents',
+    description: 'Convert unstructured notes into emails, briefs, reports, procedures, and action plans.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'prompts-think-like-consultant',
+    category: 'Decisions & Business',
+    type: 'Prompt Library',
+    title: '30 Prompts to Think Like a Consultant',
+    description: 'Apply pre-mortems, Pareto analysis, MECE, opportunity cost, five whys, and process audits.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'validate-business-idea-with-ai',
+    category: 'Decisions & Business',
+    type: 'Validation Guide',
+    title: 'Validate Your Business Idea with AI',
+    description: 'Examine the problem, customer, market, competitors, costs, risks, and first practical test.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'understand-customers-with-ai',
+    category: 'Decisions & Business',
+    type: 'Customer Analysis',
+    title: 'Understand Your Customers with AI',
+    description: 'Identify customer needs, language, objections, channels, and assumptions that require validation.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'ai-research-fact-checking-checklist',
+    category: 'Decisions & Business',
+    type: 'Checklist',
+    title: 'The AI Research and Fact-Checking Checklist',
+    description: 'Separate facts, assumptions, inferences, credible sources, and unverified information.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'ai-meeting-system',
+    category: 'Productivity & Organization',
+    type: 'Operating System',
+    title: 'The AI Meeting System',
+    description: 'Prepare meetings, capture decisions, assign actions, and manage professional follow-up.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'ai-action-plan-builder',
+    category: 'Productivity & Organization',
+    type: 'Action Planner',
+    title: 'The AI Action Plan Builder',
+    description: 'Turn an objective into milestones, tasks, owners, deadlines, and completion criteria.',
+    status: 'Coming soon',
+  },
+  {
+    id: 'personal-weekly-review-with-ai',
+    category: 'Productivity & Organization',
+    type: 'Weekly Review',
+    title: 'The Personal Weekly Review with AI',
+    description: 'Review progress, blockers, unfinished work, changing priorities, and next actions.',
+    status: 'Coming soon',
+  },
+];
+
+const featuredResource = resourceCatalog[0];
+
 function Resources() {
-  const checklistItems = [
-    'Where does the information enter?',
-    'Who owns the next step?',
-    'What output is needed?',
-    'What can AI draft, summarize, classify, or structure?',
-    'What must be reviewed by a human?',
-    'Where is the final decision documented?',
-    'What follow-up is required?',
-    'What should never be entered into AI?',
-  ];
+  const [activeCategory, setActiveCategory] = React.useState<(typeof resourceCategories)[number]>('All Resources');
 
-  const aiUseMapFields = ['Team / role', 'AI tool used', 'Task or workflow', 'Input type', 'Output type', 'Risk level', 'Reviewer', 'Next action'];
-  const aiUseMapExamples = [
-    'Admin — Email draft — Client notes — Follow-up email — Manager review',
-    'Broker — Property summary — Listing notes — Client update — Broker review',
-    'Owner — Weekly report — Team updates — Priority list — Owner review',
-  ];
+  const filteredResources = activeCategory === 'All Resources'
+    ? resourceCatalog
+    : resourceCatalog.filter((resource) => resource.category === activeCategory);
 
-  const promptTemplates = [
-    {
-      title: 'Client follow-up',
-      prompt: 'Turn these notes into a clear client follow-up email with next steps, open questions, and a professional tone.',
-    },
-    {
-      title: 'Owner or manager update',
-      prompt: 'Summarize this project update for an owner who needs risks, decisions, deadlines, and next actions.',
-    },
-    {
-      title: 'Task checklist',
-      prompt: 'Create a checklist from this request so a team member can complete the work without another meeting.',
-    },
-    {
-      title: 'Estimate or proposal explanation',
-      prompt: 'Rewrite this estimate explanation so it is clear, direct, professional, and easy for a client to approve or question.',
-    },
-    {
-      title: 'Human review',
-      prompt: 'Review this AI-generated draft for missing context, unclear assumptions, sensitive data, and anything that should be checked before sending.',
-    },
-  ];
-
-  const aiUseLogFields = ['Date', 'Tool', 'User / role', 'Workflow', 'Input type', 'Output created', 'Human reviewer', 'Final decision', 'Notes'];
-
-  const commonMistakes = [
-    'Automating a workflow no one has clearly defined.',
-    'Letting every team member invent their own prompts and standards.',
-    'Using AI for client-facing work without review.',
-    'Uploading sensitive or confidential information without rules.',
-    'Treating AI output as a decision instead of a draft.',
-    'Buying another app when the real issue is ownership, handoffs, and follow-up.',
-    'Creating summaries that do not become tasks, decisions, or next actions.',
-  ];
-
-  const workflowExamples = [
-    {
-      title: 'Client follow-up workflow',
-      flow: 'Call notes → AI summary → human review → client email → assigned task → follow-up date',
-    },
-    {
-      title: 'Real estate update workflow',
-      flow: 'Property notes → client-ready summary → document checklist → next action → weekly deal update',
-    },
-    {
-      title: 'Contractor or renovation workflow',
-      flow: 'Site visit notes → estimate draft → internal review → client proposal → change request log',
-    },
-    {
-      title: 'Small business workflow',
-      flow: 'Client request → clarified scope → task checklist → owner assigned → status update',
-    },
-    {
-      title: 'Internal team workflow',
-      flow: 'Weekly updates → AI summary → risks and decisions → owner review → priority list',
-    },
-  ];
-
-  const reviewReasons = [
-    'Your team already uses AI but without a shared method.',
-    'You do not know what data people enter into AI tools.',
-    'You need standard prompts and review steps.',
-    'Client communication takes too long.',
-    'Follow-ups or documents are scattered.',
-    'AI outputs are not connected to tasks or decisions.',
-    'You want a simple 30-day action plan.',
-  ];
-
-  const featuredResourceCards = [
-    {
-      eyebrow: 'DOWNLOAD DEMO',
-      title: 'Stakeholder Analysis AI + PM Demo',
-      description: 'Scarica il pacchetto demo con documento Word, dashboard Excel e PowerPoint executive per una stakeholder analysis real estate creata con workflow AI + Project Management.',
-      cta: 'Scarica il pacchetto',
-      href: '/downloads/Stakeholder%20Register.rar',
-      variant: 'demo',
-    },
-    ...Array.from({ length: 11 }, (_, index) => ({
-      eyebrow: 'RESOURCE CARD',
-      title: 'Coming Soon',
-      description: 'Nuova risorsa AI + Project Management in preparazione.',
-      cta: '',
-      href: '',
-      variant: index % 2 === 0 ? 'ice' : 'lavender',
-    })),
+  const featuredBenefits = [
+    'Build clearer professional prompts',
+    'Reduce generic or unusable answers',
+    'Define what a useful output should contain',
+    'Apply the framework to real business workflows',
+    'Includes practical real estate and hospitality examples',
   ];
 
   return (
     <>
-      <PageIntro
-        eyebrow="Free AI Workflow Resources"
-        title="Practical starting points for using AI inside real business workflows."
-        text="Before buying another tool or asking AI for more outputs, start by mapping the workflow, clarifying the next step, and deciding where human review is required."
-      />
-      <section className="section-shell resources-hero-actions">
-        <div className="hero-actions">
-          <a className="button primary" href="#ai-workflow-checklist">Start with the checklist</a>
-          <Link className="button secondary" to="/contact">Book an AI Use Review</Link>
-        </div>
-      </section>
-
-      <section className="section-shell resource-card-section">
-        <div className="resource-card-grid">
-          {featuredResourceCards.map((card) => (
-            <article className={`resource-card standard-resource-card standard-resource-card-${card.variant}`} key={card.title}>
-              <div>
-                <p className="eyebrow">{card.eyebrow}</p>
-                <h2>{card.title}</h2>
-                <p>{card.description}</p>
-              </div>
-              {card.href ? (
-                <a className="button primary resource-download-button" href={card.href} download>{card.cta}</a>
-              ) : (
-                <span className="resource-card-placeholder" aria-hidden="true">Coming soon</span>
-              )}
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section-shell resource-grid resources-starter-grid" id="ai-workflow-checklist">
-        <article className="resource-card resources-wide-card">
-          <p className="eyebrow">1. AI Workflow Checklist</p>
-          <h2>Pick one workflow before picking another tool.</h2>
-          <ul>
-            {checklistItems.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-        </article>
-
-        <article className="resource-card resources-wide-card">
-          <p className="eyebrow">2. AI Use Map Starter</p>
-          <h2>Before controlling AI, map where it is already being used.</h2>
-          <p>An AI Use Map helps a team see who uses AI, for what task, with what input, what output is created, who reviews it, and what happens next.</p>
-          <div className="resource-pill-grid">
-            {aiUseMapFields.map((field) => <span key={field}>{field}</span>)}
+      <section className="resources-page-shell resources-hero">
+        <div className="section-shell resources-hero-inner">
+          <p className="eyebrow">FREE AI + WORKFLOW RESOURCES</p>
+          <h1>Practical AI resources for clearer work, better decisions, and stronger workflows.</h1>
+          <p className="hero-lede">Free prompt frameworks, checklists, templates, and operating guides for professionals, project teams, and small businesses. No filler. No hype. Just tools you can use in real work.</p>
+          <div className="hero-actions resources-compact-actions">
+            <a className="button primary" href="#featured-resource">Start with the free guide</a>
+            <a className="button secondary" href="#resource-library">Browse the library</a>
           </div>
-          <div className="resource-example-list">
-            {aiUseMapExamples.map((example) => <p key={example}>{example}</p>)}
-          </div>
-        </article>
-      </section>
-
-      <section className="section-shell resources-section-block">
-        <div className="section-header single-column-header">
-          <div>
-            <div className="section-kicker">3. Prompt Templates</div>
-            <h2>Use prompts that connect AI output to a real workflow.</h2>
-          </div>
-        </div>
-        <div className="resource-grid prompt-template-grid">
-          {promptTemplates.map((template) => (
-            <article className="resource-card" key={template.title}>
-              <h2>{template.title}</h2>
-              <p>{template.prompt}</p>
-            </article>
-          ))}
+          <p className="resources-small-note">Free to download. No signup required.</p>
         </div>
       </section>
 
-      <section className="section-shell resource-grid resources-starter-grid">
-        <article className="resource-card resources-wide-card">
-          <p className="eyebrow">4. AI Use Log Starter</p>
-          <h2>If AI supports business work, the use should leave a simple trace.</h2>
-          <p>The goal is not bureaucracy. The goal is visibility: knowing how AI was used, what was reviewed, and what became part of the business process.</p>
-          <div className="resource-pill-grid log-field-grid">
-            {aiUseLogFields.map((field) => <span key={field}>{field}</span>)}
+      <section className="section-shell resources-featured-section" id="featured-resource" aria-labelledby="featured-resource-title">
+        <article className="resources-featured-card">
+          <div className="resources-featured-copy">
+            <div className="resources-card-meta">
+              <span>{featuredResource.category.toUpperCase()}</span>
+              <span>{featuredResource.status.toUpperCase()}</span>
+              <span>FREE PDF</span>
+            </div>
+            <h2 id="featured-resource-title">{featuredResource.title}</h2>
+            <p>Most weak AI outputs begin with an unclear request. This practical guide helps you define the goal, audience, context, inputs, constraints, and output format before asking AI to do the work.</p>
           </div>
-        </article>
-
-        <article className="resource-card resources-wide-card">
-          <p className="eyebrow">5. Common AI Mistakes</p>
-          <h2>Common AI Mistakes</h2>
-          <ul>
-            {commonMistakes.map((mistake) => <li key={mistake}>{mistake}</li>)}
-          </ul>
-        </article>
-      </section>
-
-      <section className="section-shell resources-section-block">
-        <div className="section-header single-column-header">
-          <div>
-            <div className="section-kicker">6. Simple Workflow Examples</div>
-            <h2>Simple Workflow Examples</h2>
-          </div>
-        </div>
-        <div className="resource-grid workflow-example-grid">
-          {workflowExamples.map((example) => (
-            <article className="resource-card" key={example.title}>
-              <h2>{example.title}</h2>
-              <p>{example.flow}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section-shell resources-review-section">
-        <div className="resources-review-panel">
-          <div>
-            <p className="eyebrow">When to book a review</p>
-            <h2>When to book an AI Use Review</h2>
-            <p>These resources help you start. A review is useful when you want the workflow adapted to your actual business, team, documents, tools, risks, and follow-up process.</p>
-            <div className="hero-actions">
-              <Link className="button primary" to="/contact">Book an AI Use Review</Link>
-              <Link className="button secondary" to="/services">Explore Services</Link>
+          <div className="resources-featured-aside">
+            <h3>What it helps you do</h3>
+            <ul>
+              {featuredBenefits.map((benefit) => <li key={benefit}>{benefit}</li>)}
+            </ul>
+            <div className="resources-download-row">
+              <a
+                className="button primary resource-download-button"
+                href={featuredResource.href}
+                download
+                aria-label={`Download the free PDF: ${featuredResource.title}`}
+              >
+                Download the free PDF
+              </a>
+              <span>No signup required</span>
             </div>
           </div>
-          <ul>
-            {reviewReasons.map((reason) => <li key={reason}>{reason}</li>)}
-          </ul>
+        </article>
+      </section>
+
+      <section className="section-shell resources-library-intro" id="resource-library" aria-labelledby="resource-library-title">
+        <div className="resources-library-heading">
+          <p className="eyebrow">EXPLORE THE LIBRARY</p>
+          <h2 id="resource-library-title">Start with the problem you need to solve.</h2>
+          <p>Each resource is designed to help you create a practical output: a clearer prompt, a better decision, a professional message, an action plan, or a repeatable workflow.</p>
+        </div>
+        <div className="resources-filter-chips" aria-label="Filter resources by category">
+          {resourceCategories.map((category) => (
+            <button
+              className={category === activeCategory ? 'resources-filter-chip active' : 'resources-filter-chip'}
+              type="button"
+              aria-pressed={category === activeCategory}
+              key={category}
+              onClick={() => setActiveCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
         </div>
       </section>
 
-      <section className="cta section-shell resource-bottom-cta">
-        <div className="cta-panel">
-          <p className="eyebrow">Start simple</p>
-          <h2>Start with one workflow.</h2>
-          <p>Pick one workflow, map how information moves, decide where AI can help, and define who reviews the output before it becomes part of the work.</p>
-          <Link className="button primary light" to="/contact">Book an AI Use Review</Link>
+      <section className="section-shell resources-catalog-grid" aria-label="Resource library cards">
+        {filteredResources.map((resource) => (
+          <article className="resource-card resources-mini-card" key={resource.id}>
+            <div className="resources-mini-card-top">
+              <p className="resources-category-label">{resource.category}</p>
+              <span className="resources-type-badge">{resource.type}</span>
+            </div>
+            <div className="resources-mini-card-copy">
+              <h3>{resource.title}</h3>
+              <p>{resource.description}</p>
+            </div>
+            <div className="resources-mini-card-footer">
+              <span className={resource.status === 'Available now' ? 'resources-status-badge available' : 'resources-status-badge'}>{resource.status}</span>
+              {resource.href ? (
+                <a
+                  className="resources-card-download"
+                  href={resource.href}
+                  download
+                  aria-label={`Download ${resource.title}`}
+                >
+                  Download
+                </a>
+              ) : null}
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <section className="section-shell resources-bridge-section">
+        <div className="resources-bridge-panel">
+          <div>
+            <p className="eyebrow">FROM RESOURCE TO REAL WORK</p>
+            <h2>A useful prompt is a starting point. A working process is better.</h2>
+            <p>Use the resources to clarify one task or decision. Then bring one real workflow and identify what should be simplified, improved, automated, documented, or kept under human control.</p>
+            <p className="resources-bridge-note">Start with one workflow, one bottleneck, and one practical next step.</p>
+          </div>
+          <Link className="button primary" to="/contact">Request a Free Workflow Review</Link>
         </div>
+      </section>
+
+      <section className="section-shell resources-final-note">
+        <h2>Built to be useful, not just downloaded.</h2>
+        <p>New resources will be added as they are completed, reviewed, and tested. The goal is not to publish the largest prompt library. The goal is to create practical tools that professionals and small teams can actually use.</p>
+        <a className="resources-text-link" href="#featured-resource">Start with The Clarity Checklist</a>
       </section>
     </>
   );
