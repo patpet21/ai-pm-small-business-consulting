@@ -41,7 +41,7 @@ export function Contact() {
 
       if (!response.ok) {
         const result = (await response.json().catch(() => null)) as { errors?: Array<{ message?: string }> } | null;
-        const message = result?.errors?.map((item) => item.message).filter(Boolean).join(' ') || 'The message could not be sent. Please email hello@practicalaisystems.com or book a call.';
+        const message = result?.errors?.map((item) => item.message).filter(Boolean).join(' ') || 'The message could not be sent. Please email trigosatconsulting@gmail.com or book a call.';
         throw new Error(message);
       }
 
@@ -49,7 +49,7 @@ export function Contact() {
       setStatus('success');
     } catch (error) {
       setStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'The message could not be sent. Please email hello@practicalaisystems.com or book a call.');
+      setErrorMessage(error instanceof Error ? error.message : 'The message could not be sent. Please email trigosatconsulting@gmail.com or book a call.');
     }
   }
 
@@ -77,7 +77,7 @@ export function Contact() {
       <section className="contact-section section-shell">
         <div className="contact-layout">
           <form className="contact-form-card" onSubmit={handleContactSubmit}>
-            <input type="hidden" name="_subject" value="New Practical AI Systems contact request" />
+            <input type="hidden" name="_subject" value="New AI PM LAB contact request" />
             <input type="text" name="_gotcha" className="visually-hidden" tabIndex={-1} autoComplete="off" />
 
             <div className="contact-form-heading">
@@ -154,8 +154,8 @@ export function Contact() {
               <p className="eyebrow">Direct options</p>
               <h3>Prefer a faster path?</h3>
               <p>Email or book a short review if you already know the workflow you want to improve.</p>
-              <a href="mailto:hello@practicalaisystems.com">hello@practicalaisystems.com</a>
-              <a href={calendlyLink} target="_blank" rel="noreferrer">Book a 15-minute review</a>
+              <a href="mailto:trigosatconsulting@gmail.com">trigosatconsulting@gmail.com</a>
+              <a href={calendlyLink} target="_blank" rel="noreferrer">Book a Free Workflow Clarity Call</a>
             </div>
             <div className="contact-info-card muted-card">
               <p className="eyebrow">What happens next</p>
