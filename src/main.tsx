@@ -881,6 +881,13 @@ function Services() {
 type ResourceCategory = 'AI & Prompting' | 'Professional Communication' | 'Decisions & Business' | 'Productivity & Organization';
 type ResourceStatus = 'Available now' | 'Coming soon';
 
+type ResourceDownload = {
+  href: string;
+  label: string;
+  language: 'English' | 'Italian';
+  flag: '🇺🇸' | '🇮🇹';
+};
+
 type ResourceItem = {
   id: string;
   category: ResourceCategory;
@@ -889,6 +896,7 @@ type ResourceItem = {
   description: string;
   status: ResourceStatus;
   href?: string;
+  downloads?: ResourceDownload[];
 };
 
 const resourceCategories: Array<'All Resources' | ResourceCategory> = [
@@ -934,7 +942,20 @@ const resourceCatalog: ResourceItem[] = [
     title: '20 Professional Prompts for Everyday Work',
     description: 'Practical prompts for emails, documents, meetings, analysis, decisions, follow-ups, and planning.',
     status: 'Available now',
-    href: '/downloads/20_Professional_Prompts_for_Everyday_Work_AI_PM_Lab.pdf',
+    downloads: [
+      {
+        href: '/downloads/20_Professional_Prompts_for_Everyday_Work_AI_PM_Lab.pdf',
+        label: 'Download PDF',
+        language: 'English',
+        flag: '🇺🇸',
+      },
+      {
+        href: '/downloads/20_Professional_Prompts_for_Everyday_Work_AI_PM_Lab_ITA.pdf',
+        label: 'Download PDF',
+        language: 'Italian',
+        flag: '🇮🇹',
+      },
+    ],
   },
   {
     id: 'instructions-improve-ai-answer',
@@ -943,7 +964,20 @@ const resourceCatalog: ResourceItem[] = [
     title: '25 Instructions That Improve Almost Any AI Answer',
     description: 'Use critique, comparison, checklists, red teaming, summaries, and decision matrices.',
     status: 'Available now',
-    href: '/downloads/25_Instructions_That_Improve_Almost_Any_AI_Answer_AI_PM_Lab.pdf',
+    downloads: [
+      {
+        href: '/downloads/25_Instructions_That_Improve_Almost_Any_AI_Answer_AI_PM_Lab.pdf',
+        label: 'Download PDF',
+        language: 'English',
+        flag: '🇺🇸',
+      },
+      {
+        href: '/downloads/25_Instructions_That_Improve_Almost_Any_AI_Answer_AI_PM_Lab_ITA.pdf',
+        label: 'Download PDF',
+        language: 'Italian',
+        flag: '🇮🇹',
+      },
+    ],
   },
   {
     id: 'which-ai-tool-for-each-task',
@@ -1120,16 +1154,24 @@ function Resources() {
             </div>
             <div className="resources-mini-card-footer">
               <span className={resource.status === 'Available now' ? 'resources-status-badge available' : 'resources-status-badge'}>{resource.status}</span>
-              {resource.href ? (
+              {(resource.downloads ?? (resource.href ? [{
+                href: resource.href,
+                label: resource.href.endsWith('.rar') ? 'Download Demo' : 'Download PDF',
+                language: 'English' as const,
+                flag: '🇺🇸' as const,
+              }] : [])).map((download) => (
                 <a
                   className="resources-card-download"
-                  href={resource.href}
+                  href={download.href}
                   download
-                  aria-label={`${resource.href.endsWith('.rar') ? 'Download demo package' : 'Download PDF'}: ${resource.title}`}
+                  aria-label={`${download.label} in ${download.language}: ${resource.title}`}
+                  key={download.href}
                 >
-                  {resource.href.endsWith('.rar') ? 'Download Demo' : 'Download PDF'}
+                  <span aria-hidden="true" className="resources-download-flag">{download.flag}</span>
+                  <span>{download.label}</span>
+                  <span className="resources-download-language">{download.language === 'Italian' ? 'ITA' : 'USA'}</span>
                 </a>
-              ) : null}
+              ))}
             </div>
           </article>
         ))}

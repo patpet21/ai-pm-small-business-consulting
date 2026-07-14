@@ -4039,3 +4039,26 @@ button:focus-visible {
     width: 100%;
   }
 }
+
+.resources-mini-card-footer {
+  gap: 10px;
+}
+
+.resources-card-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.resources-download-flag {
+  display: inline-flex;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.resources-download-language {
+  color: #846B3F;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
