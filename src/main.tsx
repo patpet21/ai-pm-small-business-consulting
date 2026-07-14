@@ -755,7 +755,8 @@ const resourceCatalog: ResourceItem[] = [
     type: 'Framework',
     title: 'The One Prompt Framework You Actually Need',
     description: 'A reusable professional structure for almost any AI-assisted task.',
-    status: 'Coming soon',
+    status: 'Available now',
+    href: '/downloads/The_One_Prompt_Framework_AI_PM_Lab.pdf',
   },
   {
     id: 'vague-request-to-professional-prompt',
@@ -763,7 +764,8 @@ const resourceCatalog: ResourceItem[] = [
     type: 'Practical Guide',
     title: 'From Vague Request to Professional Prompt',
     description: 'Before-and-after examples that turn unclear requests into usable instructions.',
-    status: 'Coming soon',
+    status: 'Available now',
+    href: '/downloads/From_Vague_Request_to_Professional_Prompt_AI_PM_Lab.pdf',
   },
   {
     id: 'professional-prompts-everyday-work',
@@ -771,7 +773,8 @@ const resourceCatalog: ResourceItem[] = [
     type: 'Prompt Kit',
     title: '20 Professional Prompts for Everyday Work',
     description: 'Practical prompts for emails, documents, meetings, analysis, decisions, follow-ups, and planning.',
-    status: 'Coming soon',
+    status: 'Available now',
+    href: '/downloads/20_Professional_Prompts_for_Everyday_Work_AI_PM_Lab.pdf',
   },
   {
     id: 'instructions-improve-ai-answer',
@@ -779,7 +782,8 @@ const resourceCatalog: ResourceItem[] = [
     type: 'Cheat Sheet',
     title: '25 Instructions That Improve Almost Any AI Answer',
     description: 'Use critique, comparison, checklists, red teaming, summaries, and decision matrices.',
-    status: 'Coming soon',
+    status: 'Available now',
+    href: '/downloads/25_Instructions_That_Improve_Almost_Any_AI_Answer_AI_PM_Lab.pdf',
   },
   {
     id: 'which-ai-tool-for-each-task',
@@ -787,7 +791,8 @@ const resourceCatalog: ResourceItem[] = [
     type: 'Tool Guide',
     title: 'Which AI Tool Should You Use for Each Task?',
     description: 'Choose the right tool for writing, research, documents, data, images, code, and automation.',
-    status: 'Coming soon',
+    status: 'Available now',
+    href: '/downloads/Which_AI_Tool_Should_You_Use_for_Each_Task_AI_PM_Lab.pdf',
   },
   {
     id: 'ai-email-toolkit',
@@ -795,7 +800,8 @@ const resourceCatalog: ResourceItem[] = [
     type: 'Email Toolkit',
     title: 'The AI Email Toolkit',
     description: 'Templates for professional requests, reminders, follow-ups, refusals, and sensitive messages.',
-    status: 'Coming soon',
+    status: 'Available now',
+    href: '/downloads/The_AI_Email_Toolkit_AI_PM_Lab.pdf',
   },
   {
     id: 'write-like-a-human-with-ai',
@@ -803,7 +809,8 @@ const resourceCatalog: ResourceItem[] = [
     type: 'Writing Guide',
     title: 'Write Like a Human with AI',
     description: 'Remove robotic language, generic phrases, unnecessary formality, and artificial tone.',
-    status: 'Coming soon',
+    status: 'Available now',
+    href: '/downloads/Write_Like_a_Human_with_AI_PM_Lab.pdf',
   },
   {
     id: 'difficult-conversation-prompt-kit',
@@ -862,6 +869,15 @@ const resourceCatalog: ResourceItem[] = [
     status: 'Coming soon',
   },
   {
+    id: 'stakeholder-analysis-ai-pm-demo',
+    category: 'Decisions & Business',
+    type: 'Demo Package',
+    title: 'Stakeholder Analysis AI + PM Demo',
+    description: 'Download the demo package with Word, Excel, and PowerPoint files for a stakeholder analysis workflow created with AI and project management structure.',
+    status: 'Available now',
+    href: '/downloads/Stakeholder%20Register.rar',
+  },
+  {
     id: 'ai-meeting-system',
     category: 'Productivity & Organization',
     type: 'Operating System',
@@ -887,7 +903,6 @@ const resourceCatalog: ResourceItem[] = [
   },
 ];
 
-const featuredResource = resourceCatalog[0];
 
 function Resources() {
   const [activeCategory, setActiveCategory] = React.useState<(typeof resourceCategories)[number]>('All Resources');
@@ -896,13 +911,6 @@ function Resources() {
     ? resourceCatalog
     : resourceCatalog.filter((resource) => resource.category === activeCategory);
 
-  const featuredBenefits = [
-    'Build clearer professional prompts',
-    'Reduce generic or unusable answers',
-    'Define what a useful output should contain',
-    'Apply the framework to real business workflows',
-    'Includes practical real estate and hospitality examples',
-  ];
 
   return (
     <>
@@ -912,42 +920,10 @@ function Resources() {
           <h1>Practical AI resources for clearer work, better decisions, and stronger workflows.</h1>
           <p className="hero-lede">Free prompt frameworks, checklists, templates, and operating guides for professionals, project teams, and small businesses. No filler. No hype. Just tools you can use in real work.</p>
           <div className="hero-actions resources-compact-actions">
-            <a className="button primary" href="#featured-resource">Start with the free guide</a>
-            <a className="button secondary" href="#resource-library">Browse the library</a>
+            <a className="button primary" href="#resource-library">Browse the Resource Library</a>
           </div>
           <p className="resources-small-note">Free to download. No signup required.</p>
         </div>
-      </section>
-
-      <section className="section-shell resources-featured-section" id="featured-resource" aria-labelledby="featured-resource-title">
-        <article className="resources-featured-card">
-          <div className="resources-featured-copy">
-            <div className="resources-card-meta">
-              <span>{featuredResource.category.toUpperCase()}</span>
-              <span>{featuredResource.status.toUpperCase()}</span>
-              <span>FREE PDF</span>
-            </div>
-            <h2 id="featured-resource-title">{featuredResource.title}</h2>
-            <p>Most weak AI outputs begin with an unclear request. This practical guide helps you define the goal, audience, context, inputs, constraints, and output format before asking AI to do the work.</p>
-          </div>
-          <div className="resources-featured-aside">
-            <h3>What it helps you do</h3>
-            <ul>
-              {featuredBenefits.map((benefit) => <li key={benefit}>{benefit}</li>)}
-            </ul>
-            <div className="resources-download-row">
-              <a
-                className="button primary resource-download-button"
-                href={featuredResource.href}
-                download
-                aria-label={`Download the free PDF: ${featuredResource.title}`}
-              >
-                Download the free PDF
-              </a>
-              <span>No signup required</span>
-            </div>
-          </div>
-        </article>
       </section>
 
       <section className="section-shell resources-library-intro" id="resource-library" aria-labelledby="resource-library-title">
@@ -973,7 +949,7 @@ function Resources() {
 
       <section className="section-shell resources-catalog-grid" aria-label="Resource library cards">
         {filteredResources.map((resource) => (
-          <article className="resource-card resources-mini-card" key={resource.id}>
+          <article className={resource.status === 'Available now' ? 'resource-card resources-mini-card resources-mini-card-available' : 'resource-card resources-mini-card'} key={resource.id}>
             <div className="resources-mini-card-top">
               <p className="resources-category-label">{resource.category}</p>
               <span className="resources-type-badge">{resource.type}</span>
@@ -989,9 +965,9 @@ function Resources() {
                   className="resources-card-download"
                   href={resource.href}
                   download
-                  aria-label={`Download ${resource.title}`}
+                  aria-label={`${resource.href.endsWith('.rar') ? 'Download demo package' : 'Download PDF'}: ${resource.title}`}
                 >
-                  Download
+                  {resource.href.endsWith('.rar') ? 'Download Demo' : 'Download PDF'}
                 </a>
               ) : null}
             </div>
@@ -1014,7 +990,7 @@ function Resources() {
       <section className="section-shell resources-final-note">
         <h2>Built to be useful, not just downloaded.</h2>
         <p>New resources will be added as they are completed, reviewed, and tested. The goal is not to publish the largest prompt library. The goal is to create practical tools that professionals and small teams can actually use.</p>
-        <a className="resources-text-link" href="#featured-resource">Start with The Clarity Checklist</a>
+        <a className="resources-text-link" href="#resource-library">Browse all available resources</a>
       </section>
     </>
   );
