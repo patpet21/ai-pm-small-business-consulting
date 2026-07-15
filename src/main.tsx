@@ -995,7 +995,20 @@ const resourceCatalog: ResourceItem[] = [
     title: 'The AI Email Toolkit',
     description: 'Templates for professional requests, reminders, follow-ups, refusals, and sensitive messages.',
     status: 'Available now',
-    href: '/downloads/The_AI_Email_Toolkit_AI_PM_Lab.pdf',
+    downloads: [
+      {
+        href: '/downloads/The_AI_Email_Toolkit_AI_PM_Lab.pdf',
+        label: 'Download PDF',
+        language: 'English',
+        flag: '🇺🇸',
+      },
+      {
+        href: '/downloads/The_AI_Email_Toolkit_AI_PM_Lab_ITA.pdf',
+        label: 'Download PDF',
+        language: 'Italian',
+        flag: '🇮🇹',
+      },
+    ],
   },
   {
     id: 'write-like-a-human-with-ai',
