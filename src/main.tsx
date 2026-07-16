@@ -1033,7 +1033,21 @@ const resourceCatalog: ResourceItem[] = [
     type: 'Prompt Pack',
     title: 'Client Follow-Up Prompt Pack',
     description: 'Follow up after calls, proposals, events, presentations, and unanswered messages.',
-    status: 'Coming soon',
+    status: 'Available now',
+    downloads: [
+      {
+        href: '/downloads/Client_Follow_Up_Prompt_Pack_AI_PM_Lab.pdf',
+        label: 'Download PDF',
+        language: 'English',
+        flag: '🇺🇸',
+      },
+      {
+        href: '/downloads/Client_Follow_Up_Prompt_Pack_AI_PM_Lab_ITA.pdf',
+        label: 'Download PDF',
+        language: 'Italian',
+        flag: '🇮🇹',
+      },
+    ],
   },
   {
     id: 'turn-notes-into-documents',
