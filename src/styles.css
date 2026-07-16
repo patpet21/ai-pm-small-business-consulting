@@ -4112,3 +4112,4 @@ button:focus-visible {
   .library-main { padding-top: 22px; }.library-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }.library-resource-card { min-height: 170px; }
 }
 @media (max-width: 560px) { .library-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.library-resource-card { min-height: 178px; padding: 10px; }.library-resource-card h3 { font-size: .72rem; }.library-resource-card p { font-size: .59rem; }.library-type { display: none; } }
+.library-auth-tabs{display:flex;gap:6px;padding:5px;border:1px solid var(--line);border-radius:99px;background:#f3f0e9}.library-auth-tabs button{flex:1;border:0;border-radius:99px;padding:9px;background:transparent;font:inherit;font-weight:800;cursor:pointer}.library-auth-tabs button.active{background:#071f36;color:#fff}
