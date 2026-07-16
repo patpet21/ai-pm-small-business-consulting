@@ -1,0 +1,6 @@
+export type MembershipTier = 'free' | 'premium' | 'client' | 'admin';
+export type ResourceStatus = 'available' | 'coming_soon' | 'archived';
+export type AccessLevel = 'public' | 'free_member' | 'premium' | 'client';
+export type ResourceFile = { id: string; resource_id: string; language_code: 'en'|'it'|'other'; language_label: string; file_name: string; public_url: string; mime_type: string; file_format: string; sort_order: number };
+export type Resource = { id: string; slug: string; title: string; description: string; category: string; resource_type: string; status: ResourceStatus; access_level: AccessLevel; is_featured: boolean; sort_order: number; resource_files?: ResourceFile[] };
+export type Profile = { id: string; username: string; email: string; membership_tier: MembershipTier; marketing_consent: boolean; privacy_accepted_at: string; last_access_at: string | null };
