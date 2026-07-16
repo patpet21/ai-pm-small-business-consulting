@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom';
 import { Contact } from './pages/Contact';
 import { RealEstateAIPMPilot } from './pages/RealEstateAIPMPilot';
+import { Resources } from './pages/Resources';
+import { Library } from './pages/Library';
+import { ResourceLibraryPrivacyNotice } from './pages/ResourceLibraryPrivacyNotice';
+import { AuthProvider } from './auth/AuthProvider';
 import './styles.css';
 
 const calendlyLink = 'https://calendly.com/propertydext/15min';
@@ -230,6 +234,7 @@ const navItems = [
   { label: 'Home', to: '/' },
   { label: 'Services', to: '/services' },
   { label: 'Resources', to: '/resources' },
+  { label: 'Library', to: '/library' },
   { label: 'Real Estate Copilot', to: '/real-estate-ai-pm-pilot' },
   { label: 'About', to: '/about' },
   { label: 'Contact', to: '/contact' },
@@ -878,353 +883,6 @@ function Services() {
   );
 }
 
-type ResourceCategory = 'AI & Prompting' | 'Professional Communication' | 'Decisions & Business' | 'Productivity & Organization';
-type ResourceStatus = 'Available now' | 'Coming soon';
-
-type ResourceDownload = {
-  href: string;
-  label: string;
-  language: 'English' | 'Italian';
-  flag: '🇺🇸' | '🇮🇹';
-};
-
-type ResourceItem = {
-  id: string;
-  category: ResourceCategory;
-  type: string;
-  title: string;
-  description: string;
-  status: ResourceStatus;
-  href?: string;
-  downloads?: ResourceDownload[];
-};
-
-const resourceCategories: Array<'All Resources' | ResourceCategory> = [
-  'All Resources',
-  'AI & Prompting',
-  'Professional Communication',
-  'Decisions & Business',
-  'Productivity & Organization',
-];
-
-const resourceCatalog: ResourceItem[] = [
-  {
-    id: 'before-you-prompt-clarity-checklist',
-    category: 'AI & Prompting',
-    type: 'Checklist',
-    title: 'Before You Prompt: The Clarity Checklist',
-    description: 'Define the objective, audience, context, inputs, constraints, and format before writing a prompt.',
-    status: 'Available now',
-    href: '/downloads/before-you-prompt-clarity-checklist.pdf',
-  },
-  {
-    id: 'one-prompt-framework',
-    category: 'AI & Prompting',
-    type: 'Framework',
-    title: 'The One Prompt Framework You Actually Need',
-    description: 'A reusable professional structure for almost any AI-assisted task.',
-    status: 'Available now',
-    href: '/downloads/The_One_Prompt_Framework_AI_PM_Lab.pdf',
-  },
-  {
-    id: 'vague-request-to-professional-prompt',
-    category: 'AI & Prompting',
-    type: 'Practical Guide',
-    title: 'From Vague Request to Professional Prompt',
-    description: 'Before-and-after examples that turn unclear requests into usable instructions.',
-    status: 'Available now',
-    href: '/downloads/From_Vague_Request_to_Professional_Prompt_AI_PM_Lab.pdf',
-  },
-  {
-    id: 'professional-prompts-everyday-work',
-    category: 'AI & Prompting',
-    type: 'Prompt Kit',
-    title: '20 Professional Prompts for Everyday Work',
-    description: 'Practical prompts for emails, documents, meetings, analysis, decisions, follow-ups, and planning.',
-    status: 'Available now',
-    downloads: [
-      {
-        href: '/downloads/20_Professional_Prompts_for_Everyday_Work_AI_PM_Lab.pdf',
-        label: 'Download PDF',
-        language: 'English',
-        flag: '🇺🇸',
-      },
-      {
-        href: '/downloads/20_Professional_Prompts_for_Everyday_Work_AI_PM_Lab_ITA.pdf',
-        label: 'Download PDF',
-        language: 'Italian',
-        flag: '🇮🇹',
-      },
-    ],
-  },
-  {
-    id: 'instructions-improve-ai-answer',
-    category: 'AI & Prompting',
-    type: 'Cheat Sheet',
-    title: '25 Instructions That Improve Almost Any AI Answer',
-    description: 'Use critique, comparison, checklists, red teaming, summaries, and decision matrices.',
-    status: 'Available now',
-    downloads: [
-      {
-        href: '/downloads/25_Instructions_That_Improve_Almost_Any_AI_Answer_AI_PM_Lab.pdf',
-        label: 'Download PDF',
-        language: 'English',
-        flag: '🇺🇸',
-      },
-      {
-        href: '/downloads/25_Instructions_That_Improve_Almost_Any_AI_Answer_AI_PM_Lab_ITA.pdf',
-        label: 'Download PDF',
-        language: 'Italian',
-        flag: '🇮🇹',
-      },
-    ],
-  },
-  {
-    id: 'which-ai-tool-for-each-task',
-    category: 'AI & Prompting',
-    type: 'Tool Guide',
-    title: 'Which AI Tool Should You Use for Each Task?',
-    description: 'Choose the right tool for writing, research, documents, data, images, code, and automation.',
-    status: 'Available now',
-    href: '/downloads/Which_AI_Tool_Should_You_Use_for_Each_Task_AI_PM_Lab.pdf',
-  },
-  {
-    id: 'ai-email-toolkit',
-    category: 'Professional Communication',
-    type: 'Email Toolkit',
-    title: 'The AI Email Toolkit',
-    description: 'Templates for professional requests, reminders, follow-ups, refusals, and sensitive messages.',
-    status: 'Available now',
-    downloads: [
-      {
-        href: '/downloads/The_AI_Email_Toolkit_AI_PM_Lab.pdf',
-        label: 'Download PDF',
-        language: 'English',
-        flag: '🇺🇸',
-      },
-      {
-        href: '/downloads/The_AI_Email_Toolkit_AI_PM_Lab_ITA.pdf',
-        label: 'Download PDF',
-        language: 'Italian',
-        flag: '🇮🇹',
-      },
-    ],
-  },
-  {
-    id: 'write-like-a-human-with-ai',
-    category: 'Professional Communication',
-    type: 'Writing Guide',
-    title: 'Write Like a Human with AI',
-    description: 'Remove robotic language, generic phrases, unnecessary formality, and artificial tone.',
-    status: 'Available now',
-    href: '/downloads/Write_Like_a_Human_with_AI_PM_Lab.pdf',
-  },
-  {
-    id: 'difficult-conversation-prompt-kit',
-    category: 'Professional Communication',
-    type: 'Prompt Kit',
-    title: 'The Difficult Conversation Prompt Kit',
-    description: 'Prepare feedback, address delays, clarify responsibilities, and manage conflict.',
-    status: 'Coming soon',
-  },
-  {
-    id: 'client-follow-up-prompt-pack',
-    category: 'Professional Communication',
-    type: 'Prompt Pack',
-    title: 'Client Follow-Up Prompt Pack',
-    description: 'Follow up after calls, proposals, events, presentations, and unanswered messages.',
-    status: 'Available now',
-    downloads: [
-      {
-        href: '/downloads/Client_Follow_Up_Prompt_Pack_AI_PM_Lab.pdf',
-        label: 'Download PDF',
-        language: 'English',
-        flag: '🇺🇸',
-      },
-      {
-        href: '/downloads/Client_Follow_Up_Prompt_Pack_AI_PM_Lab_ITA.pdf',
-        label: 'Download PDF',
-        language: 'Italian',
-        flag: '🇮🇹',
-      },
-    ],
-  },
-  {
-    id: 'turn-notes-into-documents',
-    category: 'Professional Communication',
-    type: 'Document Builder',
-    title: 'Turn Notes into Clear Professional Documents',
-    description: 'Convert unstructured notes into emails, briefs, reports, procedures, and action plans.',
-    status: 'Coming soon',
-  },
-  {
-    id: 'prompts-think-like-consultant',
-    category: 'Decisions & Business',
-    type: 'Prompt Library',
-    title: '30 Prompts to Think Like a Consultant',
-    description: 'Apply pre-mortems, Pareto analysis, MECE, opportunity cost, five whys, and process audits.',
-    status: 'Coming soon',
-  },
-  {
-    id: 'validate-business-idea-with-ai',
-    category: 'Decisions & Business',
-    type: 'Validation Guide',
-    title: 'Validate Your Business Idea with AI',
-    description: 'Examine the problem, customer, market, competitors, costs, risks, and first practical test.',
-    status: 'Coming soon',
-  },
-  {
-    id: 'understand-customers-with-ai',
-    category: 'Decisions & Business',
-    type: 'Customer Analysis',
-    title: 'Understand Your Customers with AI',
-    description: 'Identify customer needs, language, objections, channels, and assumptions that require validation.',
-    status: 'Coming soon',
-  },
-  {
-    id: 'ai-research-fact-checking-checklist',
-    category: 'Decisions & Business',
-    type: 'Checklist',
-    title: 'The AI Research and Fact-Checking Checklist',
-    description: 'Separate facts, assumptions, inferences, credible sources, and unverified information.',
-    status: 'Coming soon',
-  },
-  {
-    id: 'stakeholder-analysis-ai-pm-demo',
-    category: 'Decisions & Business',
-    type: 'Demo Package',
-    title: 'Stakeholder Analysis AI + PM Demo',
-    description: 'Download the demo package with Word, Excel, and PowerPoint files for a stakeholder analysis workflow created with AI and project management structure.',
-    status: 'Available now',
-    href: '/downloads/Stakeholder%20Register.rar',
-  },
-  {
-    id: 'ai-meeting-system',
-    category: 'Productivity & Organization',
-    type: 'Operating System',
-    title: 'The AI Meeting System',
-    description: 'Prepare meetings, capture decisions, assign actions, and manage professional follow-up.',
-    status: 'Coming soon',
-  },
-  {
-    id: 'ai-action-plan-builder',
-    category: 'Productivity & Organization',
-    type: 'Action Planner',
-    title: 'The AI Action Plan Builder',
-    description: 'Turn an objective into milestones, tasks, owners, deadlines, and completion criteria.',
-    status: 'Coming soon',
-  },
-  {
-    id: 'personal-weekly-review-with-ai',
-    category: 'Productivity & Organization',
-    type: 'Weekly Review',
-    title: 'The Personal Weekly Review with AI',
-    description: 'Review progress, blockers, unfinished work, changing priorities, and next actions.',
-    status: 'Coming soon',
-  },
-];
-
-
-function Resources() {
-  const [activeCategory, setActiveCategory] = React.useState<(typeof resourceCategories)[number]>('All Resources');
-
-  const filteredResources = activeCategory === 'All Resources'
-    ? resourceCatalog
-    : resourceCatalog.filter((resource) => resource.category === activeCategory);
-
-
-  return (
-    <>
-      <section className="resources-page-shell resources-hero">
-        <div className="section-shell resources-hero-inner">
-          <p className="eyebrow">FREE AI + WORKFLOW RESOURCES</p>
-          <h1>Practical AI resources for clearer work, better decisions, and stronger workflows.</h1>
-          <p className="hero-lede">Free prompt frameworks, checklists, templates, and operating guides for professionals, project teams, and small businesses. No filler. No hype. Just tools you can use in real work.</p>
-          <div className="hero-actions resources-compact-actions">
-            <a className="button primary" href="#resource-library">Browse the Resource Library</a>
-          </div>
-          <p className="resources-small-note">Free to download. No signup required.</p>
-        </div>
-      </section>
-
-      <section className="section-shell resources-library-intro" id="resource-library" aria-labelledby="resource-library-title">
-        <div className="resources-library-heading">
-          <p className="eyebrow">EXPLORE THE LIBRARY</p>
-          <h2 id="resource-library-title">Start with the problem you need to solve.</h2>
-          <p>Each resource is designed to help you create a practical output: a clearer prompt, a better decision, a professional message, an action plan, or a repeatable workflow.</p>
-        </div>
-        <div className="resources-filter-chips" aria-label="Filter resources by category">
-          {resourceCategories.map((category) => (
-            <button
-              className={category === activeCategory ? 'resources-filter-chip active' : 'resources-filter-chip'}
-              type="button"
-              aria-pressed={category === activeCategory}
-              key={category}
-              onClick={() => setActiveCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="section-shell resources-catalog-grid" aria-label="Resource library cards">
-        {filteredResources.map((resource) => (
-          <article className={resource.status === 'Available now' ? 'resource-card resources-mini-card resources-mini-card-available' : 'resource-card resources-mini-card'} key={resource.id}>
-            <div className="resources-mini-card-top">
-              <p className="resources-category-label">{resource.category}</p>
-              <span className="resources-type-badge">{resource.type}</span>
-            </div>
-            <div className="resources-mini-card-copy">
-              <h3>{resource.title}</h3>
-              <p>{resource.description}</p>
-            </div>
-            <div className="resources-mini-card-footer">
-              <span className={resource.status === 'Available now' ? 'resources-status-badge available' : 'resources-status-badge'}>{resource.status}</span>
-              {(resource.downloads ?? (resource.href ? [{
-                href: resource.href,
-                label: resource.href.endsWith('.rar') ? 'Download Demo' : 'Download PDF',
-                language: 'English' as const,
-                flag: '🇺🇸' as const,
-              }] : [])).map((download) => (
-                <a
-                  className="resources-card-download"
-                  href={download.href}
-                  download
-                  aria-label={`${download.label} in ${download.language}: ${resource.title}`}
-                  key={download.href}
-                >
-                  <span aria-hidden="true" className="resources-download-flag">{download.flag}</span>
-                  <span>{download.label}</span>
-                  <span className="resources-download-language">{download.language === 'Italian' ? 'ITA' : 'USA'}</span>
-                </a>
-              ))}
-            </div>
-          </article>
-        ))}
-      </section>
-
-      <section className="section-shell resources-bridge-section">
-        <div className="resources-bridge-panel">
-          <div>
-            <p className="eyebrow">FROM RESOURCE TO REAL WORK</p>
-            <h2>A useful prompt is a starting point. A working process is better.</h2>
-            <p>Use the resources to clarify one task or decision. Then bring one real workflow and identify what should be simplified, improved, automated, documented, or kept under human control.</p>
-            <p className="resources-bridge-note">Start with one workflow, one bottleneck, and one practical next step.</p>
-          </div>
-          <Link className="button primary" to="/contact">Request a Free Workflow Review</Link>
-        </div>
-      </section>
-
-      <section className="section-shell resources-final-note">
-        <h2>Built to be useful, not just downloaded.</h2>
-        <p>New resources will be added as they are completed, reviewed, and tested. The goal is not to publish the largest prompt library. The goal is to create practical tools that professionals and small teams can actually use.</p>
-        <a className="resources-text-link" href="#resource-library">Browse all available resources</a>
-      </section>
-    </>
-  );
-}
-
 function UseCases() {
   return (
     <>
@@ -1531,12 +1189,15 @@ function About() {
 function App() {
   return (
     <BrowserRouter>
+      <AuthProvider>
       <SiteHeader />
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
           <Route path="/resources" element={<Resources />} />
+          <Route path="/library" element={<Library />} />
+          <Route path="/resource-library-privacy-notice" element={<ResourceLibraryPrivacyNotice />} />
           <Route path="/use-cases" element={<UseCases />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
@@ -1544,6 +1205,7 @@ function App() {
         </Routes>
       </main>
       <SiteFooter />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
