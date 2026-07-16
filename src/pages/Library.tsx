@@ -22,7 +22,8 @@ function LibrarySidebar({ active, onChange, username, onLogout }: { active: Tab;
   const choose = (tab: Tab) => { onChange(tab); setOpen(false); };
   return <aside className={`library-sidebar ${open ? 'is-open' : ''}`} aria-label="Library navigation">
     <div className="library-sidebar-brand"><span>AI PM LAB</span><small>Resource Library</small></div>
-    <button className="library-menu-toggle" type="button" aria-expanded={open} onClick={() => setOpen(!open)}>Library menu <span aria-hidden="true">{open ? '−' : '+'}</span></button>
+    <button className="library-menu-toggle" type="button" aria-expanded={open} onClick={() => setOpen(!open)}><span><small>Library section</small>{active}</span><span className="library-menu-icon" aria-hidden="true">{open ? '×' : '☰'}</span></button>
+    {open && <button className="library-menu-backdrop" type="button" aria-label="Close Library menu" onClick={() => setOpen(false)} />}
     <nav className="library-nav" aria-label="Member dashboard sections">{tabs.map((tab) => <button type="button" className={active === tab ? 'active' : ''} key={tab} onClick={() => choose(tab)}>{tab}</button>)}</nav>
     <div className="library-member-mini"><span>Free Member</span><strong>@{username}</strong></div>
     <button className="library-signout" type="button" onClick={onLogout}>Sign out</button>
