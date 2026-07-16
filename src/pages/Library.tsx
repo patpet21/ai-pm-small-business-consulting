@@ -20,14 +20,16 @@ const consultingPhases = [
 function LibrarySidebar({ active, onChange, username, onLogout }: { active: Tab; onChange: (tab: Tab) => void; username: string; onLogout: () => void }) {
   const [open, setOpen] = React.useState(false);
   const choose = (tab: Tab) => { onChange(tab); setOpen(false); };
-  return <aside className={`library-sidebar ${open ? 'is-open' : ''}`} aria-label="Library navigation">
-    <div className="library-sidebar-brand"><span>AI PM LAB</span><small>Resource Library</small></div>
-    <button className="library-menu-toggle" type="button" aria-expanded={open} onClick={() => setOpen(!open)}><span><small>Library section</small>{active}</span><span className="library-menu-icon" aria-hidden="true">{open ? '×' : '☰'}</span></button>
-    {open && <button className="library-menu-backdrop" type="button" aria-label="Close Library menu" onClick={() => setOpen(false)} />}
-    <nav className="library-nav" aria-label="Member dashboard sections">{tabs.map((tab) => <button type="button" className={active === tab ? 'active' : ''} key={tab} onClick={() => choose(tab)}>{tab}</button>)}</nav>
-    <div className="library-member-mini"><span>Free Member</span><strong>@{username}</strong></div>
-    <button className="library-signout" type="button" onClick={onLogout}>Sign out</button>
-  </aside>;
+  return <>
+    <button className="library-mobile-launcher" type="button" aria-label="Open Library navigation" aria-expanded={open} onClick={() => setOpen(true)}><span>Library</span><span aria-hidden="true">☰</span></button>
+    {open && <button className="library-menu-backdrop" type="button" aria-label="Close Library navigation" onClick={() => setOpen(false)} />}
+    <aside className={`library-sidebar ${open ? 'is-open' : ''}`} aria-label="Library navigation">
+      <div className="library-sidebar-brand"><span>AI PM LAB</span><small>Resource Library</small><button className="library-mobile-close" type="button" aria-label="Close Library navigation" onClick={() => setOpen(false)}>×</button></div>
+      <nav className="library-nav" aria-label="Member dashboard sections">{tabs.map((tab) => <button type="button" className={active === tab ? 'active' : ''} key={tab} onClick={() => choose(tab)}>{tab}</button>)}</nav>
+      <div className="library-member-mini"><span>Free Member</span><strong>@{username}</strong></div>
+      <button className="library-signout" type="button" onClick={onLogout}>Sign out</button>
+    </aside>
+  </>;
 }
 
 function ResourceCards({ resources, saved, onToggle, onDownload }: { resources: Resource[]; saved: string[]; onToggle: (resource: Resource) => void; onDownload: (resource: Resource, fileId: string) => void }) {
