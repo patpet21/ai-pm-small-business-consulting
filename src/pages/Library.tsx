@@ -69,7 +69,7 @@ export function Library() {
   React.useEffect(() => { if (session) { void supabase.catalog(session).then(setItems).catch(() => undefined); void supabase.bookmarks(session).then((rows) => setSaved(rows.map((row) => row.resource_id))).catch(() => undefined); } }, [session]);
   if ((loading && !hasLocalAccess) || !hasAccess || (session && profileLoading)) return <div className="library-loading">Preparing your Library…</div>;
   if (session && !profile) return <div className="library-loading">Finishing your Library profile…</div>;
-  if (session && profile && !profile.onboarding_completed) return <Onboarding />;
+  if (session && profile && profile.onboarding_completed === false) return <Onboarding />;
   const toggle = async (resource: Resource) => { const isSaved = saved.includes(resource.id); if (session) { await supabase.toggleBookmark(session, resource.id, isSaved); await supabase.activity(session, resource.id, isSaved ? 'unsave' : 'save'); } setSaved((current) => isSaved ? current.filter((id) => id !== resource.id) : [...current, resource.id]); };
   const download = (resource: Resource, fileId: string) => { if (session) void supabase.activity(session, resource.id, 'download', fileId); };
   const logout = async () => { await signOut(); navigate('/resources'); };
