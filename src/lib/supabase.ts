@@ -54,6 +54,11 @@ export const supabase = {
   },
   rpc: async (name: string, args: Record<string, unknown>) => ({ data: await req(`/rest/v1/rpc/${name}`, { method: 'POST', body: JSON.stringify(args) }, session()?.access_token).catch(() => null) }),
   getProfile: async (current: Session) => { const profiles = await req<Profile[]>(`/rest/v1/profiles?id=eq.${current.user.id}&select=*`, {}, current.access_token); return profiles[0] || null; },
+  ensureGoogleProfile: async (current: Session) => {
+    const metadata = current.user.user_metadata ?? {};
+    const displayName = typeof metadata.full_name === 'string' ? metadata.full_name : typeof metadata.name === 'string' ? metadata.name : null;
+    return req<Profile[]>('/rest/v1/profiles?on_conflict=id', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=representation' }, body: JSON.stringify({ id: current.user.id, username: `google-${current.user.id.slice(0, 8)}`, email: (current.user.email ?? '').trim().toLowerCase(), privacy_accepted_at: new Date().toISOString(), auth_provider: 'google', onboarding_completed: false, display_name: displayName }) }, current.access_token);
+  },
   saveProfile: async (current: Session, profile: Partial<Profile>) => req<Profile[]>(`/rest/v1/profiles?id=eq.${current.user.id}`, { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ ...profile, last_access_at: new Date().toISOString() }) }, current.access_token),
   catalog: async (current?: Session | null) => {
     const resources = await req<Resource[]>('/rest/v1/resources?select=*&order=sort_order.asc', {}, current?.access_token);
