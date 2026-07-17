@@ -36,7 +36,7 @@ function ResourceCards({ resources, saved, onToggle, onDownload }: { resources: 
   return <div className="library-grid">{resources.map((resource) => <article className="library-resource-card" key={resource.id}>
     <div className="library-resource-top"><div><span className="library-badge">{resource.category}</span><span className="library-type">{resource.resource_type}</span></div><button className={saved.includes(resource.id) ? 'library-save saved' : 'library-save'} type="button" onClick={() => onToggle(resource)}>{saved.includes(resource.id) ? 'Saved' : 'Save'}</button></div>
     <h3>{resource.title}</h3><p>{resource.description}</p>
-    <footer>{resource.status === 'available' ? (resource.resource_files ?? []).map((file) => <a className="library-download" key={file.id} href={file.public_url} download onClick={() => onDownload(resource, file.id)}>{file.language_code === 'it' ? 'PDF Italiano' : 'English PDF'} <span>↓</span></a>) : <span className="library-status">Coming Soon</span>}</footer>
+    <footer>{resource.status === 'available' ? (resource.resource_files ?? []).map((file) => <a className="library-download" key={file.id} href={file.public_url} download onClick={() => onDownload(resource, file.id)}>{file.language_code === 'it' ? '🇮🇹 PDF Italiano' : '🇺🇸 English PDF'} <span>↓</span></a>) : <span className="library-status">Coming Soon</span>}</footer>
   </article>)}</div>;
 }
 
