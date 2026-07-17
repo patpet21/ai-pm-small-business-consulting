@@ -13,7 +13,8 @@ create or replace function public.register_library_member(username text, email t
 returns boolean language plpgsql security definer set search_path = public as $$
 begin
   insert into public.library_members (username, email)
-  values (btrim(username), lower(btrim(email)));
+  values (btrim(username), lower(btrim(email)))
+  on conflict (email) do update set username = excluded.username;
   return true;
 exception when unique_violation then
   return false;
