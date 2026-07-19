@@ -2852,8 +2852,34 @@ h1 {
   max-width: 760px;
   margin-top: 18px;
   color: #354A5F;
-  font-size: clamp(1.02rem, 1.45vw, 1.18rem);
+  font-size: clamp(0.92rem, 1.2vw, 1.02rem);
   line-height: 1.58;
+}
+
+.resources-library-cta {
+  display: flex;
+  margin-top: 22px;
+}
+
+.resources-library-cta-wrap {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.resources-library-cta-wrap .resources-library-cta {
+  justify-content: center;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .resources-library-cta {
+    margin-top: 18px;
+  }
+
+  .resources-library-cta .button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .resources-compact-actions {
@@ -4097,11 +4123,11 @@ button:focus-visible {
 }
 
 /* Resource-card treatment mirrors the established public Resources catalogue. */
-.library-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.library-resource-card { min-height: 164px; padding: 12px; gap: 7px; border: 1px solid rgba(171, 146, 101, .48); border-radius: 9px; background: linear-gradient(145deg, #fffefb, #f5fafc); box-shadow: 0 5px 13px rgba(2, 26, 49, .06); }
-.library-resource-card:hover { transform: translateY(-2px); box-shadow: 0 9px 18px rgba(2, 26, 49, .11); }
-.library-resource-top { min-height: 24px; }.library-badge { color: #8a7043; font-size: .52rem; letter-spacing: .1em; }.library-type { display: inline-block; margin: 0 0 0 5px; padding: 3px 5px; border: 1px solid rgba(2,26,49,.18); border-radius: 99px; color: #102b44; font-size: .48rem; font-weight: 900; letter-spacing: .04em; }
-.library-resource-card h3 { font-size: .77rem; line-height: 1.15; letter-spacing: -.025em; }.library-resource-card p { font-size: .62rem; line-height: 1.4; }.library-resource-card footer { gap: 4px; padding-top: 6px; }.library-save { padding: 3px 5px; border: 1px solid rgba(2,26,49,.2); border-radius: 99px; background: #fff; font-size: .53rem; }.library-download { padding: 4px 5px; border: 0; border-radius: 99px; background: #08243e; color: #fffdf7; font-size: .52rem; }.library-download span { color: #e0c98f; }.library-status { padding: 4px 5px; font-size: .52rem; }
+.library-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.library-resource-card { min-height: 238px; padding: 22px; gap: 13px; border: 1px solid rgba(171, 146, 101, .42); border-radius: 16px; background: linear-gradient(145deg, #fffefb, #f4f8fa); box-shadow: 0 10px 24px rgba(2, 26, 49, .07); }
+.library-resource-card:hover { transform: translateY(-4px); border-color: rgba(137, 108, 60, .7); box-shadow: 0 18px 32px rgba(2, 26, 49, .13); }
+.library-resource-top { min-height: 28px; }.library-badge { color: #80643a; font-size: .65rem; letter-spacing: .1em; }.library-type { display: inline-block; margin: 0 0 0 7px; padding: 4px 7px; border: 1px solid rgba(2,26,49,.18); border-radius: 99px; color: #102b44; font-size: .57rem; font-weight: 900; letter-spacing: .05em; }
+.library-resource-card h3 { font-size: 1.08rem; line-height: 1.18; letter-spacing: -.03em; }.library-resource-card p { font-size: .84rem; line-height: 1.55; }.library-resource-card footer { gap: 7px; padding-top: 11px; }.library-save { padding: 6px 9px; border: 1px solid rgba(2,26,49,.2); border-radius: 99px; background: #fff; font-size: .67rem; }.library-download { padding: 7px 10px; border: 0; border-radius: 99px; background: #08243e; color: #fffdf7; font-size: .68rem; }.library-download span { color: #e0c98f; }.library-status { padding: 6px 9px; font-size: .65rem; }
 .library-mobile-launcher,.library-mobile-close { display: none; }
 @media (max-width: 900px) {
   .library-mobile-launcher { position: fixed; left: 14px; bottom: 16px; display: inline-flex; align-items: center; gap: 9px; min-height: 42px; padding: 0 13px; border: 1px solid rgba(199,170,116,.8); border-radius: 99px; background: #071f36; color: #fffaf0; box-shadow: 0 10px 24px rgba(2,26,49,.23); font: inherit; font-size: .76rem; font-weight: 850; z-index: 31; }
