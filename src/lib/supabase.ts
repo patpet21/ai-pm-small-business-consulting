@@ -1,3 +1,4 @@
+import { mergeFallbackCatalog } from './catalog';
 import type { Profile, Resource, ResourceFile } from './types';
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
@@ -77,7 +78,7 @@ export const supabase = {
   catalog: async (current?: Session | null) => {
     const resources = await req<Resource[]>('/rest/v1/resources?select=*&order=sort_order.asc', {}, current?.access_token);
     const files = await req<ResourceFile[]>('/rest/v1/resource_files?select=*&order=sort_order.asc', {}, current?.access_token);
-    return resources.map((resource) => ({ ...resource, resource_files: files.filter((file) => file.resource_id === resource.id) }));
+    return mergeFallbackCatalog(resources.map((resource) => ({ ...resource, resource_files: files.filter((file) => file.resource_id === resource.id) })));
   },
   activity: async (current: Session, id: string, event: string, file?: string) => req('/rest/v1/resource_activity', { method: 'POST', body: JSON.stringify({ user_id: current.user.id, resource_id: id, resource_file_id: file, event_type: event }) }, current.access_token),
   bookmarks: async (current: Session) => req<{ resource_id: string }[]>('/rest/v1/resource_bookmarks?select=resource_id', {}, current.access_token),

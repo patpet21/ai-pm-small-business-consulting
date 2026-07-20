@@ -13,6 +13,7 @@ const catalogRows: CatalogRow[] = [
 ['difficult-conversation-prompt-kit','The Difficult Conversation Prompt Kit','Prepare feedback, address delays, clarify responsibilities, and manage conflict.','Professional Communication','Prompt Kit','free_member',[]],
 ['client-follow-up-prompt-pack','Client Follow-Up Prompt Pack','Follow up after calls, proposals, events, presentations, and unanswered messages.','Professional Communication','Prompt Pack','free_member',['Client_Follow_Up_Prompt_Pack_AI_PM_Lab.pdf','Client_Follow_Up_Prompt_Pack_AI_PM_Lab_ITA.pdf']],
 ['client-call-to-tracked-task','From Client Call to Tracked Task','Turn client call notes into clear tracked tasks with owners, deadlines, status, and next actions.','Professional Communication','Workflow Guide','free_member',['From_Client_Call_to_Tracked_Task_AI_PM_Lab_EN.pdf','Dalla_Chiamata_al_Task_Tracciato_AI_PM_Lab_ITA.pdf']],
+['create-install-codex-skill','Create & Install a Codex Skill','A bilingual practical guide for creating, installing, and using Codex skills in a repeatable workflow.','AI & Prompting','Skill Guide','free_member',['Guide_Create_Install_Codex_Skill_AI_PM_Lab_ENG.pdf','Guida_Creare_Installare_Skill_Codex_AI_PM_Lab_ITA.pdf']],
 ['turn-notes-into-documents','Turn Notes into Clear Professional Documents','Convert unstructured notes into emails, briefs, reports, procedures, and action plans.','Professional Communication','Document Builder','free_member',[]],
 ['prompts-think-like-consultant','30 Prompts to Think Like a Consultant','Apply pre-mortems, Pareto analysis, MECE, opportunity cost, five whys, and process audits.','Decisions & Business','Prompt Library','free_member',[]],
 ['validate-business-idea-with-ai','Validate Your Business Idea with AI','Examine the problem, customer, market, competitors, costs, risks, and first practical test.','Decisions & Business','Validation Guide','free_member',[]],
@@ -26,3 +27,16 @@ const catalogRows: CatalogRow[] = [
 ['riforma-method','The RIFORMA Method','A practical bilingual guide to structure AI-assisted work with a clear repeatable method.','AI & Prompting','Method Guide','free_member',['The_RIFORMA_Method_AI_PM_Lab.pdf','Il_Metodo_RIFORMA_AI_PM_Lab_ITA.pdf']],
 ];
 export const fallbackCatalog: Resource[] = catalogRows.map(([slug,title,description,category,resource_type,access_level,files],i)=>({id:slug,slug,title,description,category,resource_type,status:(files as string[]).length?'available':'coming_soon',access_level:access_level as Resource['access_level'],is_featured:i<3,sort_order:i+1,resource_files:(files as string[]).map((f,j)=>file(slug,j?'it':'en',f))}));
+
+export function mergeFallbackCatalog(resources: Resource[]): Resource[] {
+  const bySlug = new Map(resources.map((resource) => [resource.slug, resource]));
+  const merged = fallbackCatalog.map((fallback) => {
+    const remote = bySlug.get(fallback.slug);
+    if (!remote) return fallback;
+    const remoteFiles = remote.resource_files ?? [];
+    const missingFiles = (fallback.resource_files ?? []).filter((fallbackFile) => !remoteFiles.some((remoteFile) => remoteFile.language_code === fallbackFile.language_code && remoteFile.file_name === fallbackFile.file_name));
+    return { ...remote, resource_files: [...remoteFiles, ...missingFiles].sort((a, b) => a.sort_order - b.sort_order) };
+  });
+  const fallbackSlugs = new Set(fallbackCatalog.map((resource) => resource.slug));
+  return [...merged, ...resources.filter((resource) => !fallbackSlugs.has(resource.slug))].sort((a, b) => a.sort_order - b.sort_order);
+}
