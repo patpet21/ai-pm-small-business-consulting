@@ -34,7 +34,7 @@ export function ServicesOverview() {
         <span className="hub-overline">AI PM LAB / SERVICES</span>
         <h1>Project and operations support, <em>with technology where it helps.</em></h1>
         <p>Every organization works differently. My role is to help understand the challenge, coordinate the work and shape a solution that people can actually use.</p>
-        <div className="hub-actions"><Link className="hub-button hub-button-primary" to="/contact">Discuss a project ↗</Link><Link className="hub-button hub-button-outline" to="/projects">See applied work →</Link></div>
+        <div className="hub-actions"><Link className="hub-button hub-button-primary" to="/quote">Get a Free Quote ↗</Link><Link className="hub-button hub-button-outline" to="/projects">See applied work →</Link></div>
       </section>
       <section className="hub-section section-shell hub-services-area" aria-labelledby="offer-heading">
         <div className="hub-section-header"><div><span className="hub-overline">HOW I CAN HELP</span><h2 id="offer-heading">Four connected capabilities.</h2></div><p>Project coordination is the core, supported by process improvement and implementation skills.</p></div>
@@ -42,7 +42,7 @@ export function ServicesOverview() {
           <article className="hub-offer" key={offer.number}>
             <div className="hub-offer-title"><span>{offer.number} / SERVICE</span><h3>{offer.title}</h3><p>{offer.summary}</p></div>
             <div className="hub-offer-details"><strong>Possible activities</strong><ul>{offer.examples.map(x=><li key={x}>{x}</li>)}</ul></div>
-            <div className="hub-offer-outcome"><span>EXAMPLE DELIVERABLE</span><p>{offer.outcome}</p><Link to="/contact">Discuss this need ↗</Link></div>
+            <div className="hub-offer-outcome"><span>EXAMPLE DELIVERABLE</span><p>{offer.outcome}</p><Link to="/quote">Request a quote ↗</Link></div>
           </article>
         ))}</div>
       </section>
@@ -59,7 +59,7 @@ export function ServicesOverview() {
           <div><span>04</span><strong>Hand over</strong><p>Document the process, next actions and how to maintain it.</p></div>
         </div>
       </section>
-      <section className="hub-cta section-shell"><div><span className="hub-overline hub-overline-light">LET'S TALK</span><h2>One problem is enough to start.</h2><p>Share an operational challenge, a project to coordinate or a small implementation idea. Scope and feasibility come first.</p></div><Link className="hub-button hub-button-light" to="/contact">Start a conversation ↗</Link></section>
+      <section className="hub-cta section-shell"><div><span className="hub-overline hub-overline-light">LET'S TALK</span><h2>One problem is enough to start.</h2><p>Share an operational challenge, a project to coordinate or a small implementation idea. Scope and feasibility come first.</p></div><Link className="hub-button hub-button-light" to="/quote">Request a Free Quote ↗</Link></section>
     </div>
   );
 }

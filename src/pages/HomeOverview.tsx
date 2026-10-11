@@ -17,7 +17,7 @@ export function HomeOverview() {
           <p className="hub-lead">I help businesses and project teams coordinate work, improve everyday processes, and turn digital tools and AI into practical, human-controlled solutions.</p>
           <div className="hub-actions">
             <Link className="hub-button hub-button-primary" to="/projects">Explore my work <span aria-hidden="true">↗</span></Link>
-            <Link className="hub-button hub-button-outline" to="/contact">Discuss a project <span aria-hidden="true">→</span></Link>
+            <Link className="hub-button hub-button-outline" to="/quote">Get a Free Quote <span aria-hidden="true">↗</span></Link>
           </div>
           <div className="hub-hero-note"><span className="hub-tick">✓</span> Practical coordination, clear ownership, useful technology.</div>
         </div>
@@ -113,7 +113,7 @@ export function HomeOverview() {
 
       <section className="hub-cta section-shell">
         <div><span className="hub-overline hub-overline-light">START WITH THE REAL PROBLEM</span><h2>Have a project, a coordination challenge, or a process that needs clarity?</h2><p>Tell me what you're trying to accomplish. The right first step may be project coordination, a clearer workflow, or a small digital solution — not necessarily another AI tool.</p></div>
-        <Link className="hub-button hub-button-light" to="/contact">Get in touch <span aria-hidden="true">↗</span></Link>
+        <Link className="hub-button hub-button-light" to="/quote">Request a Free Quote <span aria-hidden="true">↗</span></Link>
       </section>
     </div>
   );

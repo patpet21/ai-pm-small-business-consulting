@@ -5,6 +5,9 @@ import { HomeOverview } from './pages/HomeOverview';
 import { ServicesOverview } from './pages/ServicesOverview';
 import { Projects } from './pages/Projects';
 import { Products } from './pages/Products';
+import { FreeQuote } from './pages/FreeQuote';
+import { ProjectAssistant } from './pages/ProjectAssistant';
+import './quote-assistant.css';
 import './portfolio.css';
 import { Contact } from './pages/Contact';
 import { RealEstateAIPMPilot } from './pages/RealEstateAIPMPilot';
@@ -292,8 +295,8 @@ function SiteHeader() {
           </NavLink>
         ))}
       </nav>
-      <Link className="nav-cta" to="/contact" onClick={() => { setIsMenuOpen(false); trackClick('cta_click', 'Header project inquiry'); }}>
-        Discuss a Project
+      <Link className="nav-cta" to="/quote" onClick={() => { setIsMenuOpen(false); trackClick('cta_click', 'Header free quote'); }}>
+        Free Quote
       </Link>
     </header>
   );
@@ -348,6 +351,7 @@ function SiteFooter() {
           {navItems.map((item) => (
             <p key={item.to}><Link to={item.to}>{item.label}</Link></p>
           ))}
+          <p><Link to="/quote">Request a Free Quote</Link></p>
           <p><Link to="/library">Resource Library</Link></p>
           <p><Link to="/real-estate-ai-pm-pilot">Real Estate AI PM Pilot</Link></p>
           <p><a href="https://propertydex.xyz" target="_blank" rel="noreferrer">PropertyDEX research</a></p>
@@ -1218,6 +1222,7 @@ function App() {
           <Route path="/services" element={<ServicesOverview />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/quote" element={<FreeQuote />} />
           <Route path="/workflow-consulting" element={<Home />} />
           <Route path="/services/workflows" element={<Services />} />
           <Route path="/resources" element={<Resources />} />
@@ -1230,6 +1235,7 @@ function App() {
         </Routes>
       </main>
       <SiteFooter />
+      <ProjectAssistant />
       </AuthProvider>
     </BrowserRouter>
   );
