@@ -1,6 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { HomeOverview } from './pages/HomeOverview';
+import { ServicesOverview } from './pages/ServicesOverview';
+import { Projects } from './pages/Projects';
+import { Products } from './pages/Products';
+import './portfolio.css';
 import { Contact } from './pages/Contact';
 import { RealEstateAIPMPilot } from './pages/RealEstateAIPMPilot';
 import { Resources } from './pages/Resources';
@@ -233,9 +238,9 @@ const useCaseDetails = [
 const navItems = [
   { label: 'Home', to: '/' },
   { label: 'Services', to: '/services' },
+  { label: 'Projects', to: '/projects' },
+  { label: 'Products', to: '/products' },
   { label: 'Resources', to: '/resources' },
-  { label: 'Library', to: '/library' },
-  { label: 'Real Estate Copilot', to: '/real-estate-ai-pm-pilot' },
   { label: 'About', to: '/about' },
   { label: 'Contact', to: '/contact' },
 ];
@@ -287,9 +292,9 @@ function SiteHeader() {
           </NavLink>
         ))}
       </nav>
-      <a className="nav-cta" href={calendlyLink} target="_blank" rel="noreferrer" onClick={() => trackClick('cta_click', 'Header free call')}>
-        Book a Free Call
-      </a>
+      <Link className="nav-cta" to="/contact" onClick={() => { setIsMenuOpen(false); trackClick('cta_click', 'Header project inquiry'); }}>
+        Discuss a Project
+      </Link>
     </header>
   );
 }
@@ -329,7 +334,7 @@ function SiteFooter() {
           <div>
             <p className="site-footer-brand">AI PM LAB</p>
             <p className="site-footer-subbrand">by Trigosat Consulting</p>
-            <p>AI + project workflow systems for real operations.</p>
+            <p>Project coordination, business operations & practical AI.</p>
           </div>
         </div>
         <div>
@@ -343,7 +348,9 @@ function SiteFooter() {
           {navItems.map((item) => (
             <p key={item.to}><Link to={item.to}>{item.label}</Link></p>
           ))}
-          <p><a href="https://propertydex.xyz" target="_blank" rel="noreferrer">PropertyDEX related research</a></p>
+          <p><Link to="/library">Resource Library</Link></p>
+          <p><Link to="/real-estate-ai-pm-pilot">Real Estate AI PM Pilot</Link></p>
+          <p><a href="https://propertydex.xyz" target="_blank" rel="noreferrer">PropertyDEX research</a></p>
         </div>
       </div>
     </footer>
@@ -1041,11 +1048,11 @@ function About() {
       <section className="section-shell about-hero">
         <div className="about-hero-copy">
           <p className="eyebrow">ABOUT AI PM LAB</p>
-          <h1>I build practical AI + project workflows around the way real work gets done.</h1>
+          <h1>I coordinate projects, improve operations, and use AI where it makes work more effective.</h1>
           <div className="about-hero-text">
-            <p>I created AI PM LAB to help small businesses, professionals, and project teams move beyond isolated AI outputs and unclear processes.</p>
-            <p>My work starts with one recurring activity, connects it to the people, documents, decisions, responsibilities, risks, and follow-up around it, and turns it into a clearer, repeatable, human-controlled project workflow.</p>
-            <p>I combine an engineering background and hands-on business operations experience, and I am currently pursuing a Master of Science in Project Management at Harrisburg University in the United States.</p>
+            <p>I created AI PM LAB to bring project coordination, practical operations support and thoughtful digital tools together for small businesses and project teams.</p>
+            <p>My approach starts by understanding the real project or operational challenge, organizing responsibilities and communication, and then using useful workflows, templates, automation or AI where appropriate.</p>
+            <p>I combine an engineering background, hands-on coordination and business operations experience, and graduate study in Project Management at Harrisburg University in the United States.</p>
             <p className="about-institutional-line">AI PM LAB is a Trigosat Consulting initiative.</p>
           </div>
           <div className="hero-actions about-hero-actions">
@@ -1186,15 +1193,33 @@ function About() {
 }
 
 
+function RouteScroll() {
+  const location = useLocation();
+  React.useEffect(() => {
+    if (location.hash) {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const raf = window.requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }));
+      return () => window.cancelAnimationFrame(raf);
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname, location.hash]);
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+      <RouteScroll />
       <SiteHeader />
       <main>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/services" element={<Services />} />
+          <Route path="/" element={<HomeOverview />} />
+          <Route path="/services" element={<ServicesOverview />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/workflow-consulting" element={<Home />} />
+          <Route path="/services/workflows" element={<Services />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/library" element={<Library />} />
           <Route path="/resource-library-privacy-notice" element={<ResourceLibraryPrivacyNotice />} />

@@ -4,13 +4,13 @@ const calendlyLink = 'https://calendly.com/propertydext/15min';
 const formspreeEndpoint = 'https://formspree.io/f/mojboraw';
 
 const contactProjectOptions = [
-  'AI workflow audit',
-  'AI implementation roadmap',
+  'Project coordination or operations support',
+  'Business process / workflow improvement',
+  'AI adoption or automation feasibility',
+  'Digital implementation (website, dashboard, forms)',
   'Real Estate AI PM pilot',
-  'Prompt and template system',
-  'Team training or adoption support',
-  'Human-reviewed workflow report',
-  'Not sure yet',
+  'Employment or professional collaboration',
+  'Other / not sure yet',
 ];
 
 const contactTimelineOptions = [
@@ -59,16 +59,16 @@ export function Contact() {
         <div className="contact-hero-grid">
           <div className="contact-hero-copy">
             <p className="eyebrow">Contact</p>
-            <h1>Let’s make your workflow clearer before adding more tools.</h1>
-            <p className="hero-lede">Tell me what is happening in your business, where work gets stuck, and what kind of practical AI and workflow support you want next.</p>
+            <h1>Let's discuss your project, operations or collaboration needs.</h1>
+            <p className="hero-lede">Share a project, coordination challenge, improvement idea or professional opportunity. We can begin with the actual need and discuss a realistic next step.</p>
           </div>
           <div className="contact-summary-card">
             <p className="card-topline">Best fit</p>
-            <h3>Small businesses and real estate teams that need practical systems, not hype.</h3>
+            <h3>Businesses and project teams looking for clearer coordination, practical systems and useful technology.</h3>
             <ul>
-              <li>Workflow audits and bottleneck diagnosis</li>
-              <li>Prompt packs, tracker structures, and SOP support</li>
-              <li>Human-reviewed AI PM implementation plans</li>
+              <li>Project and stakeholder coordination</li>
+              <li>Operations, workflow and process improvement</li>
+              <li>Digital tools and appropriate AI support</li>
             </ul>
           </div>
         </div>
@@ -83,7 +83,7 @@ export function Contact() {
             <div className="contact-form-heading">
               <p className="eyebrow">Start here</p>
               <h2>Send a project note</h2>
-              <p>Use the form for consulting requests, Real Estate AI PM questions, workflow reviews, or human-reviewed report requests.</p>
+              <p>Use this form for project coordination, business operations, AI workflows, digital implementation, or employment and collaboration inquiries.</p>
             </div>
 
             {status === 'success' && (
@@ -132,14 +132,14 @@ export function Contact() {
             </div>
 
             <label>
-              What workflow or business problem should we look at first? *
-              <textarea name="message" required rows={7} placeholder="Example: buyer follow-up is scattered across texts, email, and CRM, and I need a simple tracker + AI prompts for weekly updates." />
+              What project, business need or opportunity would you like to discuss? *
+              <textarea name="message" required rows={7} placeholder="Briefly describe what you need, who is involved, and what you would like to improve or deliver. Please avoid including sensitive client information." />
             </label>
 
             <fieldset className="contact-checkbox-group">
               <legend>Optional context</legend>
               <label><input type="checkbox" name="context" value="I want a 15-minute review call" /> I want a 15-minute review call</label>
-              <label><input type="checkbox" name="context" value="I want a human-reviewed report" /> I want a human-reviewed report</label>
+              <label><input type="checkbox" name="context" value="I would like a proposal after an initial discussion" /> I would like a proposal after an initial discussion</label>
               <label><input type="checkbox" name="context" value="I am using the Real Estate AI PM pilot" /> I am using the Real Estate AI PM pilot</label>
             </fieldset>
 
@@ -153,7 +153,7 @@ export function Contact() {
             <div className="contact-info-card">
               <p className="eyebrow">Direct options</p>
               <h3>Prefer a faster path?</h3>
-              <p>Email or book a short review if you already know the workflow you want to improve.</p>
+              <p>Email or book a short introductory call if you already know what you'd like to discuss.</p>
               <a href="mailto:trigosatconsulting@gmail.com">trigosatconsulting@gmail.com</a>
               <a href={calendlyLink} target="_blank" rel="noreferrer">Book a Free Workflow Clarity Call</a>
             </div>
