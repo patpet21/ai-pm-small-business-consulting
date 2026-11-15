@@ -270,6 +270,7 @@ export function TikTokStudio() {
             }
             {creator && <>
               <label htmlFor="studio-privacy">Privacy (select manually)</label>
+              {creator.privacyOptions.includes('PUBLIC_TO_EVERYONE') && <p className="studio-result" role="note">Sandbox test: TikTok may reject even an “Only me” post while this TikTok account is public. For unaudited apps, TikTok requires the entire TikTok account to be private as well. Change it in the TikTok app under Settings and privacy → Privacy, then reload this page.</p>}
               <select id="studio-privacy" required value={privacy} onChange={e=>{setPrivacy(e.target.value);setConsent(false);}}>
                 <option value="">Choose visibility...</option>
                 {creator.privacyOptions.map(option=><option key={option} value={option} disabled={paidBrand&&option==='SELF_ONLY'}>{privacyLabels[option]||option}</option>)}
