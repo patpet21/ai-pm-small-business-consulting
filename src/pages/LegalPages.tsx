@@ -54,7 +54,7 @@ export function PrivacyPolicy() {
         <section className="legal-panel">
           <h2>4. Services involved in processing</h2>
           <p>The website and its existing features use or may interact with Netlify (hosting and technical operations), Formspree (contact and quote forms), Calendly (booking), Supabase (resource-library profiles and session functions), Google Analytics (website measurement), and services that support the workflow pilot. These providers process information subject to their own terms and policies.</p>
-          <p>When an optional connection to TikTok becomes available, TikTok's authorization screen will identify the requested permissions. Authorized information will be used for the requested account connection and permitted content-upload or publishing workflow, not to imply TikTok endorses AI PM LAB.</p>
+          <p>If the TikTok Content Studio connection is enabled and a user chooses to authorize it, TikTok's authorization screen identifies the requested permissions. TikTok authorization and refresh tokens are handled by the website's server-side functions for account connection, creator settings, approved posting and status checks. Generated JPEGs sent to TikTok may be stored on the site and served through publicly accessible, hard-to-guess media URLs so TikTok can retrieve them. Do not include confidential personal or client information in uploaded images. No posting occurs merely by connecting an account; each upload requires a separate user confirmation.</p>
         </section>
         <section className="legal-panel">
           <h2>5. Cookies and local storage</h2>
@@ -66,7 +66,7 @@ export function PrivacyPolicy() {
         </section>
         <section className="legal-panel">
           <h2>7. Retention and safeguards</h2>
-          <p>Information is retained for as long as reasonably needed for the applicable request, service, security, recordkeeping or legal purpose. Retention can differ by provider and feature. We use reasonable administrative and technical measures, but no online service can guarantee absolute security.</p>
+          <p>Information is retained for as long as reasonably needed for the applicable request, service, security, recordkeeping or legal purpose. TikTok connection records remain while a session is active or until they are revoked or deleted. Generated JPEG media may remain hosted for later retrieval or processing until removed; their unguessable public links are not access-controlled. You can ask us to remove retained uploads. Retention can differ by provider and feature. We use reasonable administrative and technical measures, but no online service can guarantee absolute security.</p>
         </section>
         <section className="legal-panel">
           <h2>8. Your choices and rights</h2>
@@ -118,7 +118,7 @@ export function TermsOfService() {
         </section>
         <section className="legal-panel">
           <h2>6. Third-party services and social integrations</h2>
-          <p>Features may rely on third parties, including hosting, form, booking, account, analytics and social platforms. Their terms also apply. If a TikTok connection is offered in the future, it will require authorization for the applicable scopes. You remain responsible for selecting, reviewing and having rights to publish the content you submit. A proposed integration is not a promise that TikTok has approved the app or will make a particular publishing capability available.</p>
+          <p>Features may rely on third parties, including hosting, form, booking, account, analytics and social platforms. Their terms also apply. The optional TikTok Content Studio integration requires account authorization and explicit review and confirmation for each post. Users remain responsible for the accuracy and rights to publish their original content. Some publishing features may be unavailable or restricted to private visibility unless TikTok grants approval. Availability does not imply that TikTok has reviewed or endorsed the application.</p>
         </section>
         <section className="legal-panel">
           <h2>7. Availability and changes</h2>
