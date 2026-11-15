@@ -21,6 +21,54 @@
   status = 200
 
 [[redirects]]
+  from = "/api/studio/status"
+  to = "/.netlify/functions/tiktok-studio?action=status"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/studio/start"
+  to = "/.netlify/functions/tiktok-studio?action=start"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/studio/callback"
+  to = "/.netlify/functions/tiktok-studio?action=callback"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/studio/creator"
+  to = "/.netlify/functions/tiktok-studio?action=creator"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/studio/post"
+  to = "/.netlify/functions/tiktok-studio?action=post"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/studio/image"
+  to = "/.netlify/functions/tiktok-studio?action=image"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/studio/publish-status"
+  to = "/.netlify/functions/tiktok-studio?action=publish-status"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/studio/disconnect"
+  to = "/.netlify/functions/tiktok-studio?action=disconnect"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
