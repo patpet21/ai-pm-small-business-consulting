@@ -62,8 +62,10 @@ const normalizedCreator = (data) => ({
   commentDisabled: Boolean(data.comment_disabled),
   canPost:data.can_post!==false
 });
-async function handler(req) {
-  const url=new URL(req.url),action=url.searchParams.get('action')||'';
+async function handler(req, specifiedAction = '') {
+  const url=new URL(req.url);
+  const inferredPathAction=url.pathname.match(/\/(?:api\/studio|studio)[/]([a-z-]+)\/?$/)?.[1] || '';
+  const action=specifiedAction || url.searchParams.get('action') || inferredPathAction;
   if(action==='image' && req.method==='GET') {
     const id=url.searchParams.get('id')||'';
     if(!/^[a-f0-9-]{36}$/.test(id))return err('Invalid image reference.',404);
@@ -183,7 +185,9 @@ async function handler(req) {
   }
   return err('Unknown studio action.',404);
 }
-export default async (request) => {
-  try{return await handler(request);}
+export async function handleStudio(request, specifiedAction = '') {
+  try{return await handler(request, specifiedAction);}
   catch(error){console.error('TikTok Studio request failed:',error?.code||error?.message||'unknown');return err('TikTok operation failed: '+String(error?.message||'Internal server error').slice(0,220),502);}
 };
+
+export default (request) => handleStudio(request);
