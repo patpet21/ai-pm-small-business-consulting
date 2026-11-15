@@ -14,8 +14,10 @@ import { RealEstateAIPMPilot } from './pages/RealEstateAIPMPilot';
 import { Resources } from './pages/Resources';
 import { Library } from './pages/Library';
 import { ResourceLibraryPrivacyNotice } from './pages/ResourceLibraryPrivacyNotice';
+import { PrivacyPolicy, TermsOfService } from './pages/LegalPages';
 import { AuthProvider } from './auth/AuthProvider';
 import './styles.css';
+import './legal.css';
 
 const calendlyLink = 'https://calendly.com/propertydext/15min';
 const brandLogoUrl = 'https://i.ibb.co/4npftkCv/Logo-AI-PM-LAB-by-Trigosatconsulting.png';
@@ -354,6 +356,8 @@ function SiteFooter() {
           <p><Link to="/quote">Request a Free Quote</Link></p>
           <p><Link to="/library">Resource Library</Link></p>
           <p><Link to="/real-estate-ai-pm-pilot">Real Estate AI PM Pilot</Link></p>
+          <p><Link to="/privacy">Privacy Policy</Link></p>
+          <p><Link to="/terms">Terms of Service</Link></p>
           <p><a href="https://propertydex.xyz" target="_blank" rel="noreferrer">PropertyDEX research</a></p>
         </div>
       </div>
@@ -1228,6 +1232,8 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/library" element={<Library />} />
           <Route path="/resource-library-privacy-notice" element={<ResourceLibraryPrivacyNotice />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
           <Route path="/use-cases" element={<UseCases />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
