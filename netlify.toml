@@ -22,49 +22,49 @@
 
 [[redirects]]
   from = "/api/studio/status"
-  to = "/.netlify/functions/tiktok-studio?action=status"
+  to = "/.netlify/functions/studio-status"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/studio/start"
-  to = "/.netlify/functions/tiktok-studio?action=start"
+  to = "/.netlify/functions/studio-start"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/studio/callback"
-  to = "/.netlify/functions/tiktok-studio?action=callback"
+  to = "/.netlify/functions/studio-callback"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/studio/creator"
-  to = "/.netlify/functions/tiktok-studio?action=creator"
+  to = "/.netlify/functions/studio-creator"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/studio/post"
-  to = "/.netlify/functions/tiktok-studio?action=post"
+  to = "/.netlify/functions/studio-post"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/studio/image"
-  to = "/.netlify/functions/tiktok-studio?action=image"
+  to = "/.netlify/functions/studio-image"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/studio/publish-status"
-  to = "/.netlify/functions/tiktok-studio?action=publish-status"
+  to = "/.netlify/functions/studio-publish-status"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/studio/disconnect"
-  to = "/.netlify/functions/tiktok-studio?action=disconnect"
+  to = "/.netlify/functions/studio-disconnect"
   status = 200
   force = true
 
