@@ -15,6 +15,7 @@ import { Resources } from './pages/Resources';
 import { Library } from './pages/Library';
 import { ResourceLibraryPrivacyNotice } from './pages/ResourceLibraryPrivacyNotice';
 import { PrivacyPolicy, TermsOfService } from './pages/LegalPages';
+import { TikTokStudio } from './pages/TikTokStudio';
 import { AuthProvider } from './auth/AuthProvider';
 import './styles.css';
 import './legal.css';
@@ -246,6 +247,7 @@ const navItems = [
   { label: 'Projects', to: '/projects' },
   { label: 'Products', to: '/products' },
   { label: 'Resources', to: '/resources' },
+  { label: 'Content Studio', to: '/content-studio' },
   { label: 'About', to: '/about' },
   { label: 'Contact', to: '/contact' },
 ];
@@ -1233,6 +1235,7 @@ function App() {
           <Route path="/library" element={<Library />} />
           <Route path="/resource-library-privacy-notice" element={<ResourceLibraryPrivacyNotice />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/content-studio" element={<TikTokStudio />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/use-cases" element={<UseCases />} />
           <Route path="/about" element={<About />} />
