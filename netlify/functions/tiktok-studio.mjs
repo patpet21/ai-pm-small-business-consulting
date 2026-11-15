@@ -50,7 +50,9 @@ async function tiktokCall(path,access_token,body) {
   const status=result.error?.code || (response.ok?'ok':'request_error');
   if(!response.ok || status!=='ok') {
     const ex=new Error(result.error?.message || 'TikTok API request failed ('+status+').');
-    ex.code=status; throw ex;
+    ex.code=status;
+    ex.logId=typeof result.error?.log_id==='string' ? result.error.log_id : undefined;
+    throw ex;
   }
   return result.data||{};
 }
@@ -187,7 +189,23 @@ async function handler(req, specifiedAction = '') {
 }
 export async function handleStudio(request, specifiedAction = '') {
   try{return await handler(request, specifiedAction);}
-  catch(error){console.error('TikTok Studio request failed:',error?.code||error?.message||'unknown');return err('TikTok operation failed: '+String(error?.message||'Internal server error').slice(0,220),502);}
+  catch(error){
+    const code=typeof error?.code==='string' ? error.code.slice(0,90) : 'unexpected_error';
+    const logId=typeof error?.logId==='string' ? error.logId.slice(0,120) : null;
+    console.error('TikTok Studio request failed:',code,logId||'');
+    const guides={
+      unaudited_client_can_only_post_to_private_accounts:'TikTok Sandbox requires a PRIVATE TikTok account and Only me (private) visibility until the app passes its posting audit. Change the account privacy in the TikTok app, refresh Content Studio, and retry one private test.',
+      url_ownership_unverified:'TikTok has not verified the domain serving these photos in this app environment. Verify the photo URL domain for the same Sandbox app.',
+      privacy_level_option_mismatch:'Privacy selection is not available for this account. Refresh the page, query creator settings again and choose a listed visibility.',
+      scope_not_authorized:'This TikTok connection did not grant video.publish. Disconnect, then reconnect and approve the publishing permission.',
+      spam_risk_too_many_posts:'TikTok has limited the number of API posts on this account for today. Do not keep retrying.',
+      spam_risk_too_many_pending_share:'TikTok has reached its pending-share limit. Do not repeatedly retry.',
+      reached_active_user_cap:'This TikTok app has reached its daily active creator quota.',
+      rate_limit_exceeded:'TikTok API rate limit was reached. Retry after the allowed window.',
+    };
+    const message=guides[code] || String(error?.message||'TikTok API request failed.').slice(0,240);
+    return json({error:message,code, ...(logId?{logId}: {})},403);
+  }
 };
 
 export default (request) => handleStudio(request);
