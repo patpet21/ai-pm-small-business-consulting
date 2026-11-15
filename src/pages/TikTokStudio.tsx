@@ -282,7 +282,7 @@ export function TikTokStudio() {
                 {paidBrand && <p className="studio-helper">Branded content cannot be published privately.</p>}
               </div>}
               <label className="studio-check"><input type="checkbox" checked={aiGenerated} onChange={e=>setAiGenerated(e.target.checked)} /> These images contain AI-generated content</label>
-              <label className="studio-check"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)} /> I reviewed all five slides and authorize this specific upload. By posting, I agree to TikTok's <a target="_blank" rel="noreferrer" href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/en">Music Usage Confirmation</a>{paidBrand?' and Branded Content Policy':''}.</label>
+              <label className="studio-check"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)} /> I reviewed all five slides and authorize this specific upload. By posting, I agree to TikTok's <a target="_blank" rel="noreferrer" href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/en">Music Usage Confirmation</a>{paidBrand?<> and the <a target="_blank" rel="noreferrer" href="https://www.tiktok.com/legal/page/global/bc-policy/en">Branded Content Policy</a></>:null}.</label>
               <button type="button" className="studio-action studio-submit" onClick={postToTikTok} disabled={cannotPost}>{busy?'Submitting...':'Publish my five-slide carousel'}</button>
               {publishId && <button type="button" className="studio-status-check" onClick={checkStatus} disabled={busy}>Check TikTok publishing status</button>}
               <button type="button" className="studio-disconnect" onClick={async()=>{await fetch('/api/studio/disconnect',{method:'POST',headers:{'X-Studio-Request':'1'}});setAccount({configured:true,connected:false});setCreator(null);setPrivacy('');setResult('TikTok account disconnected.');}}>Disconnect TikTok</button>
@@ -293,6 +293,7 @@ export function TikTokStudio() {
             <h3>Built for creators, not a background posting bot.</h3>
             <p>Every creator controls their own original content. No automatic reuse of another account's posts, no forced watermarks, and no publishing until the account holder authorizes it.</p>
             <p>New integrations are tested privately first. Public visibility depends on TikTok's API audit and available account permissions.</p>
+            <p>If you choose to publish, the prepared JPEG files are hosted at publicly retrievable, hard-to-guess links so TikTok can import them. Do not include confidential customer or client information.</p>
             <div className="studio-mini-steps"><span>Draft</span><b>→</b><span>Review</span><b>→</b><span>Authorize</span><b>→</b><span>Track status</span></div>
           </div>
         </div>
